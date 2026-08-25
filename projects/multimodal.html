@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Multimodal Sensing &amp; Contact Location Estimation · Jusung Kim</title>
+  <title>Multimodal Sensing &amp; Unified Control Framework · Jusung Kim</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="icon" href="data:,">
 </head>
@@ -13,70 +13,125 @@
   <a class="back" href="../index.html">← Back to home</a>
 
   <div class="detail-head">
-    <h1>Multimodal Sensing Integration &amp; Contact Location Estimation</h1>
-    <p class="detail-meta">KETI · 2024 · Lead / core contributor
-      <span class="award">ICCAS 2024 (Poster)</span></p>
+    <h1>Multimodal Sensing Integration &amp; Unified Control Framework</h1>
+    <p class="detail-meta">KETI · 2024 – Present · Core contributor (50%)
+      <span class="award">RoboWorld 2024 live demo</span></p>
   </div>
 
   <img class="media" src="../images/roboworld_framework.png"
        alt="Multi-process framework fusing vision, tactile and force/torque sensing">
-  <p class="media-note">The multi-process orchestration framework: vision, tactile (DIGIT) and
-     force/torque streams buffered into one control loop.</p>
+  <p class="media-note">The 2024 single-arm framework: vision, tactile (DIGIT) and force/torque
+     streams buffered into one control loop, shown at RoboWorld 2024.</p>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">0.85 mm</span><span class="lbl">avg. contact-location error</span></div>
+    <div class="stat"><span class="num">200 Hz</span><span class="lbl">control loop, decoupled from policy</span></div>
+    <div class="stat"><span class="num">2 × 7</span><span class="lbl">DoF arms + 16-DoF hand</span></div>
     <div class="stat"><span class="num">53%</span><span class="lbl">Relocate success · RoboWorld 2024</span></div>
   </div>
 
   <h3>Overview</h3>
   <p>
-    Robust manipulation needs more than vision — especially when the object is occluded by the
-    hand. This project fuses vision, tactile, and force/torque sensing into one control loop and
-    estimates where contact happens from F/T signals alone.
+    Robot manipulation needs vision, touch and force in the same control loop, and each of them
+    arrives on its own clock. This project is the framework that holds them together — first as
+    a single-arm system demonstrated live at RoboWorld 2024, then rebuilt as a dual-arm
+    platform with a safety layer between the learned policy and the hardware.
   </p>
 
-  <h3>What I did</h3>
+  <h3>2024 — the single-arm framework</h3>
+  <p>
+    Vision, tactile and control ran as separate processes on separate clocks, and the resulting
+    asynchronous data flow plus I/O contention was what degraded real-time control. The fix was
+    an orchestration redesign rather than faster code: sensor acquisition was separated from
+    control computation into their own processes, and a shared state-buffer plus data-sync layer
+    absorbed the rate mismatch so the control side always reads a consistent, current snapshot
+    instead of blocking on a sensor.
+  </p>
   <ul>
-    <li>Built a multi-process orchestration framework integrating vision, tactile (DIGIT, F/T), and control streams with state buffering.</li>
-    <li>Reached 53% success on the Relocate task at RoboWorld 2024.</li>
-    <li>Developed an F/T-based contact-location estimation algorithm with 0.85&nbsp;mm average error, enabling manipulation under visual occlusion.</li>
-    <li>Presented the estimation method as a poster at ICCAS 2024.</li>
+    <li>Multi-process orchestration integrating vision, tactile (DIGIT), force/torque and control
+        streams, with state buffering and explicit data synchronization.</li>
+    <li>53% success on the Relocate task, demonstrated live at RoboWorld 2024.</li>
   </ul>
 
-  <h3>Fingertip design &amp; validation</h3>
-  <div class="media-grid">
-    <figure>
-      <img src="../images/fingertip_cad.png" alt="Fingertip 3D CAD design">
-      <figcaption><b>Fingertip CAD.</b> The sensorized fingertip the estimation method is
-        built around.</figcaption>
-    </figure>
-    <figure>
-      <img src="../images/fingertip_estimation_results.png" alt="Contact location estimation results">
-      <figcaption><b>Estimation results.</b> 0.85&nbsp;mm average contact-location error from
-        force/torque signals alone.</figcaption>
-    </figure>
-    <figure>
-      <img src="../images/fingertip_validation_1.jpg" alt="Fingertip validation experiment, setup 1">
-      <figcaption><b>Validation setup.</b> Known contact points applied to the fingertip.</figcaption>
-    </figure>
-    <figure>
-      <img src="../images/fingertip_validation_2.jpg" alt="Fingertip validation experiment, setup 2">
-      <figcaption><b>Validation setup.</b> Repeated across contact locations across the
-        fingertip surface.</figcaption>
-    </figure>
-  </div>
+  <h3>2026 — rebuilt for two arms</h3>
+  <p>
+    The same architecture was carried onto a dual-arm platform: two <b>xArm7</b> arms
+    (7&nbsp;DoF each) with a 16-DoF <b>Allegro</b> hand on the right and a 6-DoF
+    <b>Inspire</b> hand on the left, four fingertip tactile sensors, and RGB cameras at
+    30&nbsp;fps. Two arms are not twice one arm — a shared buffer that was merely current now has
+    to be consistent <em>across</em> arms, and a wrong command is now something the robot can do
+    to itself.
+  </p>
+  <ul>
+    <li><b>Rate separation as structure.</b> Three loops at their own frequencies — control at
+        200&nbsp;Hz, policy at 30&nbsp;Hz, teleoperation at 60&nbsp;Hz — over devices that report
+        at 250&nbsp;Hz (arms) and 333&nbsp;Hz (hands). The policy publishes chunks; the control
+        loop interpolates and drives the hardware, so a slow policy step cannot stall the arms.</li>
+    <li><b>Consistent snapshots.</b> The state buffer keeps latest-only, non-destructive values
+        and exposes a single-lock <code>snapshot()</code>, so an observation never mixes an arm
+        pose from one instant with a tactile reading from another.</li>
+    <li><b>Atomic dual-arm publication.</b> Both arms' commands are written under one lock in the
+        same tick, which is what keeps a two-arm motion synchronized; single-arm operation takes
+        the same path without touching the other side.</li>
+    <li><b>Sim/real parity by construction.</b> Every device is a base interface with a real and
+        a MuJoCo-backed simulated implementation, selected by config — so the same control code,
+        observation packing and safety checks run in both, and tactile readings are normalized
+        between sim and real from a percentile calibration rather than by hand-tuning.</li>
+    <li><b>Teleoperation from an Apple Vision Pro.</b> Arm motion is delta end-effector tracking
+        anchored on the first valid frame; the hand is retargeted geometrically from the tracked
+        finger frames onto the Allegro's 16 joints. The same command path serves teleoperation
+        and policy, and an action-fusion stage blends the two by weight.</li>
+  </ul>
+
+  <h3>Safety shield — the part that decides whether a policy may run at all</h3>
+  <p>
+    A learned policy on a dual-arm platform can command the arm into the robot's own torso or
+    into the table. A marker-based shield sits between the policy and the command buffer,
+    computing clearance from arm and hand surface markers to torso and tabletop box proxies, and
+    it holds three contracts that are easy to state and easy to get wrong:
+  </p>
+  <ul>
+    <li><b>What is checked is what executes.</b> The gate does the 200&nbsp;Hz interpolation and
+        joint clipping itself and passes the result through pre-interpolated, so the array the
+        shield inspected is the array the device receives. Leaving re-interpolation downstream
+        would make the verdict describe a trajectory that never ran.</li>
+    <li><b>Rejection is atomic.</b> An unsafe chunk is not partially published — nothing enters
+        the command buffer, so there is no half-executed motion to unwind.</li>
+    <li><b>Recovery needs a human.</b> After a stop the state latches; clearance recovering on
+        its own does not resume motion.</li>
+  </ul>
+  <p>
+    Margins are staged (warning 50&nbsp;mm, stop 30&nbsp;mm, recovery 40&nbsp;mm) so the stop and
+    release thresholds cannot chatter against each other. Interpolation re-anchors to the
+    measured joint position every tick and carries velocity across ticks, with a tolerance that
+    restarts from zero velocity when the measured pose has drifted too far from the last
+    command — otherwise a homing move or an external disturbance would be interpolated as if
+    the arm were still on plan.
+  </p>
+  <p>
+    <em>Verified in simulation, including the unsafe torso and table approaches, with unit and
+    integration tests covering the shielded path. Real-robot validation of the shield, and the
+    grasp policy it is built to gate, are the next step.</em>
+  </p>
 
   <h3>RoboWorld 2024</h3>
   <div class="media-grid single">
     <figure>
       <img src="../images/roboworld_demo.jpg" alt="Relocate task demonstration at RoboWorld 2024">
-      <figcaption><b>Live demonstration.</b> The Relocate task running on the dual-arm
-        platform at RoboWorld 2024 — 53% success.</figcaption>
+      <figcaption><b>Live demonstration.</b> The Relocate task running on the platform at
+        RoboWorld 2024 — 53% success, with vision, tactile and force sensing in one loop.</figcaption>
     </figure>
   </div>
 
   <h3>Stack</h3>
-  <p class="tags">sensor fusion · DIGIT tactile · F/T sensor · RGB-D · multi-process control</p>
+  <p class="tags">Python · multiprocessing · xArm7 ×2 · Allegro Hand · Inspire Hand ·
+     tactile sensing · RealSense · MuJoCo · Apple Vision Pro teleoperation · safety shield</p>
+
+  <h3>Related</h3>
+  <p>
+    The fingertip contact-location work that feeds this framework's tactile channel is written up
+    separately: <a href="contact.html">Contact Location Estimation on Dexterous Hand
+    Fingertips</a>.
+  </p>
 
 </div>
 </body>

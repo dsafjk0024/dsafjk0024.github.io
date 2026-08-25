@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact Location Estimation on Fingertips · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>Contact Location Estimation on Dexterous Hand Fingertips</h1>
+    <p class="detail-meta">KETI · 2024 · Lead / core contributor
+      <span class="award">ICCAS 2024 (Poster)</span></p>
+  </div>
+
+  <img class="media compact" src="../images/fingertip_cad.png"
+       alt="Sensorized fingertip 3D CAD">
+  <p class="media-note">The sensorized fingertip the estimation method is built around.</p>
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">0.85 mm</span><span class="lbl">avg. contact-location error</span></div>
+    <div class="stat"><span class="num">F/T only</span><span class="lbl">no vision, no tactile array</span></div>
+  </div>
+
+  <h3>Overview</h3>
+  <p>
+    Once a hand closes on an object, the contact is exactly where the camera cannot see it. This
+    work estimates <em>where</em> on the fingertip surface contact occurred from force/torque
+    signals alone, so manipulation can keep a usable contact estimate under full visual
+    occlusion.
+  </p>
+
+  <h3>What I did</h3>
+  <ul>
+    <li>Designed the sensorized fingertip around a force/torque sensor, so that the contact point
+        is recoverable from the measured wrench rather than from a dense tactile array.</li>
+    <li>Developed the estimation algorithm mapping the measured force/torque to a contact
+        location on the fingertip surface.</li>
+    <li>Validated it against known applied contact points across the fingertip surface —
+        0.85&nbsp;mm average error.</li>
+    <li>Presented the method as a poster at ICCAS 2024 (Jeju, Korea).</li>
+  </ul>
+
+  <h3>Validation</h3>
+  <div class="media-grid uniform">
+    <figure>
+      <img src="../images/fingertip_estimation_results.png" alt="Contact location estimation results">
+      <figcaption><b>Estimation results.</b> Estimated contact location against the applied
+        ground truth.</figcaption>
+    </figure>
+    <figure>
+      <img src="../images/fingertip_cad.png" alt="Fingertip 3D CAD design">
+      <figcaption><b>Fingertip design.</b> Sensor placement and the surface the estimate is
+        expressed on.</figcaption>
+    </figure>
+  </div>
+  <div class="media-grid uniform tall">
+    <figure>
+      <img src="../images/fingertip_validation_1.jpg" alt="Fingertip validation experiment, setup 1">
+      <figcaption><b>Validation rig.</b> Known contact points applied to the fingertip.</figcaption>
+    </figure>
+    <figure>
+      <img src="../images/fingertip_validation_2.jpg" alt="Fingertip validation experiment, setup 2">
+      <figcaption><b>Validation rig.</b> Repeated across locations on the fingertip
+        surface.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Stack</h3>
+  <p class="tags">F/T sensing · contact mechanics · SolidWorks · Python · Allegro Hand</p>
+
+  <h3>Related</h3>
+  <p>
+    This fingertip feeds the tactile channel of the
+    <a href="multimodal.html">multimodal sensing &amp; unified control framework</a>.
+  </p>
+
+</div>
+</body>
+</html>

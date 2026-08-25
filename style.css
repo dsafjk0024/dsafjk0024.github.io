@@ -262,3 +262,15 @@ figcaption b { color: var(--fg); font-weight: 600; }
   padding: 0 8px;
 }
 @media (max-width: 600px) { .thumb-placeholder { width: 116px; } }
+
+/* ---------- transparent PNGs need a light ground, video needs a dark one ---------- */
+figure img, img.media { background: #fff; }
+figure video, video.media { background: #000; }
+
+/* uniform cells: equal height, nothing cropped (plots and photos keep their content) */
+.media-grid.uniform figure img {
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #fff;
+}
+.media-grid.uniform.tall figure img { aspect-ratio: 3 / 4; }
