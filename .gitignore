@@ -3,12 +3,6 @@ images/_originals/
 images/_static_broken/
 videos/_originals/
 
-# unused media (kept locally until they have a home on the site)
-videos/dualarm_act.mp4
-videos/dualarm_flow_matching.mp4
-videos/table_shield.mp4
-videos/torso_shield.mp4
-
 # scratch tooling, not part of the site
 ppt_maker/
 

@@ -19,9 +19,9 @@
   </div>
 
   <img class="media" src="../images/roboworld_framework.png"
-       alt="Multi-process framework fusing vision, tactile and force/torque sensing">
-  <p class="media-note">The 2024 single-arm framework: vision, tactile (DIGIT) and force/torque
-     streams buffered into one control loop, shown at RoboWorld 2024.</p>
+       alt="Multimodal sensing and unified control framework">
+  <p class="media-note">Vision, tactile and force/torque streams buffered into one control loop —
+     the 2024 single-arm framework, demonstrated live at RoboWorld 2024.</p>
 
   <div class="stat-row">
     <div class="stat"><span class="num">200 Hz</span><span class="lbl">control loop, decoupled from policy</span></div>
@@ -31,107 +31,104 @@
 
   <h3>Overview</h3>
   <p>
-    Robot manipulation needs vision, touch and force in the same control loop, and each of them
-    arrives on its own clock. This project is the framework that holds them together — first as
-    a single-arm system demonstrated live at RoboWorld 2024, then rebuilt as a dual-arm
-    platform with a safety layer between the learned policy and the hardware.
+    Vision, touch and force have to share one control loop, and each arrives on its own clock.
+    This is the framework that holds them together — first a single-arm system shown live at
+    RoboWorld 2024, then rebuilt for a dual-arm platform where learned policies, teleoperation
+    and a safety layer all run through the same command path.
   </p>
 
-  <h3>2024 — the single-arm framework</h3>
+  <h3>2024 — single arm</h3>
   <p>
-    Vision, tactile and control ran as separate processes on separate clocks, and the resulting
-    asynchronous data flow plus I/O contention was what degraded real-time control. The fix was
-    an orchestration redesign rather than faster code: sensor acquisition was separated from
-    control computation into their own processes, and a shared state-buffer plus data-sync layer
-    absorbed the rate mismatch so the control side always reads a consistent, current snapshot
-    instead of blocking on a sensor.
+    Asynchronous sensor streams and I/O contention were what degraded real-time control, so the
+    fix was structural: sensor acquisition and control computation went into separate processes,
+    with state buffering and data synchronization absorbing the rate mismatch — the control side
+    reads a current snapshot instead of blocking on a sensor. 53% success on the Relocate task.
+  </p>
+
+  <h3>2026 — dual arm</h3>
+  <p>
+    Two <b>xArm7</b> arms with a 16-DoF <b>Allegro</b> hand and a 6-DoF <b>Inspire</b> hand,
+    fingertip tactile sensors and RGB cameras. Two arms are not twice one arm: a buffer that was
+    merely current now has to be consistent <em>across</em> arms, and a bad command is something
+    the robot can do to itself.
   </p>
   <ul>
-    <li>Multi-process orchestration integrating vision, tactile (DIGIT), force/torque and control
-        streams, with state buffering and explicit data synchronization.</li>
-    <li>53% success on the Relocate task, demonstrated live at RoboWorld 2024.</li>
+    <li><b>Rate separation.</b> Control 200&nbsp;Hz, policy 30&nbsp;Hz, teleoperation 60&nbsp;Hz,
+        over devices reporting at 250 / 333&nbsp;Hz. The policy publishes chunks and the control
+        loop interpolates, so a slow policy step cannot stall the arms.</li>
+    <li><b>Consistency under one lock.</b> A latest-only state buffer whose single-lock
+        <code>snapshot()</code> keeps an observation from mixing time points, and both arms'
+        commands written in the same tick so two-arm motion stays synchronized.</li>
+    <li><b>Sim/real parity.</b> Every device is one interface with a real and a MuJoCo-backed
+        implementation chosen by config, so identical control, observation and safety code runs
+        in both; tactile readings are normalized across sim and real from a percentile
+        calibration.</li>
+    <li><b>Vision Pro teleoperation.</b> Delta end-effector tracking for the arms, geometric
+        retargeting of tracked finger frames onto the Allegro's 16 joints — sharing the command
+        path with the policy, blended by weight.</li>
   </ul>
 
-  <h3>2026 — rebuilt for two arms</h3>
-  <p>
-    The same architecture was carried onto a dual-arm platform: two <b>xArm7</b> arms
-    (7&nbsp;DoF each) with a 16-DoF <b>Allegro</b> hand on the right and a 6-DoF
-    <b>Inspire</b> hand on the left, four fingertip tactile sensors, and RGB cameras at
-    30&nbsp;fps. Two arms are not twice one arm — a shared buffer that was merely current now has
-    to be consistent <em>across</em> arms, and a wrong command is now something the robot can do
-    to itself.
-  </p>
-  <ul>
-    <li><b>Rate separation as structure.</b> Three loops at their own frequencies — control at
-        200&nbsp;Hz, policy at 30&nbsp;Hz, teleoperation at 60&nbsp;Hz — over devices that report
-        at 250&nbsp;Hz (arms) and 333&nbsp;Hz (hands). The policy publishes chunks; the control
-        loop interpolates and drives the hardware, so a slow policy step cannot stall the arms.</li>
-    <li><b>Consistent snapshots.</b> The state buffer keeps latest-only, non-destructive values
-        and exposes a single-lock <code>snapshot()</code>, so an observation never mixes an arm
-        pose from one instant with a tactile reading from another.</li>
-    <li><b>Atomic dual-arm publication.</b> Both arms' commands are written under one lock in the
-        same tick, which is what keeps a two-arm motion synchronized; single-arm operation takes
-        the same path without touching the other side.</li>
-    <li><b>Sim/real parity by construction.</b> Every device is a base interface with a real and
-        a MuJoCo-backed simulated implementation, selected by config — so the same control code,
-        observation packing and safety checks run in both, and tactile readings are normalized
-        between sim and real from a percentile calibration rather than by hand-tuning.</li>
-    <li><b>Teleoperation from an Apple Vision Pro.</b> Arm motion is delta end-effector tracking
-        anchored on the first valid frame; the hand is retargeted geometrically from the tracked
-        finger frames onto the Allegro's 16 joints. The same command path serves teleoperation
-        and policy, and an action-fusion stage blends the two by weight.</li>
-  </ul>
+  <h3>Imitation learning on the platform</h3>
+  <div class="media-grid">
+    <figure>
+      <video src="../videos/dualarm_act.mp4" poster="../images/dualarm_act_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>ACT.</b> Pick-and-place rollout on the dual-arm platform, running through
+        the same command path teleoperation uses.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/dualarm_flow_matching.mp4" poster="../images/dualarm_flow_matching_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Flow matching.</b> The same task under a flow-matching policy — swapped by
+        checkpoint, with no change to the control stack.</figcaption>
+    </figure>
+  </div>
 
-  <h3>Safety shield — the part that decides whether a policy may run at all</h3>
+  <h3>Safety shield</h3>
   <p>
-    A learned policy on a dual-arm platform can command the arm into the robot's own torso or
-    into the table. A marker-based shield sits between the policy and the command buffer,
-    computing clearance from arm and hand surface markers to torso and tabletop box proxies, and
-    it holds three contracts that are easy to state and easy to get wrong:
+    A learned policy can command the arm into the robot's own torso or into the table. A
+    marker-based shield sits between policy and command buffer, computing clearance from arm and
+    hand surface markers to torso and tabletop proxies, on three contracts:
   </p>
   <ul>
-    <li><b>What is checked is what executes.</b> The gate does the 200&nbsp;Hz interpolation and
-        joint clipping itself and passes the result through pre-interpolated, so the array the
-        shield inspected is the array the device receives. Leaving re-interpolation downstream
-        would make the verdict describe a trajectory that never ran.</li>
-    <li><b>Rejection is atomic.</b> An unsafe chunk is not partially published — nothing enters
-        the command buffer, so there is no half-executed motion to unwind.</li>
-    <li><b>Recovery needs a human.</b> After a stop the state latches; clearance recovering on
-        its own does not resume motion.</li>
+    <li><b>What is checked is what executes</b> — the gate does the 200&nbsp;Hz interpolation and
+        joint clipping itself, so the inspected array is the one the device receives.</li>
+    <li><b>Rejection is atomic</b> — an unsafe chunk never partially enters the command buffer.</li>
+    <li><b>Recovery needs a human</b> — the stop latches; clearance recovering on its own does
+        not resume motion.</li>
   </ul>
   <p>
-    Margins are staged (warning 50&nbsp;mm, stop 30&nbsp;mm, recovery 40&nbsp;mm) so the stop and
-    release thresholds cannot chatter against each other. Interpolation re-anchors to the
-    measured joint position every tick and carries velocity across ticks, with a tolerance that
-    restarts from zero velocity when the measured pose has drifted too far from the last
-    command — otherwise a homing move or an external disturbance would be interpolated as if
-    the arm were still on plan.
+    Margins are staged — warning 50&nbsp;mm, stop 30&nbsp;mm, recovery 40&nbsp;mm — so stop and
+    release cannot chatter against each other.
   </p>
-  <p>
-    <em>Verified in simulation, including the unsafe torso and table approaches, with unit and
-    integration tests covering the shielded path. Real-robot validation of the shield, and the
-    grasp policy it is built to gate, are the next step.</em>
-  </p>
+
+  <div class="media-grid">
+    <figure>
+      <video src="../videos/torso_shield.mp4" poster="../images/torso_shield_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Torso stop.</b> The arm is commanded toward the robot's own torso and the
+        shield halts it at the margin.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/table_shield.mp4" poster="../images/table_shield_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Table stop.</b> The same shield against the tabletop proxy, stopping the
+        hand before contact.</figcaption>
+    </figure>
+  </div>
 
   <h3>RoboWorld 2024</h3>
   <div class="media-grid single">
     <figure>
       <img src="../images/roboworld_demo.jpg" alt="Relocate task demonstration at RoboWorld 2024">
-      <figcaption><b>Live demonstration.</b> The Relocate task running on the platform at
-        RoboWorld 2024 — 53% success, with vision, tactile and force sensing in one loop.</figcaption>
+      <figcaption><b>Live demonstration.</b> The Relocate task on the platform at RoboWorld 2024
+        — 53% success, vision, tactile and force in one loop.</figcaption>
     </figure>
   </div>
 
   <h3>Stack</h3>
   <p class="tags">Python · multiprocessing · xArm7 ×2 · Allegro Hand · Inspire Hand ·
-     tactile sensing · RealSense · MuJoCo · Apple Vision Pro teleoperation · safety shield</p>
-
-  <h3>Related</h3>
-  <p>
-    The fingertip contact-location work that feeds this framework's tactile channel is written up
-    separately: <a href="contact.html">Contact Location Estimation on Dexterous Hand
-    Fingertips</a>.
-  </p>
+     tactile sensing · MuJoCo · Apple Vision Pro teleoperation · ACT · flow matching</p>
 
 </div>
 </body>
