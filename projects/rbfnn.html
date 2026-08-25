@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RBFNN Online Disturbance Compensation · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>RBFNN-Based Online Disturbance Compensation for Robust Grasping</h1>
+    <p class="detail-meta">KETI · 2025 – Present · Sole developer (100%)
+      <span class="award">KRoC 2026 (Poster)</span></p>
+  </div>
+
+  <div class="media-grid">
+    <figure>
+      <video src="../videos/rbfnn_before.mp4" poster="../images/rbfnn_before_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Without compensation.</b> An external disturbance drives the residual
+        torque past what the nominal controller holds, and the object drops.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/rbfnn_after.mp4" poster="../images/rbfnn_after_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>With online RBFNN compensation.</b> The residual torque is estimated and
+        cancelled in real time, and the grip survives the same disturbance.</figcaption>
+    </figure>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">100%</span><span class="lbl">object-drop failures removed</span></div>
+    <div class="stat"><span class="num">Online</span><span class="lbl">real-time adaptation</span></div>
+  </div>
+
+  <h3>Overview</h3>
+  <p>
+    High-payload grasping is fragile to unmodeled dynamics and external disturbances. This project
+    adds a learning-based compensation layer that estimates and cancels residual torque in real
+    time, so the robot keeps its grip even under unexpected interference.
+  </p>
+
+  <h3>What I did</h3>
+  <ul>
+    <li>Designed and implemented a full-stack controller using a Radial Basis Function Neural Network (RBFNN) to compensate residual torque.</li>
+    <li>Adopted an online-learning architecture so the controller adapts immediately to unpredictable external forces.</li>
+    <li>Eliminated 100% of object-drop failures in disturbance tests.</li>
+    <li>Presented the work as a poster at KRoC 2026 (Korea Robotics Society Annual Conference).</li>
+  </ul>
+
+  <h3>Tracking results</h3>
+  <p>
+    The same trajectory run under the nominal PD controller and with the RBFNN compensation
+    layer active, on joint&nbsp;7 — the joint that carries the most residual torque in this
+    motion.
+  </p>
+  <div class="media-grid">
+    <figure>
+      <img src="../images/RBFNN_joint.png" alt="Joint 7 trajectory tracking: reference vs RBFNN vs PD">
+      <figcaption><b>Trajectory tracking.</b> The RBFNN controller (blue) follows the reference
+        (dashed) almost on top of it, while the PD controller (orange) lags the reference and
+        overshoots at every direction change.</figcaption>
+    </figure>
+    <figure>
+      <img src="../images/RBFNN_error.png" alt="Joint 7 trajectory error: RBFNN vs PD">
+      <figcaption><b>Tracking error.</b> The same run as error: PD swings to roughly
+        ±0.6&nbsp;rad, the RBFNN stays inside about ±0.15&nbsp;rad — the residual torque is
+        being estimated and cancelled rather than fought by feedback gain.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Stack</h3>
+  <p class="tags">RBFNN · online learning · torque control · Python</p>
+
+</div>
+</body>
+</html>

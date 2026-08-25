@@ -1,0 +1,264 @@
+:root {
+  --fg: #202020;
+  --muted: #606060;
+  --link: #1772d0;
+  --link-hover: #f09228;
+  --bg: #ffffff;
+  --rule: #e6e6e6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); }
+
+/* ---------- header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.header-text { flex: 1; }
+.header-text h1 {
+  margin: 0 0 12px;
+  font-size: 30px;
+  font-weight: 700;
+}
+.header-text p { margin: 0 0 12px; }
+.links { color: var(--muted); }
+.header-photo img {
+  width: 136px;
+  height: 136px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 12%;
+  display: block;
+}
+
+/* ---------- sections ---------- */
+section { margin-top: 44px; }
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* ---------- news ---------- */
+ul.news { list-style: none; padding: 0; margin: 0; }
+ul.news li { margin-bottom: 8px; }
+.date {
+  display: inline-block;
+  width: 72px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- publications ---------- */
+.pub-table { width: 100%; border-collapse: collapse; }
+.pub-table tr { vertical-align: top; }
+.pub-table td { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.pub-table.compact td { padding: 8px 0; }
+
+.thumb { width: 196px; padding-right: 36px; }
+.thumb img {
+  width: 160px;
+  border-radius: 6px;
+  display: block;
+}
+
+.pub-title { font-weight: 600; }
+a.pub-title { color: var(--fg); }
+a.pub-title:hover { color: var(--link-hover); }
+.thumb a { display: block; }
+.authors { color: var(--fg); }
+.venue { color: var(--muted); font-style: italic; }
+.role { color: var(--muted); }
+.role::before { content: "· "; }
+.award { color: #c0392b; font-weight: 600; }
+.pub-links { font-size: 14px; }
+.abstract { margin: 8px 0 6px; color: var(--fg); font-size: 15px; }
+.tags { color: var(--muted); font-size: 13px; }
+code { font-size: 13px; background: rgba(128,128,128,.14); padding: 1px 5px; border-radius: 4px; }
+
+/* thumbnail video (same footprint as img) */
+.thumb video {
+  width: 160px;
+  border-radius: 6px;
+  display: block;
+  background: #000;
+}
+
+/* ---------- skills ---------- */
+.skills { display: flex; flex-direction: column; gap: 10px; }
+.skill-row { font-size: 15px; }
+.skill-cat {
+  display: inline-block;
+  min-width: 165px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 56px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 600px) {
+  .header { flex-direction: column-reverse; text-align: center; }
+  .header-photo img { width: 112px; height: 112px; }
+  .thumb { width: 136px; padding-right: 20px; }
+  .thumb img, .thumb video { width: 116px; }
+  .skill-cat { display: block; min-width: 0; margin-bottom: 2px; }
+}
+
+/* ---------- project detail page ---------- */
+.back { font-size: 14px; color: var(--muted); }
+.detail-head h1 { font-size: 26px; margin: 12px 0 6px; }
+.detail-meta { color: var(--muted); margin: 0 0 20px; }
+.detail-meta .award { margin-left: 6px; }
+.media {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+  margin: 0 0 24px;
+  background: #000;
+}
+.detail h3 {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+  margin: 24px 0 6px;
+}
+.detail p { margin: 0 0 12px; }
+.detail ul { margin: 0 0 12px; padding-left: 20px; }
+.detail li { margin-bottom: 4px; }
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 20px 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.stat { }
+.stat .num { display: block; font-size: 24px; font-weight: 700; color: var(--link); }
+.stat .lbl { font-size: 13px; color: var(--muted); }
+
+/* ---------- dark mode ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e4e4e4;
+    --muted: #9a9a9a;
+    --link: #4ea1f2;
+    --link-hover: #f0a648;
+    --bg: #121212;
+    --rule: #2a2a2a;
+  }
+}
+
+/* ---------- results table (project detail) ---------- */
+.res-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 8px 0 14px;
+}
+.res-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--rule);
+  padding: 6px 10px 6px 0;
+}
+.res-table td {
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.res-table th + th, .res-table td + td {
+  width: 110px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  padding-right: 0;
+}
+
+/* ---------- media grids & captions (project detail) ---------- */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0 0 20px;
+}
+.media-grid.single { grid-template-columns: minmax(0, 1fr); }
+figure { margin: 0; }
+figure img, figure video {
+  width: 100%;
+  display: block;
+  border-radius: 6px;
+  background: #000;
+}
+figcaption {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+figcaption b { color: var(--fg); font-weight: 600; }
+.media-note { font-size: 13px; color: var(--muted); margin: -8px 0 20px; }
+
+/* hero image that is square or portrait: cap it instead of filling the column */
+.media.compact {
+  width: auto;
+  max-width: 100%;
+  max-height: 430px;
+  margin: 0 auto 20px;
+}
+
+/* equal-height cells: crop each item to a common aspect ratio */
+.media-grid.equal figure img,
+.media-grid.equal figure video {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 600px) {
+  .media-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- placeholder for media not yet added ---------- */
+.thumb-placeholder {
+  width: 160px;
+  aspect-ratio: 16 / 9;
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 0 8px;
+}
+@media (max-width: 600px) { .thumb-placeholder { width: 116px; } }

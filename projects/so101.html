@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SO-101 ROS 2 Imitation Learning Pipeline · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>SO-101: ROS 2 Imitation Learning Pipeline (ACT &amp; Flow Matching)</h1>
+    <p class="detail-meta">Independent research · 2026 – Present · Sole developer (100%)</p>
+  </div>
+
+  <!-- media: drop in <video class="media" autoplay muted loop playsinline> or <img class="media"> here -->
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">30 Hz</span><span class="lbl">teleop → dataset → policy loop</span></div>
+    <div class="stat"><span class="num">300</span><span class="lbl">teleoperated demonstrations</span></div>
+    <div class="stat"><span class="num">200k</span><span class="lbl">training steps per policy</span></div>
+    <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
+  </div>
+
+  <p class="links"><a href="https://github.com/dsafjk0024/so101-imitation">Code on GitHub →</a></p>
+
+  <h3>Overview</h3>
+  <p>
+    An end-to-end imitation learning pipeline on a low-cost <b>SO-101</b> leader–follower arm
+    pair: teleoperate the follower by hand-guiding the leader, record episodes, convert them
+    into a training dataset, learn a visuomotor policy, and run it back on the real arm as a
+    closed loop. Two policies share the pipeline — <b>ACT</b> (action-chunking transformer)
+    and a <b>flow-matching</b> behaviour-cloning policy — both reimplemented in one PyTorch
+    package with a single checkpoint format, so the deployment node loads one framework and
+    switches policies by checkpoint alone.
+  </p>
+  <p>
+    The design rule throughout is that <em>the data contract is the interface</em>. Joint order,
+    topic names, image sizes and sampling rates live in one YAML file
+    (<code>src/converter/config/so101.yaml</code>), and every stage — recorder, converter,
+    trainer, inference node — validates against it and errors rather than warns on drift.
+    Contract violations that would otherwise be silent (a reordered joint, a resized image)
+    fail loudly instead of training into a policy that deploys to nothing.
+  </p>
+
+  <h3>System</h3>
+  <ul>
+    <li><b>Control</b> — ROS 2 Jazzy + <code>ros2_control</code> over Feetech STS3215 servos.
+        A relay node mirrors the leader arm's joint states onto the follower's position
+        commands; a mock hardware mode exercises the whole graph without the robot attached.</li>
+    <li><b>Bring-up</b> — contract-derived launch for the controllers and the two cameras
+        (wrist + third-person), including the Fast-DDS and <code>usb_cam</code> configuration
+        that raw 480×640 image topics need to stream stably.</li>
+    <li><b>Recorder</b> — episode recorder with keyboard start / stop / discard, writing
+        rosbag2 MCAP and reporting per-topic rates after each save, so a bad episode is caught
+        at collection time rather than at training time.</li>
+    <li><b>Converter</b> — offline CLI turning rosbags into a <b>LeRobot v3.0</b> dataset.
+        Frames are built on a fixed 30 Hz grid by <em>as-of</em> sampling: each tick takes the
+        newest sample older than that instant, and the tick is dropped if it exceeds that
+        feature's <code>max_age_s</code>. An episode with too many interior gaps is skipped
+        outright — LeRobot synthesizes time as <code>frame_index / fps</code>, so a dropped
+        tick in the middle would be recorded as a normal interval and silently distort joint
+        velocities.</li>
+    <li><b>Inference</b> — one synchronous ROS 2 node that runs either an ACT or a
+        flow-matching checkpoint, executing action chunks closed-loop with the matching
+        denormalization.</li>
+  </ul>
+
+  <h3>Policies</h3>
+  <ul>
+    <li><b>ACT</b> — a standalone action-chunking transformer: the policy predicts a chunk of
+        future absolute joint targets from the two camera views plus proprioception, with its
+        own trainer and a <code>--init-from</code> path for continued training.</li>
+    <li><b>Flow matching</b> — a flow-matching behaviour-cloning policy over the same
+        observation and action contract, sharing ACT's encoder conventions and checkpoint
+        format so the two are directly comparable and interchangeable at deployment.</li>
+  </ul>
+  <p>
+    Both consume the identical dataset and emit 6-DoF absolute joint position targets in the
+    canonical order <code>shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll,
+    gripper</code>, which is the same order the URDF, the controllers and the dataset use.
+  </p>
+
+  <h3>Data &amp; training</h3>
+  <p>
+    <b>300</b> teleoperated pick-and-place demonstrations, two camera streams (wrist and
+    third-person) plus proprioception, recorded at 30 Hz and converted to LeRobot v3.0.
+    Because raw bags are large (~55 MB/s with two uncompressed 480×640 streams), conversion
+    runs on the collecting machine and only the video-encoded dataset moves to the training
+    machine.
+  </p>
+  <p>
+    Both policies were trained on that same dataset for <b>200k steps</b> each — identical
+    data, identical observation and action contract — so ACT and flow matching are compared
+    under matched conditions rather than at whatever step each happened to converge.
+  </p>
+
+  <h3>Results</h3>
+  <p>
+    <em>Task success rates, rollout videos and the ACT vs. flow-matching comparison are being
+    finalized and will be added here.</em>
+  </p>
+  <!-- results: success rate table + rollout videos to be inserted -->
+
+  <h3>Stack</h3>
+  <p class="tags">ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · PyTorch ·
+     ACT · flow matching · Pixi</p>
+
+</div>
+</body>
+</html>

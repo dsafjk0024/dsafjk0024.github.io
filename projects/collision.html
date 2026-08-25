@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sim-to-Real Collision Avoidance · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>Sim-to-Real Transfer &amp; Real-Time Collision Avoidance</h1>
+    <p class="detail-meta">KETI · 2024 – 2025 · Core contributor (50%)</p>
+  </div>
+
+  <div class="media-grid equal">
+    <figure>
+      <video src="../videos/gjk_simulation.mp4" poster="../images/gjk_simulation_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Simulation.</b> Obstacle distance from the point cloud via GJK, driving
+        dynamic velocity damping in MuJoCo.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/gjk_real_robot.mp4" poster="../images/gjk_real_robot_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Real xArm6.</b> The same controller at 30&nbsp;Hz on hardware, with no
+        proximity sensors.</figcaption>
+    </figure>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">45%</span><span class="lbl">lower tracking error</span></div>
+    <div class="stat"><span class="num">30 Hz</span><span class="lbl">on real xArm6</span></div>
+    <div class="stat"><span class="num">0</span><span class="lbl">proximity sensors</span></div>
+  </div>
+
+  <h3>Overview</h3>
+  <p>
+    A reactive collision-avoidance system that lets a manipulator slow down near obstacles using
+    only perception — no dedicated proximity sensors. Getting it to work on real hardware relied
+    on closing the sim-to-real gap first.
+  </p>
+
+  <h3>What I did</h3>
+  <ul>
+    <li>Achieved sim-to-real transfer via system identification in MuJoCo, cutting trajectory-tracking error by 45%.</li>
+    <li>Designed a Dynamic Velocity Damping architecture that scales motion by obstacle distance.</li>
+    <li>Computed obstacle distance from point-cloud data using the GJK algorithm.</li>
+    <li>Validated the full system at 30&nbsp;Hz on a real xArm6 without any proximity sensors.</li>
+  </ul>
+
+  <h3>Stack</h3>
+  <p class="tags">MuJoCo · system identification · point cloud · GJK · xArm6</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imitation Framework for Autonomous Manipulation · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>Imitation Framework for Autonomous Robot Manipulation</h1>
+    <p class="detail-meta">KETI · 2026 – Present · Contributor (30%) — teleoperation stack &amp; data collection</p>
+  </div>
+
+  <img class="media compact" src="../images/peg_in_hole_setup.jpg"
+       alt="Peg-in-Hole task board with connectors and the gripper approaching">
+  <p class="media-note">The task board: USB, heavy-duty, D-sub and RJ45 connectors plus a gear
+     set, each with its own insertion tolerance — the xArm6's Robotiq Hand-E enters from the
+     bottom right. Demonstrations were recorded by hand through a SpaceMouse.</p>
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">30%</span><span class="lbl">my contribution</span></div>
+    <div class="stat"><span class="num">2026</span><span class="lbl">AutomationWorld live demo</span></div>
+  </div>
+
+  <h3>Overview</h3>
+  <p>
+    An end-to-end framework for learning manipulation skills from human demonstration — covering
+    data collection, policy training, and evaluation on a real robot. It was built to compare
+    modern generative policies on a precision insertion task and to measure them with a rigorous,
+    quantitative pipeline.
+  </p>
+
+  <p>
+    This was a team project, and the split of work is worth stating plainly: I built the
+    teleoperation and data-collection side, while a teammate owned the learning side — the
+    training environment, the imitation learning algorithms, and the training runs themselves.
+  </p>
+
+  <h3>My contribution — teleoperation &amp; data collection</h3>
+  <ul>
+    <li>Wrote the robot-side control code: <b>xArm6 + Robotiq Hand-E gripper</b> driven by a
+        <b>SpaceMouse</b> 6-DoF input device, so an operator could demonstrate the task by
+        hand instead of scripting trajectories.</li>
+    <li>Mapped SpaceMouse twist input to end-effector motion with the Hand-E on the same
+        loop, and streamed synchronized robot state, gripper state and RealSense frames as the
+        demonstration record.</li>
+    <li>Operated the rig to collect part of the human demonstration dataset the policies were
+        trained on.</li>
+  </ul>
+
+  <h3>Teammate's contribution — learning &amp; training</h3>
+  <ul>
+    <li>Set up the imitation learning environment and implemented the generative policies —
+        Diffusion Policy and Flow Matching — in JAX/Flax.</li>
+    <li>Ran policy training and deployed the trained policies on the real robot for
+        Peg-in-Hole precision insertion.</li>
+  </ul>
+
+  <h3>Team outcome</h3>
+  <ul>
+    <li>Quantitative evaluation on 7 NIST-derived metrics (success rate, OOD adaptability,
+        real-time performance, …).</li>
+    <li>Live demonstration of the framework at <b>AutomationWorld 2026</b>.</li>
+  </ul>
+
+  <h3>AutomationWorld 2026</h3>
+  <div class="media-grid single">
+    <figure>
+      <img src="../images/automationworld_demo.jpg" alt="KETI booth at AutomationWorld 2026">
+      <figcaption><b>The booth.</b> Our exhibit at AutomationWorld 2026, where the framework
+        ran the insertion task live for visitors.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Stack</h3>
+  <p class="tags">xArm6 · Robotiq Hand-E · SpaceMouse teleoperation · RealSense ·
+     Diffusion Policy · Flow Matching</p>
+
+</div>
+</body>
+</html>

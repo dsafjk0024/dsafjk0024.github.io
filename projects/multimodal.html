@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multimodal Sensing &amp; Contact Location Estimation · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>Multimodal Sensing Integration &amp; Contact Location Estimation</h1>
+    <p class="detail-meta">KETI · 2024 · Lead / core contributor
+      <span class="award">ICCAS 2024 (Poster)</span></p>
+  </div>
+
+  <img class="media" src="../images/roboworld_framework.png"
+       alt="Multi-process framework fusing vision, tactile and force/torque sensing">
+  <p class="media-note">The multi-process orchestration framework: vision, tactile (DIGIT) and
+     force/torque streams buffered into one control loop.</p>
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">0.85 mm</span><span class="lbl">avg. contact-location error</span></div>
+    <div class="stat"><span class="num">53%</span><span class="lbl">Relocate success · RoboWorld 2024</span></div>
+  </div>
+
+  <h3>Overview</h3>
+  <p>
+    Robust manipulation needs more than vision — especially when the object is occluded by the
+    hand. This project fuses vision, tactile, and force/torque sensing into one control loop and
+    estimates where contact happens from F/T signals alone.
+  </p>
+
+  <h3>What I did</h3>
+  <ul>
+    <li>Built a multi-process orchestration framework integrating vision, tactile (DIGIT, F/T), and control streams with state buffering.</li>
+    <li>Reached 53% success on the Relocate task at RoboWorld 2024.</li>
+    <li>Developed an F/T-based contact-location estimation algorithm with 0.85&nbsp;mm average error, enabling manipulation under visual occlusion.</li>
+    <li>Presented the estimation method as a poster at ICCAS 2024.</li>
+  </ul>
+
+  <h3>Fingertip design &amp; validation</h3>
+  <div class="media-grid">
+    <figure>
+      <img src="../images/fingertip_cad.png" alt="Fingertip 3D CAD design">
+      <figcaption><b>Fingertip CAD.</b> The sensorized fingertip the estimation method is
+        built around.</figcaption>
+    </figure>
+    <figure>
+      <img src="../images/fingertip_estimation_results.png" alt="Contact location estimation results">
+      <figcaption><b>Estimation results.</b> 0.85&nbsp;mm average contact-location error from
+        force/torque signals alone.</figcaption>
+    </figure>
+    <figure>
+      <img src="../images/fingertip_validation_1.jpg" alt="Fingertip validation experiment, setup 1">
+      <figcaption><b>Validation setup.</b> Known contact points applied to the fingertip.</figcaption>
+    </figure>
+    <figure>
+      <img src="../images/fingertip_validation_2.jpg" alt="Fingertip validation experiment, setup 2">
+      <figcaption><b>Validation setup.</b> Repeated across contact locations across the
+        fingertip surface.</figcaption>
+    </figure>
+  </div>
+
+  <h3>RoboWorld 2024</h3>
+  <div class="media-grid single">
+    <figure>
+      <img src="../images/roboworld_demo.jpg" alt="Relocate task demonstration at RoboWorld 2024">
+      <figcaption><b>Live demonstration.</b> The Relocate task running on the dual-arm
+        platform at RoboWorld 2024 — 53% success.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Stack</h3>
+  <p class="tags">sensor fusion · DIGIT tactile · F/T sensor · RGB-D · multi-process control</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jusung Kim</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header">
+    <div class="header-text">
+      <h1>Jusung Kim</h1>
+      <p>
+        I'm a <b>Research Intern</b> at the
+        <a href="https://www.keti.re.kr/">Intelligent Robotics Center, KETI</a>
+        (Korea Electronics Technology Institute).
+        I build learning-based control for real robots — my work spans
+        <em>reinforcement / imitation learning</em>,
+        <em>sim-to-real transfer</em>, and
+        <em>robot manipulation &amp; control</em>.
+      </p>
+      <p>
+        I hold a B.S. in Aerospace Engineering from
+        <a href="https://www.konkuk.ac.kr/">Konkuk University</a>
+        and a B.S. in Aero Mechanical Engineering from
+        <a href="https://www.hanseo.ac.kr/">Hanseo University</a>.
+      </p>
+      <p class="links">
+        <a href="mailto:dsafjk0024@naver.com">Email</a> /
+        <a href="#">CV</a> /
+        <a href="https://github.com/dsafjk0024">GitHub</a> /
+        <a href="#">Scholar</a>
+      </p>
+    </div>
+    <div class="header-photo">
+      <img src="images/profile.jpg" alt="Jusung Kim">
+    </div>
+  </header>
+
+  <!-- ===================== NEWS ===================== -->
+  <section>
+    <h2>News</h2>
+    <ul class="news">
+      <li><span class="date">2026</span> Built an end-to-end ROS 2 imitation-learning pipeline on a real <b><a href="projects/so101.html">SO-101</a></b> arm pair — teleoperation, dataset conversion, ACT &amp; flow-matching policies, closed-loop inference.</li>
+      <li><span class="date">2026</span> Demonstrated our imitation-learning manipulation framework live at <b>AutomationWorld 2026</b>.</li>
+      <li><span class="date">2026</span> Poster on RBFNN-based disturbance compensation accepted at <b>KRoC 2026</b>.</li>
+      <li><span class="date">2024</span> Poster on fingertip contact-location estimation presented at <b>ICCAS 2024</b>.</li>
+      <li><span class="date">2024</span> Started as a Research Intern at KETI Intelligent Robotics Center.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== PROJECTS ===================== -->
+  <section>
+    <h2>Projects</h2>
+    <table class="pub-table">
+
+      <!-- ---- entry template: copy this <tr> block per project ---- -->
+      <tr>
+        <td class="thumb">
+          <!-- replace with <img>/<video> once SO-101 media is ready -->
+          <a href="projects/so101.html"><div class="thumb-placeholder">media coming</div></a>
+        </td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/so101.html">SO-101: ROS 2 Imitation Learning Pipeline (ACT &amp; Flow Matching)</a><br>
+          <span class="venue">Independent research · 2026 – Present</span>
+          <span class="role">Sole developer (100%)</span><br>
+          <p class="abstract">End-to-end imitation learning on a real SO-101 arm pair — ROS 2 teleop and episode recorder, rosbag&nbsp;→&nbsp;LeRobot v3.0 conversion, ACT and flow-matching policies, and closed-loop inference on hardware.</p>
+          <span class="tags">ROS 2 Jazzy · ros2_control · LeRobot · ACT · flow matching</span>
+          <span class="pub-links"><a href="https://github.com/dsafjk0024/so101-imitation">code</a></span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb">
+          <a href="projects/go2.html"><video src="videos/go2_deploy_finetuned.mp4" poster="images/go2_deploy_finetuned_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
+        </td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/go2.html">World Model Sim-to-Real Transfer on Unitree Go2</a><br>
+          <span class="venue">KETI · 2026 – Present</span>
+          <span class="role">Sole developer (100%)</span><br>
+          <p class="abstract">Deployed a world-model RL locomotion policy on a real Unitree Go2 quadruped at 50&nbsp;Hz.</p>
+          <span class="tags">world model · PPO · Isaac Lab · Unitree SDK</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb">
+          <a href="projects/imitation.html"><img src="images/peg_in_hole_setup.jpg" alt="Peg-in-Hole task board with the xArm6 gripper"></a>
+        </td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/imitation.html">Imitation Framework for Autonomous Robot Manipulation</a><br>
+          <span class="venue">KETI · 2026 – Present</span>
+          <span class="role">Contributor (30%) — teleoperation &amp; data collection</span><br>
+          <p class="abstract">Team framework taking teleoperated demonstrations to real-robot rollout with Diffusion Policy &amp; Flow Matching on Peg-in-Hole insertion. My part: the xArm6 + Robotiq Hand-E + SpaceMouse teleoperation stack and part of the demonstration dataset.</p>
+          <span class="tags">Diffusion Policy · Flow Matching · xArm6 · Robotiq Hand-E · SpaceMouse</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb">
+          <a href="projects/rbfnn.html"><video src="videos/rbfnn_after.mp4" poster="images/rbfnn_after_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
+        </td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/rbfnn.html">RBFNN-Based Online Disturbance Compensation for Robust Grasping</a><br>
+          <span class="venue">KETI · 2025 – Present</span>
+          <span class="role">Sole developer (100%)</span>
+          <span class="award">KRoC 2026 (Poster)</span><br>
+          <p class="abstract">Real-time RBFNN torque compensation that eliminated 100% of object-drop failures under disturbance.</p>
+          <span class="tags">RBFNN · online learning · torque control</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb">
+          <a href="projects/collision.html"><video src="videos/gjk_real_robot.mp4" poster="images/gjk_real_robot_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
+        </td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/collision.html">Sim-to-Real Transfer &amp; Real-Time Collision Avoidance</a><br>
+          <span class="venue">KETI · 2024 – 2025</span>
+          <span class="role">Core contributor (50%)</span><br>
+          <p class="abstract">Sensor-free reactive collision avoidance on a real xArm6, with 45% lower tracking error via sim-to-real.</p>
+          <span class="tags">MuJoCo · system ID · point cloud · GJK</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb">
+          <a href="projects/multimodal.html"><img src="images/fingertip_cad.png" alt="Sensorized fingertip CAD"></a>
+        </td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/multimodal.html">Multimodal Sensing Integration &amp; Contact Location Estimation</a><br>
+          <span class="venue">KETI · 2024</span>
+          <span class="role">Lead / core contributor</span>
+          <span class="award">ICCAS 2024 (Poster)</span><br>
+          <p class="abstract">Fused vision + tactile + F/T sensing to estimate contact location to 0.85&nbsp;mm under visual occlusion.</p>
+          <span class="tags">tactile sensing · DIGIT · F/T sensor · sensor fusion</span>
+        </td>
+      </tr>
+
+    </table>
+  </section>
+
+  <!-- ===================== PUBLICATIONS ===================== -->
+  <section>
+    <h2>Publications</h2>
+    <table class="pub-table compact">
+      <tr>
+        <td class="pub-info">
+          <span class="pub-title">A Method for Estimating Contact Location on Dexterous Hand Fingertips</span> —
+          <span class="authors"><b>Jusung Kim</b>, et al.</span>
+          <span class="venue">ICCAS 2024, Jeju, Korea</span>
+          <span class="award">Poster</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="pub-info">
+          <span class="pub-title">RBFNN-Based Online Disturbance Compensation for Robust Grasping</span> —
+          <span class="authors"><b>Jusung Kim</b>, et al.</span>
+          <span class="venue">KRoC 2026</span>
+          <span class="award">Poster</span>
+        </td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ===================== SKILLS ===================== -->
+  <section>
+    <h2>Skills</h2>
+    <div class="skills">
+      <div class="skill-row"><span class="skill-cat">Programming &amp; AI</span>
+        Python · PyTorch · JAX/Flax · Isaac Lab · MuJoCo · PPO · world models · Diffusion Policy · flow matching · ACT</div>
+      <div class="skill-row"><span class="skill-cat">Robotics &amp; Control</span>
+        xArm6 &amp; 7 · UR5e · Allegro Hand · Robotiq Hand-E · Unitree Go2 · SO-101 · sim-to-real · torque control</div>
+      <div class="skill-row"><span class="skill-cat">Software &amp; Infrastructure</span>
+        ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · Pixi / conda · pytest · Git</div>
+      <div class="skill-row"><span class="skill-cat">Sensing &amp; Perception</span>
+        RealSense D435i (RGB-D) · DIGIT tactile · F/T sensor</div>
+      <div class="skill-row"><span class="skill-cat">Design &amp; CAD</span>
+        SolidWorks</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Template style borrowed from <a href="https://jonbarron.info/">Jon Barron</a>.
+    Last updated 2026.</p>
+  </footer>
+
+</div>
+</body>
+</html>

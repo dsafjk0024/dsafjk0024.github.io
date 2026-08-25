@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>World Model Sim-to-Real on Unitree Go2 · Jusung Kim</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="container detail">
+
+  <a class="back" href="../index.html">← Back to home</a>
+
+  <div class="detail-head">
+    <h1>World Model Sim-to-Real Transfer on Unitree Go2</h1>
+    <p class="detail-meta">KETI · 2026 – Present · Sole developer (100%)</p>
+  </div>
+
+  <video class="media" src="../videos/go2_deploy_finetuned.mp4"
+         poster="../images/go2_deploy_finetuned_poster.jpg"
+         autoplay muted loop playsinline preload="metadata"></video>
+  <p class="media-note">Learned locomotion policy running on the real Unitree&nbsp;Go2 at 50&nbsp;Hz
+     after dynamics tuning.</p>
+
+  <div class="stat-row">
+    <div class="stat"><span class="num">50 Hz</span><span class="lbl">real-robot control</span></div>
+    <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
+  </div>
+
+  <h3>Overview</h3>
+  <p>
+    This project studies world-model-based reinforcement learning for legged locomotion,
+    end-to-end from simulation to a physical robot. I rebuilt the training stack into a custom
+    RL framework so that world-model variants could be compared under identical, reproducible
+    conditions — then deployed the learned policy on real hardware.
+  </p>
+
+  <h3>What I did</h3>
+  <ul>
+    <li>Refactored an existing codebase (<code>SimDist</code>) into a modular RL framework built for controlled ablations.</li>
+    <li>Trained a locomotion policy and deployed it on a physical Unitree Go2 quadruped at 50&nbsp;Hz.</li>
+    <li>Built the full proprioceptive observation pipeline (joint position/velocity, projected gravity) over the Unitree SDK.</li>
+    <li>Ran a comparative evaluation of a vanilla world-model baseline against a dynamics-tuned variant.</li>
+  </ul>
+
+  <h3>Deployment &amp; evaluation</h3>
+  <div class="media-grid">
+    <figure>
+      <video src="../videos/go2_deploy_baseline.mp4" poster="../images/go2_deploy_baseline_poster.jpg"
+             controls muted playsinline preload="metadata"></video>
+      <figcaption><b>Without dynamics tuning.</b> The vanilla world-model policy transferred
+        straight from simulation.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/go2_deploy_finetuned.mp4" poster="../images/go2_deploy_finetuned_poster.jpg"
+             controls muted playsinline preload="metadata"></video>
+      <figcaption><b>With dynamics tuning.</b> The same policy after the sim-to-real
+        adjustment.</figcaption>
+    </figure>
+  </div>
+  <div class="media-grid single">
+    <figure>
+      <video src="../videos/go2_sim_evaluation.mp4" poster="../images/go2_sim_evaluation_poster.jpg"
+             controls muted playsinline preload="metadata"></video>
+      <figcaption><b>Simulation evaluation.</b> Controlled comparison of the world-model
+        variants before deployment.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Stack</h3>
+  <p class="tags">world model · PPO · Isaac Lab · MuJoCo · Unitree SDK · Python / PyTorch</p>
+
+</div>
+</body>
+</html>
