@@ -10,3 +10,12 @@ ppt_maker/
 
 # raw phone footage from evaluation sessions (edited clips are committed, originals are not)
 videos/so101 ACT/
+
+# raw phone footage — edited clips are committed, originals are not
+videos/so101*/
+videos/175000_success.mp4
+
+# personal documents: never publish from this repo
+Jusung_Kim_Portfolio.pdf
+*.pdf
+images/서명.png
