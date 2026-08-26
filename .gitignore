@@ -7,3 +7,6 @@ videos/_originals/
 ppt_maker/
 
 .DS_Store
+
+# raw phone footage from evaluation sessions (edited clips are committed, originals are not)
+videos/so101 ACT/

@@ -17,12 +17,17 @@
     <p class="detail-meta">Independent research · 2026 – Present · Sole developer (100%)</p>
   </div>
 
-  <!-- media: drop in <video class="media" autoplay muted loop playsinline> or <img class="media"> here -->
+  <video class="media" src="../videos/so101_success_montage.mp4"
+         poster="../images/so101_success_montage_poster.jpg"
+         autoplay muted loop playsinline preload="metadata" controls></video>
+  <p class="media-note">Five successful rollouts of the deployed ACT policy at 2× speed, chosen to
+     span the cube placements — from the two cubes adjacent to the widest separation tested.</p>
 
   <div class="stat-row">
     <div class="stat"><span class="num">30 Hz</span><span class="lbl">teleop → dataset → policy loop</span></div>
     <div class="stat"><span class="num">300</span><span class="lbl">teleoperated demonstrations</span></div>
-    <div class="stat"><span class="num">200k</span><span class="lbl">training steps per policy</span></div>
+    <div class="stat"><span class="num">300k</span><span class="lbl">training steps per policy</span></div>
+    <div class="stat"><span class="num">74%</span><span class="lbl">task completion, 50 real trials</span></div>
     <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
   </div>
 
@@ -77,7 +82,8 @@
         own trainer and a <code>--init-from</code> path for continued training.</li>
     <li><b>Flow matching</b> — a flow-matching behaviour-cloning policy over the same
         observation and action contract, sharing ACT's encoder conventions and checkpoint
-        format so the two are directly comparable and interchangeable at deployment.</li>
+        format so the two are directly comparable and interchangeable at deployment.
+        <b>Trained; not yet evaluated on hardware</b> — the results below are ACT's alone.</li>
   </ul>
   <p>
     Both consume the identical dataset and emit 6-DoF absolute joint position targets in the
@@ -94,17 +100,91 @@
     machine.
   </p>
   <p>
-    Both policies were trained on that same dataset for <b>200k steps</b> each — identical
-    data, identical observation and action contract — so ACT and flow matching are compared
-    under matched conditions rather than at whatever step each happened to converge.
+    Both policies were trained on that same dataset for <b>300k steps</b> each — identical
+    data, identical observation and action contract — so that when the flow-matching policy is
+    evaluated on hardware it is compared under matched conditions, not at whatever step each
+    happened to converge.
   </p>
 
-  <h3>Results</h3>
+  <h3>Results — deployed ACT policy</h3>
   <p>
-    <em>Task success rates, rollout videos and the ACT vs. flow-matching comparison are being
-    finalized and will be added here.</em>
+    60 logged rollouts on the real arm in one session, all from the same ACT checkpoint at
+    30&nbsp;Hz. A trial counts as <b>completed</b> when the held cube ends stacked on the base
+    cube; <b>first attempt</b> is the stricter subset where that happened without a regrasp
+    after a miss or a drop. Intervals are Wilson 95%.
   </p>
-  <!-- results: success rate table + rollout videos to be inserted -->
+  <table class="res-table">
+    <tr><th>Condition</th><th>Completed</th><th>95% CI</th><th>First attempt</th></tr>
+    <tr><td>In-distribution (cubes within the demonstrated range)</td>
+        <td>37/50 (74%)</td><td>60–84%</td><td>34/50 (68%)</td></tr>
+    <tr><td>Out-of-distribution (cubes displaced beyond it)</td>
+        <td>2/10 (20%)</td><td>6–51%</td><td>1/10 (10%)</td></tr>
+  </table>
+  <p>
+    The control loop held 29.7–29.9&nbsp;Hz against a 30&nbsp;Hz request across every rollout,
+    with mean inference 3.4&nbsp;ms. Three rollouts logged a command dropout of a second or more
+    (an input went stale, 3.4&nbsp;s at worst); excluding all three moves in-distribution
+    completion from 74% to 74% — the failures are the policy's, not the pipeline's.
+  </p>
+
+  <p>
+    <b>Flow matching is next.</b> Its checkpoint is trained on the same 300 demonstrations for
+    the same 300k steps, and the inference node already runs it by pointing at that checkpoint —
+    what is missing is the hardware session. It will run the protocol above unchanged: the same
+    placements in the same interleaved order, so the two policies are compared on identical
+    setups rather than on whatever the table looked like that afternoon.
+  </p>
+
+  <h3>Where it fails</h3>
+  <p>
+    In distribution, most failures are not missed grasps — the policy reaches the cube, lifts it
+    and puts it on the base, and the stack then slides off within a second of release. The cube
+    is being let go slightly off-centre and still moving, which the success criterion (standing
+    3&nbsp;s after release) is written to catch. It is a placement-precision problem at the end
+    of the episode, not a perception or grasping one.
+  </p>
+  <p>
+    Out of distribution the failure is different in kind: the policy reaches confidently for
+    where the cube <em>would</em> have been in the demonstrations. That is the honest signature
+    of behaviour cloning on 300 demonstrations — it interpolates the demonstrated workspace and
+    does not extrapolate past it.
+  </p>
+  <div class="media-grid">
+    <figure>
+      <video src="../videos/so101_indist_failures.mp4" poster="../images/so101_indist_failures_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>In-distribution failures</b> (2× speed). Two rollouts where the stack slides
+        off just after release, and one where the cube is never stacked at all.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/so101_ood_failures.mp4" poster="../images/so101_ood_failures_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Out-of-distribution failures</b> (2× speed). Three rollouts with the cubes
+        displaced beyond the range the demonstrations covered.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/so101_retry.mp4" poster="../images/so101_retry_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Recovery after a miss</b> (2× speed). The gripper knocks the cube, comes
+        back for it and completes the stack — counted as completed, but not as a first
+        attempt.</figcaption>
+    </figure>
+    <figure>
+      <video src="../videos/so101_release_failure.mp4" poster="../images/so101_release_failure_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>An unusual failure</b> (1.5× speed). A clean grasp released mid-transport —
+        the only instance in the session, kept because it is a different failure from the rest.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Evaluation harness</h3>
+  <p>
+    The session above was driven by a harness in the repository: it generates a paired,
+    interleaved schedule, launches the inference node per trial, captures the achieved control
+    rate and inference latency automatically, and reports success rates with Wilson intervals
+    plus a McNemar test between policies. It exists so the flow-matching session yields a
+    directly comparable table rather than a second set of numbers gathered a different way.
+  </p>
 
   <h3>Stack</h3>
   <p class="tags">ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · PyTorch ·

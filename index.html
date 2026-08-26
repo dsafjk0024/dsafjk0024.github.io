@@ -45,6 +45,7 @@
   <section>
     <h2>News</h2>
     <ul class="news">
+      <li><span class="date">2026</span> Deployed an ACT policy on the real <b><a href="projects/so101.html">SO-101</a></b> arm: 74% task completion over 50 cube-stacking trials, closed-loop at 30&nbsp;Hz.</li>
       <li><span class="date">2026</span> Built an end-to-end ROS 2 imitation-learning pipeline on a real <b><a href="projects/so101.html">SO-101</a></b> arm pair — teleoperation, dataset conversion, ACT &amp; flow-matching policies, closed-loop inference.</li>
       <li><span class="date">2026</span> Demonstrated our imitation-learning manipulation framework live at <b>AutomationWorld 2026</b>.</li>
       <li><span class="date">2026</span> Poster on RBFNN-based disturbance compensation accepted at <b>KRoC 2026</b>.</li>
@@ -61,15 +62,14 @@
       <!-- ---- entry template: copy this <tr> block per project ---- -->
       <tr>
         <td class="thumb">
-          <!-- replace with <img>/<video> once SO-101 media is ready -->
-          <a href="projects/so101.html"><div class="thumb-placeholder">media coming</div></a>
+          <a href="projects/so101.html"><video src="videos/so101_thumb.mp4" poster="images/so101_thumb_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
         </td>
         <td class="pub-info">
           <a class="pub-title" href="projects/so101.html">SO-101: ROS 2 Imitation Learning Pipeline (ACT &amp; Flow Matching)</a><br>
           <span class="venue">Independent research · 2026 – Present</span>
           <span class="role">Sole developer (100%)</span><br>
-          <p class="abstract">End-to-end imitation learning on a real SO-101 arm pair — ROS 2 teleop and episode recorder, rosbag&nbsp;→&nbsp;LeRobot v3.0 conversion, ACT and flow-matching policies, and closed-loop inference on hardware.</p>
-          <span class="tags">ROS 2 Jazzy · ros2_control · LeRobot · ACT · flow matching</span>
+          <p class="abstract">End-to-end imitation learning on a real SO-101 arm pair — ROS 2 teleop and episode recorder, rosbag&nbsp;→&nbsp;LeRobot v3.0 conversion, ACT and flow-matching policies, and closed-loop inference on hardware. The deployed ACT policy completes 74% of 50 cube-stacking trials at 30&nbsp;Hz, and 20% once the cubes are placed outside the demonstrated range; the flow-matching policy is trained and awaiting its hardware session.</p>
+          <span class="tags">ROS 2 Jazzy · ros2_control · LeRobot · ACT · flow matching · real-robot eval</span>
           <span class="pub-links"><a href="https://github.com/dsafjk0024/so101-imitation">code</a></span>
         </td>
       </tr>
