@@ -20,171 +20,188 @@
   <video class="media" src="../videos/so101_success_montage.mp4"
          poster="../images/so101_success_montage_poster.jpg"
          autoplay muted loop playsinline preload="metadata" controls></video>
-  <p class="media-note">Five successful rollouts of the deployed ACT policy at 2× speed, chosen to
-     span the cube placements — from the two cubes adjacent to the widest separation tested.</p>
-
-  <div class="stat-row">
-    <div class="stat"><span class="num">30 Hz</span><span class="lbl">teleop → dataset → policy loop</span></div>
-    <div class="stat"><span class="num">300</span><span class="lbl">teleoperated demonstrations</span></div>
-    <div class="stat"><span class="num">300k</span><span class="lbl">training steps per policy</span></div>
-    <div class="stat"><span class="num">74%</span><span class="lbl">task completion, 50 real trials</span></div>
-    <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
-  </div>
+  <p class="media-note">Five successful rollouts of the deployed ACT policy at 2× speed, spanning
+     the cube placements tested — from the two cubes adjacent to the widest separation.</p>
 
   <p class="links"><a href="https://github.com/dsafjk0024/so101-imitation">Code on GitHub →</a></p>
 
+  <div class="stat-row">
+    <div class="stat"><span class="num">74%</span><span class="lbl">task completion, 50 real trials</span></div>
+    <div class="stat"><span class="num">300</span><span class="lbl">teleoperated demonstrations</span></div>
+    <div class="stat"><span class="num">30 Hz</span><span class="lbl">closed-loop control</span></div>
+    <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
+  </div>
+
   <h3>Overview</h3>
   <p>
-    An end-to-end imitation learning pipeline on a low-cost <b>SO-101</b> leader–follower arm
-    pair: teleoperate the follower by hand-guiding the leader, record episodes, convert them
-    into a training dataset, learn a visuomotor policy, and run it back on the real arm as a
-    closed loop. Two policies share the pipeline — <b>ACT</b> (action-chunking transformer)
-    and a <b>flow-matching</b> behaviour-cloning policy — both reimplemented in one PyTorch
-    package with a single checkpoint format, so the deployment node loads one framework and
-    switches policies by checkpoint alone.
-  </p>
-  <p>
-    The design rule throughout is that <em>the data contract is the interface</em>. Joint order,
-    topic names, image sizes and sampling rates live in one YAML file
-    (<code>src/converter/config/so101.yaml</code>), and every stage — recorder, converter,
-    trainer, inference node — validates against it and errors rather than warns on drift.
-    Contract violations that would otherwise be silent (a reordered joint, a resized image)
-    fail loudly instead of training into a policy that deploys to nothing.
+    The task is to pick up a small cube and stack it on a larger base cube, with both cubes
+    moved between trials. Hand-guide the leader arm to demonstrate it, record the episodes,
+    convert them into a dataset, train a visuomotor policy, and run it back on the real arm in
+    place of the human. <b>ACT</b> and a <b>flow-matching</b> policy share the pipeline — one
+    PyTorch package, one checkpoint format — so deployment switches policy by checkpoint alone.
   </p>
 
-  <h3>System</h3>
-  <ul>
-    <li><b>Control</b> — ROS 2 Jazzy + <code>ros2_control</code> over Feetech STS3215 servos.
-        A relay node mirrors the leader arm's joint states onto the follower's position
-        commands; a mock hardware mode exercises the whole graph without the robot attached.</li>
-    <li><b>Bring-up</b> — contract-derived launch for the controllers and the two cameras
-        (wrist + third-person), including the Fast-DDS and <code>usb_cam</code> configuration
-        that raw 480×640 image topics need to stream stably.</li>
-    <li><b>Recorder</b> — episode recorder with keyboard start / stop / discard, writing
-        rosbag2 MCAP and reporting per-topic rates after each save, so a bad episode is caught
-        at collection time rather than at training time.</li>
-    <li><b>Converter</b> — offline CLI turning rosbags into a <b>LeRobot v3.0</b> dataset.
-        Frames are built on a fixed 30 Hz grid by <em>as-of</em> sampling: each tick takes the
-        newest sample older than that instant, and the tick is dropped if it exceeds that
-        feature's <code>max_age_s</code>. An episode with too many interior gaps is skipped
-        outright — LeRobot synthesizes time as <code>frame_index / fps</code>, so a dropped
-        tick in the middle would be recorded as a normal interval and silently distort joint
-        velocities.</li>
-    <li><b>Inference</b> — one synchronous ROS 2 node that runs either an ACT or a
-        flow-matching checkpoint, executing action chunks closed-loop with the matching
-        denormalization.</li>
-  </ul>
+  <h3>Pipeline</h3>
+
+  <div class="diagram-scroll">
+  <svg class="diagram" viewBox="0 0 940 430" role="img"
+       aria-label="Hand-guided teleoperation drives the follower arm through a command topic. The same topics are recorded, converted into a LeRobot dataset and trained into a policy, which is then deployed onto that same command topic in place of the human.">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+      </marker>
+    </defs>
+
+    <text class="lane" x="940" y="14" text-anchor="end">REAL TIME · ROS 2 JAZZY</text>
+    <text class="lane" x="940" y="248" text-anchor="end">OFFLINE</text>
+
+    <!-- teleoperation chain -->
+    <g class="node">
+      <rect x="0" y="30" width="120" height="46" rx="6"/><text x="60" y="58">human hand</text>
+      <rect x="160" y="30" width="140" height="46" rx="6"/><text x="230" y="52">leader arm</text>
+      <text class="sub" x="230" y="67">STS3215 × 6</text>
+      <rect x="340" y="30" width="140" height="46" rx="6"/><text x="410" y="52">teleop_node</text>
+      <text class="sub" x="410" y="67">50 Hz · stale guard</text>
+      <rect x="800" y="30" width="140" height="46" rx="6"/><text x="870" y="52">follower arm</text>
+      <text class="sub" x="870" y="67">ros2_control</text>
+    </g>
+    <g class="topic">
+      <rect x="520" y="34" width="240" height="38" rx="19"/>
+      <text x="640" y="58">/follower/…/commands</text>
+    </g>
+    <g class="edge">
+      <path d="M120,53 H155" marker-end="url(#ar)"/>
+      <path d="M300,53 H335" marker-end="url(#ar)"/>
+      <path d="M480,53 H515" marker-end="url(#ar)"/>
+      <path d="M760,53 H795" marker-end="url(#ar)"/>
+    </g>
+
+    <!-- sensing feeds the recorder -->
+    <g class="node">
+      <rect x="95" y="120" width="140" height="46" rx="6"/><text x="165" y="142">recorder</text>
+      <text class="sub" x="165" y="157">start / stop / discard</text>
+      <rect x="660" y="120" width="140" height="46" rx="6"/><text x="730" y="142">2 × camera</text>
+      <text class="sub" x="730" y="157">wrist + top, 480×640</text>
+    </g>
+    <g class="topic">
+      <rect x="390" y="124" width="210" height="38" rx="19"/>
+      <text x="495" y="148">4 contract topics</text>
+    </g>
+    <g class="edge">
+      <path d="M870,76 V98 H495 V120" marker-end="url(#ar)"/>
+      <path d="M660,143 H605" marker-end="url(#ar)"/>
+      <path d="M390,143 H240" marker-end="url(#ar)"/>
+      <path d="M165,166 V256" marker-end="url(#ar)"/>
+    </g>
+
+    <!-- offline chain -->
+    <g class="node">
+      <rect x="95" y="260" width="140" height="52" rx="6"/><text x="165" y="283">rosbag2</text>
+      <text class="sub" x="165" y="298">MCAP, raw CDR</text>
+      <rect x="285" y="260" width="160" height="52" rx="6"/><text x="365" y="283">converter</text>
+      <text class="sub" x="365" y="298">30 Hz as-of grid</text>
+      <rect x="495" y="260" width="160" height="52" rx="6"/><text x="575" y="283">LeRobot v3.0</text>
+      <text class="sub" x="575" y="298">300 episodes</text>
+      <rect x="705" y="260" width="180" height="52" rx="6"/><text x="795" y="283">ACT · flow matching</text>
+      <text class="sub" x="795" y="298">300k steps each</text>
+    </g>
+    <g class="edge">
+      <path d="M235,286 H280" marker-end="url(#ar)"/>
+      <path d="M445,286 H490" marker-end="url(#ar)"/>
+      <path d="M655,286 H700" marker-end="url(#ar)"/>
+    </g>
+
+    <!-- deployment closes the loop -->
+    <g class="node">
+      <rect x="600" y="360" width="230" height="52" rx="6"/><text x="715" y="383">sync inference node</text>
+      <text class="sub" x="715" y="398">30 Hz · chunked, closed loop</text>
+    </g>
+    <g class="edge">
+      <path d="M795,312 V386 H835" marker-end="url(#ar)"/>
+      <text class="sub" x="880" y="341">checkpoint</text>
+    </g>
+    <g class="edge dashed">
+      <path d="M600,386 H45 V210 H640 V76" marker-end="url(#ar)"/>
+    </g>
+    <text class="note" x="110" y="202">the policy takes the human's place on the same topic</text>
+  </svg>
+  </div>
+
+  <p>
+    One YAML file (<code>src/converter/config/so101.yaml</code>) fixes joint order, topic names,
+    types and image sizes, and every stage <em>errors</em> on drift rather than warning — a
+    reordered joint trains fine and deploys to nothing. The converter resamples onto a fixed
+    30 Hz grid and skips an episode with too many interior gaps, because LeRobot synthesizes
+    time as <code>frame_index / fps</code> and would log a gap as a normal interval. The
+    inference node waits for a complete, fresh observation instead of extrapolating.
+  </p>
 
   <h3>Policies</h3>
-  <ul>
-    <li><b>ACT</b> — a standalone action-chunking transformer: the policy predicts a chunk of
-        future absolute joint targets from the two camera views plus proprioception, with its
-        own trainer and a <code>--init-from</code> path for continued training.</li>
-    <li><b>Flow matching</b> — a flow-matching behaviour-cloning policy over the same
-        observation and action contract, sharing ACT's encoder conventions and checkpoint
-        format so the two are directly comparable and interchangeable at deployment.
-        <b>Trained; not yet evaluated on hardware</b> — the results below are ACT's alone.</li>
-  </ul>
   <p>
-    Both consume the identical dataset and emit 6-DoF absolute joint position targets in the
-    canonical order <code>shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll,
-    gripper</code>, which is the same order the URDF, the controllers and the dataset use.
-  </p>
-
-  <h3>Data &amp; training</h3>
-  <p>
-    <b>300</b> teleoperated pick-and-place demonstrations, two camera streams (wrist and
-    third-person) plus proprioception, recorded at 30 Hz and converted to LeRobot v3.0.
-    Because raw bags are large (~55 MB/s with two uncompressed 480×640 streams), conversion
-    runs on the collecting machine and only the video-encoded dataset moves to the training
-    machine.
-  </p>
-  <p>
-    Both policies were trained on that same dataset for <b>300k steps</b> each — identical
-    data, identical observation and action contract — so that when the flow-matching policy is
-    evaluated on hardware it is compared under matched conditions, not at whatever step each
-    happened to converge.
+    The observation is two 480×640 camera views — wrist and third-person — plus 6-DoF joint
+    positions; the action is 6 absolute joint targets. <b>ACT</b> predicts a chunk of future
+    targets and the node executes 20 of them before replanning, so the policy sees the world
+    again roughly every 0.7&nbsp;s at 30&nbsp;Hz. Actions are denormalized with the statistics
+    the checkpoint was trained under — publishing the raw normalized output looks plausible on
+    joints centred near zero and throws the wrist joint by more than a radian.
+    <b>Flow matching</b> shares the identical contract and training budget but is
+    <b>not yet run on hardware</b>, so the results below are ACT's alone.
   </p>
 
   <h3>Results — deployed ACT policy</h3>
   <p>
-    60 logged rollouts on the real arm in one session, all from the same ACT checkpoint at
-    30&nbsp;Hz. A trial counts as <b>completed</b> when the held cube ends stacked on the base
-    cube; <b>first attempt</b> is the stricter subset where that happened without a regrasp
-    after a miss or a drop. Intervals are Wilson 95%.
+    60 rollouts from one checkpoint in one session. Demonstrations were collected with the
+    cubes randomized around a grid of marked points, so <b>in-distribution</b> means placements
+    inside that range and <b>out-of-distribution</b> means displaced well beyond it. A trial is
+    <b>completed</b> when the cube ends stacked and still standing 3&nbsp;s after release;
+    <b>first attempt</b> is the stricter subset with no regrasp after a miss or a drop.
+    Intervals are Wilson 95%.
   </p>
   <table class="res-table">
     <tr><th>Condition</th><th>Completed</th><th>95% CI</th><th>First attempt</th></tr>
-    <tr><td>In-distribution (cubes within the demonstrated range)</td>
-        <td>37/50 (74%)</td><td>60–84%</td><td>34/50 (68%)</td></tr>
-    <tr><td>Out-of-distribution (cubes displaced beyond it)</td>
-        <td>2/10 (20%)</td><td>6–51%</td><td>1/10 (10%)</td></tr>
+    <tr><td>In-distribution</td><td>37/50 (74%)</td><td>60–84%</td><td>34/50 (68%)</td></tr>
+    <tr><td>Out-of-distribution</td><td>2/10 (20%)</td><td>6–51%</td><td>1/10 (10%)</td></tr>
   </table>
   <p>
-    The control loop held 29.7–29.9&nbsp;Hz against a 30&nbsp;Hz request across every rollout,
-    with mean inference 3.4&nbsp;ms. Three rollouts logged a command dropout of a second or more
-    (an input went stale, 3.4&nbsp;s at worst); excluding all three moves in-distribution
-    completion from 74% to 74% — the failures are the policy's, not the pipeline's.
-  </p>
-
-  <p>
-    <b>Flow matching is next.</b> Its checkpoint is trained on the same 300 demonstrations for
-    the same 300k steps, and the inference node already runs it by pointing at that checkpoint —
-    what is missing is the hardware session. It will run the protocol above unchanged: the same
-    placements in the same interleaved order, so the two policies are compared on identical
-    setups rather than on whatever the table looked like that afternoon.
+    The loop held 29.7–29.9&nbsp;Hz against a 30&nbsp;Hz request throughout, at 3.4&nbsp;ms mean
+    inference. Three rollouts logged a command dropout of a second or more; dropping all three
+    leaves completion at 74% — the failures are the policy's, not the pipeline's.
   </p>
 
   <h3>Where it fails</h3>
   <p>
-    In distribution, most failures are not missed grasps — the policy reaches the cube, lifts it
-    and puts it on the base, and the stack then slides off within a second of release. The cube
-    is being let go slightly off-centre and still moving, which the success criterion (standing
-    3&nbsp;s after release) is written to catch. It is a placement-precision problem at the end
-    of the episode, not a perception or grasping one.
-  </p>
-  <p>
-    Out of distribution the failure is different in kind: the policy reaches confidently for
-    where the cube <em>would</em> have been in the demonstrations. That is the honest signature
-    of behaviour cloning on 300 demonstrations — it interpolates the demonstrated workspace and
-    does not extrapolate past it.
+    In distribution the policy reaches, lifts and places — and the stack then slides off within
+    a second of release, the cube let go slightly off-centre and still moving. That is
+    placement precision at the end of the episode, not perception or grasping. Out of
+    distribution the failure differs in kind: the arm reaches for where the cube <em>would</em>
+    have been in the demonstrations.
   </p>
   <div class="media-grid">
     <figure>
       <video src="../videos/so101_indist_failures.mp4" poster="../images/so101_indist_failures_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>In-distribution failures</b> (2× speed). Two rollouts where the stack slides
-        off just after release, and one where the cube is never stacked at all.</figcaption>
+      <figcaption><b>In-distribution failures</b> (2×). Two stacks slide off after release; one
+        cube is never stacked.</figcaption>
     </figure>
     <figure>
       <video src="../videos/so101_ood_failures.mp4" poster="../images/so101_ood_failures_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>Out-of-distribution failures</b> (2× speed). Three rollouts with the cubes
-        displaced beyond the range the demonstrations covered.</figcaption>
+      <figcaption><b>Out-of-distribution failures</b> (2×). Cubes displaced beyond the
+        demonstrated range.</figcaption>
     </figure>
     <figure>
       <video src="../videos/so101_retry.mp4" poster="../images/so101_retry_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>Recovery after a miss</b> (2× speed). The gripper knocks the cube, comes
-        back for it and completes the stack — counted as completed, but not as a first
+      <figcaption><b>Recovery after a miss</b> (2×). Counted as completed, not as a first
         attempt.</figcaption>
     </figure>
     <figure>
       <video src="../videos/so101_release_failure.mp4" poster="../images/so101_release_failure_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>An unusual failure</b> (1.5× speed). A clean grasp released mid-transport —
-        the only instance in the session, kept because it is a different failure from the rest.</figcaption>
+      <figcaption><b>An unusual failure</b> (1.5×). A clean grasp released mid-transport — the
+        only instance in the session.</figcaption>
     </figure>
   </div>
-
-  <h3>Evaluation harness</h3>
-  <p>
-    The session above was driven by a harness in the repository: it generates a paired,
-    interleaved schedule, launches the inference node per trial, captures the achieved control
-    rate and inference latency automatically, and reports success rates with Wilson intervals
-    plus a McNemar test between policies. It exists so the flow-matching session yields a
-    directly comparable table rather than a second set of numbers gathered a different way.
-  </p>
 
   <h3>Stack</h3>
   <p class="tags">ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · PyTorch ·
