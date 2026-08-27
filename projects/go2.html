@@ -20,56 +20,141 @@
   <video class="media" src="../videos/go2_deploy_finetuned.mp4"
          poster="../images/go2_deploy_finetuned_poster.jpg"
          autoplay muted loop playsinline preload="metadata"></video>
-  <p class="media-note">Learned locomotion policy running on the real Unitree&nbsp;Go2 at 50&nbsp;Hz
-     after dynamics tuning.</p>
+  <p class="media-note">The learned world model planning on a real Unitree&nbsp;Go2 at 50&nbsp;Hz
+     after dynamics fine-tuning.</p>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">50 Hz</span><span class="lbl">real-robot control</span></div>
+    <div class="stat"><span class="num">50 Hz</span><span class="lbl">planning on real hardware</span></div>
     <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
   </div>
 
   <h3>Overview</h3>
   <p>
-    This project studies world-model-based reinforcement learning for legged locomotion,
-    end-to-end from simulation to a physical robot. I rebuilt the training stack into a custom
-    RL framework so that world-model variants could be compared under identical, reproducible
-    conditions — then deployed the learned policy on real hardware.
+    A latent world model is pretrained in simulation, then planned against on a real
+    quadruped — and the gap between the two is closed by fine-tuning <em>only</em> the dynamics
+    on real-robot data. I am reproducing and deploying this approach, published as
+    <a href="https://sim-dist.github.io/">SimDist</a>, on a Unitree&nbsp;Go2, and rebuilt the
+    training stack into a modular RL framework so world-model variants can be compared under
+    identical conditions.
+  </p>
+
+  <h3>Method</h3>
+
+  <div class="diagram-scroll">
+  <svg class="diagram" viewBox="0 0 940 430" role="img"
+       aria-label="An expert policy trained in simulation generates rollouts that pretrain a latent world model; the model is deployed on the real robot with sampling-based planning, and the real data fine-tunes only its dynamics, which loops back into deployment.">
+    <defs>
+      <marker id="go2ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+      </marker>
+    </defs>
+
+    <text class="lane" x="940" y="14" text-anchor="end">SIMULATION · PRETRAINING</text>
+    <text class="lane" x="940" y="234" text-anchor="end">REAL WORLD · DEPLOY AND ADAPT</text>
+
+    <g class="node">
+      <rect x="0" y="30" width="270" height="60" rx="6"/>
+      <text x="135" y="55">1 · expert policy training</text>
+      <text class="sub" x="135" y="74">PPO in parallel sim, privileged state</text>
+
+      <rect x="335" y="30" width="270" height="60" rx="6"/>
+      <text x="470" y="55">2 · data generation</text>
+      <text class="sub" x="470" y="74">expert + sub-optimal rollouts, action noise</text>
+
+    </g>
+    <g class="node learned">
+      <rect x="670" y="30" width="270" height="60" rx="6"/>
+      <text x="805" y="55">3 · world model pretraining</text>
+      <text class="sub" x="805" y="74">encoder · dynamics · reward · value</text>
+    </g>
+    <g class="edge">
+      <path d="M270,60 H330" marker-end="url(#go2ar)"/>
+      <text class="sub" x="300" y="48">π<tspan dy="3" font-size="9">e</tspan>, π<tspan dy="3" font-size="9">K</tspan>, V</text>
+      <path d="M605,60 H665" marker-end="url(#go2ar)"/>
+      <text class="sub" x="635" y="48">o, a, r, v</text>
+    </g>
+
+    <!-- transfer to the real robot -->
+    <g class="edge">
+      <path d="M805,90 V150 H150 V246" marker-end="url(#go2ar)"/>
+      <text class="sub" x="480" y="141">pretrained world model</text>
+    </g>
+
+    <g class="node">
+      <rect x="0" y="250" width="300" height="60" rx="6"/>
+      <text x="150" y="275">4a · deployment</text>
+      <text class="sub" x="150" y="294">sampling-based planning, 50 Hz</text>
+
+      <rect x="360" y="250" width="220" height="60" rx="6"/>
+      <text x="470" y="275">real Unitree Go2</text>
+      <text class="sub" x="470" y="294">proprioception over the SDK</text>
+
+      <rect x="640" y="250" width="300" height="60" rx="6"/>
+      <text x="790" y="275">4b · dynamics fine-tuning</text>
+      <text class="sub" x="790" y="294">dynamics only — encoder, reward, value frozen</text>
+    </g>
+    <g class="edge">
+      <path d="M300,280 H355" marker-end="url(#go2ar)"/>
+      <path d="M580,280 H635" marker-end="url(#go2ar)"/>
+      <text class="sub" x="607" y="268">real data</text>
+    </g>
+    <g class="edge dashed">
+      <path d="M790,310 V370 H150 V314" marker-end="url(#go2ar)"/>
+      <text class="note" x="470" y="363" text-anchor="middle">adapted model goes straight back into planning</text>
+    </g>
+  </svg>
+  </div>
+
+  <p>
+    The point of the split is that only the <em>dynamics</em> are wrong on the real robot. The
+    encoder, reward and value models learned in simulation stay frozen, so adaptation is a
+    supervised system-identification problem on a handful of real rollouts rather than another
+    round of reinforcement learning on hardware.
   </p>
 
   <h3>What I did</h3>
   <ul>
-    <li>Refactored an existing codebase (<code>SimDist</code>) into a modular RL framework built for controlled ablations.</li>
-    <li>Trained a locomotion policy and deployed it on a physical Unitree Go2 quadruped at 50&nbsp;Hz.</li>
-    <li>Built the full proprioceptive observation pipeline (joint position/velocity, projected gravity) over the Unitree SDK.</li>
-    <li>Ran a comparative evaluation of a vanilla world-model baseline against a dynamics-tuned variant.</li>
+    <li>Refactored the reference implementation into a modular RL framework, so world-model
+        variants share one config, one training loop and one evaluation path — a change made
+        because otherwise every ablation is also a code difference.</li>
+    <li>Built the proprioceptive observation pipeline over the Unitree SDK — joint positions and
+        velocities, projected gravity — and the deployment loop that plans at 50&nbsp;Hz.</li>
+    <li>Deployed on the physical Go2 and compared the simulation-only policy against the
+        dynamics-fine-tuned one.</li>
   </ul>
 
-  <h3>Deployment &amp; evaluation</h3>
+  <h3>Results so far</h3>
+  <p>
+    <em>Qualitative only — a quantitative evaluation is still to be collected.</em> Transferred
+    straight from simulation the gait is visibly unstable on hardware; after dynamics
+    fine-tuning the same model walks. The videos below are the comparison as it stands, and the
+    numbers that would make it a claim — tracking error, distance before a fall, success across
+    commanded velocities — are the next thing to measure.
+  </p>
   <div class="media-grid">
     <figure>
       <video src="../videos/go2_deploy_baseline.mp4" poster="../images/go2_deploy_baseline_poster.jpg"
              controls muted playsinline preload="metadata"></video>
-      <figcaption><b>Without dynamics tuning.</b> The vanilla world-model policy transferred
-        straight from simulation.</figcaption>
+      <figcaption><b>Before dynamics fine-tuning.</b> The world model transferred straight from
+        simulation.</figcaption>
     </figure>
     <figure>
       <video src="../videos/go2_deploy_finetuned.mp4" poster="../images/go2_deploy_finetuned_poster.jpg"
              controls muted playsinline preload="metadata"></video>
-      <figcaption><b>With dynamics tuning.</b> The same policy after the sim-to-real
-        adjustment.</figcaption>
+      <figcaption><b>After dynamics fine-tuning.</b> The same model, dynamics adapted on real
+        rollouts.</figcaption>
     </figure>
-  </div>
-  <div class="media-grid single">
     <figure>
       <video src="../videos/go2_sim_evaluation.mp4" poster="../images/go2_sim_evaluation_poster.jpg"
              controls muted playsinline preload="metadata"></video>
-      <figcaption><b>Simulation evaluation.</b> Controlled comparison of the world-model
-        variants before deployment.</figcaption>
+      <figcaption><b>Simulation evaluation.</b> Variants compared under identical conditions
+        before anything reaches hardware.</figcaption>
     </figure>
   </div>
 
   <h3>Stack</h3>
-  <p class="tags">world model · PPO · Isaac Lab · MuJoCo · Unitree SDK · Python / PyTorch</p>
+  <p class="tags">world model · sampling-based planning · PPO · Isaac Lab · MuJoCo ·
+     Unitree SDK · Python / PyTorch</p>
 
 </div>
 </body>

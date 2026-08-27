@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sim-to-Real Collision Avoidance · Jusung Kim</title>
+  <title>Real-Time Collision Avoidance · Jusung Kim</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="icon" href="data:,">
 </head>
@@ -13,7 +13,7 @@
   <a class="back" href="../index.html">← Back to home</a>
 
   <div class="detail-head">
-    <h1>Sim-to-Real Transfer &amp; Real-Time Collision Avoidance</h1>
+    <h1>Real-Time Collision Avoidance from Point Clouds</h1>
     <p class="detail-meta">KETI · 2024 – 2025 · Core contributor (50%)</p>
   </div>
 
@@ -33,28 +33,42 @@
   </div>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">45%</span><span class="lbl">lower tracking error</span></div>
-    <div class="stat"><span class="num">30 Hz</span><span class="lbl">on real xArm6</span></div>
+    <div class="stat"><span class="num">30 Hz</span><span class="lbl">closed loop on a real xArm6</span></div>
     <div class="stat"><span class="num">0</span><span class="lbl">proximity sensors</span></div>
+    <div class="stat"><span class="num">GJK</span><span class="lbl">distance straight from the point cloud</span></div>
   </div>
 
   <h3>Overview</h3>
   <p>
-    A reactive collision-avoidance system that lets a manipulator slow down near obstacles using
-    only perception — no dedicated proximity sensors. Getting it to work on real hardware relied
-    on closing the sim-to-real gap first.
+    A manipulator following a trajectory should slow down when something enters its path, and
+    it should do that for objects nobody modelled in advance. This layer takes the depth
+    camera's raw point cloud, computes the distance from the arm's geometry to it with
+    <b>GJK</b>, and scales the commanded velocity by that distance — no proximity sensors on
+    the arm, no obstacle model, no prior segmentation.
   </p>
 
-  <h3>What I did</h3>
+  <h3>Design decisions</h3>
   <ul>
-    <li>Achieved sim-to-real transfer via system identification in MuJoCo, cutting trajectory-tracking error by 45%.</li>
-    <li>Designed a Dynamic Velocity Damping architecture that scales motion by obstacle distance.</li>
-    <li>Computed obstacle distance from point-cloud data using the GJK algorithm.</li>
-    <li>Validated the full system at 30&nbsp;Hz on a real xArm6 without any proximity sensors.</li>
+    <li><b>Distance against the cloud, not against a fitted object.</b> Fitting a shape first
+        means the system only avoids obstacles it can classify; GJK on the points themselves
+        makes an unmodelled object — a hand, a box, a cable — stop the arm the same way.</li>
+    <li><b>Continuous damping instead of a stop threshold.</b> Scaling velocity by clearance
+        avoids the on/off behaviour that makes an arm lurch and then freeze, which is what
+        matters if a person is working next to it.</li>
+    <li><b>Same controller in simulation and on hardware.</b> Validated in MuJoCo first and
+        moved to the real xArm6 unchanged, at 30&nbsp;Hz.</li>
   </ul>
 
+  <h3>Results</h3>
+  <p>
+    <em>Qualitative.</em> The arm slows as the obstacle closes and stops short of contact, in
+    simulation and on hardware, for obstacles introduced by hand during motion. Clearance at
+    stop, reaction latency and behaviour across approach speeds were not measured — the videos
+    are the evidence as it stands.
+  </p>
+
   <h3>Stack</h3>
-  <p class="tags">MuJoCo · system identification · point cloud · GJK · xArm6</p>
+  <p class="tags">GJK · point cloud · RealSense · dynamic velocity damping · MuJoCo · xArm6</p>
 
 </div>
 </body>

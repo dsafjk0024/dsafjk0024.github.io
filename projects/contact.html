@@ -35,28 +35,22 @@
     occlusion.
   </p>
 
-  <h3>What I did</h3>
-  <ul>
-    <li>Designed the sensorized fingertip around a force/torque sensor, so that the contact point
-        is recoverable from the measured wrench rather than from a dense tactile array.</li>
-    <li>Developed the estimation algorithm mapping the measured force/torque to a contact
-        location on the fingertip surface.</li>
-    <li>Validated it against known applied contact points across the fingertip surface —
-        0.85&nbsp;mm average error.</li>
-    <li>Presented the method as a poster at ICCAS 2024 (Jeju, Korea).</li>
-  </ul>
+  <h3>Approach</h3>
+  <p>
+    A single force/torque sensor measures a wrench, and a wrench carries where it was applied:
+    the moment is the contact position crossed with the force. I designed the fingertip so that
+    inversion is well posed on its surface — one sensor and known geometry instead of a dense
+    tactile array — and built the estimator that maps the measured wrench to a point on that
+    surface. Validated against known applied contact points across the fingertip:
+    <b>0.85&nbsp;mm</b> average error. Presented as a poster at ICCAS 2024.
+  </p>
 
   <h3>Validation</h3>
-  <div class="media-grid uniform">
+  <div class="media-grid uniform single">
     <figure>
       <img src="../images/fingertip_estimation_results.png" alt="Contact location estimation results">
       <figcaption><b>Estimation results.</b> Estimated contact location against the applied
         ground truth.</figcaption>
-    </figure>
-    <figure>
-      <img src="../images/fingertip_cad.png" alt="Fingertip 3D CAD design">
-      <figcaption><b>Fingertip design.</b> Sensor placement and the surface the estimate is
-        expressed on.</figcaption>
     </figure>
   </div>
   <div class="media-grid uniform tall">

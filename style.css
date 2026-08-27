@@ -332,3 +332,11 @@ figure video, video.media { background: #000; }
   .diagram-scroll { overflow-x: auto; }
   .diagram-scroll .diagram { min-width: 720px; }
 }
+
+/* the learned component in a diagram — the one box that is a model, not code */
+.diagram .node.learned rect {
+  stroke: var(--link);
+  stroke-width: 2;
+  fill: color-mix(in srgb, var(--link) 10%, transparent);
+}
+.diagram .node.learned > text { fill: var(--link); }

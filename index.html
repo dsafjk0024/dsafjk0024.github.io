@@ -80,8 +80,8 @@
           <a class="pub-title" href="projects/go2.html">World Model Sim-to-Real Transfer on Unitree Go2</a><br>
           <span class="venue">KETI · 2026 – Present</span>
           <span class="role">Sole developer (100%)</span><br>
-          <p class="abstract">Deployed a world-model RL locomotion policy on a real Unitree Go2 quadruped at 50&nbsp;Hz.</p>
-          <span class="tags">world model · PPO · Isaac Lab · Unitree SDK</span>
+          <p class="abstract">Planning against a latent world model on a real Unitree Go2 at 50&nbsp;Hz, with only the dynamics fine-tuned on real rollouts — reproducing the SimDist approach. Qualitative so far: unstable transferred straight from simulation, walking after adaptation.</p>
+          <span class="tags">world model · sampling-based planning · PPO · Isaac Lab · Unitree SDK</span>
         </td>
       </tr>
 
@@ -107,8 +107,8 @@
           <span class="venue">KETI · 2025 – Present</span>
           <span class="role">Sole developer (100%)</span>
           <span class="award">KRoC 2026 (Poster)</span><br>
-          <p class="abstract">Real-time RBFNN torque compensation that eliminated 100% of object-drop failures under disturbance.</p>
-          <span class="tags">RBFNN · online learning · torque control</span>
+          <p class="abstract">A radial-basis network between the trajectory controller and the joint torque command, estimating residual torque online — peak joint error ±0.15&nbsp;rad against ±0.6 under fixed-gain PD, on an xArm7 with an Allegro Hand.</p>
+          <span class="tags">RBFNN · online learning · torque control · xArm7 · Allegro Hand</span>
         </td>
       </tr>
 
@@ -117,17 +117,17 @@
           <a href="projects/collision.html"><video src="videos/gjk_real_robot.mp4" poster="images/gjk_real_robot_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
         </td>
         <td class="pub-info">
-          <a class="pub-title" href="projects/collision.html">Sim-to-Real Transfer &amp; Real-Time Collision Avoidance</a><br>
+          <a class="pub-title" href="projects/collision.html">Real-Time Collision Avoidance from Point Clouds</a><br>
           <span class="venue">KETI · 2024 – 2025</span>
           <span class="role">Core contributor (50%)</span><br>
-          <p class="abstract">Sensor-free reactive collision avoidance on a real xArm6, with 45% lower tracking error via sim-to-real.</p>
-          <span class="tags">MuJoCo · system ID · point cloud · GJK</span>
+          <p class="abstract">Reactive collision avoidance on a real xArm6 with no proximity sensors — GJK distance straight from the point cloud, driving a velocity-damping layer at 30&nbsp;Hz.</p>
+          <span class="tags">GJK · point cloud · velocity damping · xArm6</span>
         </td>
       </tr>
 
       <tr>
         <td class="thumb">
-          <a href="projects/multimodal.html"><img src="images/roboworld_framework.png" alt="Multimodal sensing and unified control framework"></a>
+          <a href="projects/multimodal.html"><video src="videos/multimodal_thumb.mp4" poster="images/multimodal_thumb_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
         </td>
         <td class="pub-info">
           <a class="pub-title" href="projects/multimodal.html">Multimodal Sensing Integration &amp; Unified Control Framework</a><br>

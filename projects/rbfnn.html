@@ -34,30 +34,36 @@
   </div>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">100%</span><span class="lbl">object-drop failures removed</span></div>
-    <div class="stat"><span class="num">Online</span><span class="lbl">real-time adaptation</span></div>
+    <div class="stat"><span class="num">±0.15 rad</span><span class="lbl">peak joint error, vs ±0.6 under PD</span></div>
+    <div class="stat"><span class="num">Online</span><span class="lbl">adaptation, no offline retraining</span></div>
+    <div class="stat"><span class="num">xArm7</span><span class="lbl">+ Allegro Hand</span></div>
   </div>
 
   <h3>Overview</h3>
   <p>
-    High-payload grasping is fragile to unmodeled dynamics and external disturbances. This project
-    adds a learning-based compensation layer that estimates and cancels residual torque in real
-    time, so the robot keeps its grip even under unexpected interference.
+    A held object is dropped not because the grasp force was wrong but because the arm loses
+    the pose it was commanded: an external push produces torque the model does not account for,
+    and a fixed-gain controller can only answer it after the error has already grown. This adds
+    a <b>Radial Basis Function Neural Network</b> between the trajectory controller and the
+    joint torque command, estimating that residual torque online and cancelling it — so the
+    disturbance is compensated rather than out-muscled by gain.
   </p>
 
-  <h3>What I did</h3>
-  <ul>
-    <li>Designed and implemented a full-stack controller using a Radial Basis Function Neural Network (RBFNN) to compensate residual torque.</li>
-    <li>Adopted an online-learning architecture so the controller adapts immediately to unpredictable external forces.</li>
-    <li>Eliminated 100% of object-drop failures in disturbance tests.</li>
-    <li>Presented the work as a poster at KRoC 2026 (Korea Robotics Society Annual Conference).</li>
-  </ul>
+  <h3>Why online</h3>
+  <p>
+    The disturbances are not known in advance, so there is nothing to pretrain against. The
+    network's weights update while the arm is moving, from the tracking error it is producing
+    right then; nothing is collected, retrained offline and redeployed. Tested on an
+    <b>xArm7</b> with an <b>Allegro Hand</b>: without compensation the grasp gave way every
+    time, and with it the object was never dropped. Trial counts were not logged, so that is an
+    observed outcome rather than a measured rate — the tracking plots below are the quantitative
+    part.
+  </p>
 
   <h3>Tracking results</h3>
   <p>
-    The same trajectory run under the nominal PD controller and with the RBFNN compensation
-    layer active, on joint&nbsp;7 — the joint that carries the most residual torque in this
-    motion.
+    The same trajectory on the xArm7, run under the nominal PD controller and with the RBFNN
+    compensation layer active. Joint&nbsp;7 carries the most residual torque in this motion.
   </p>
   <div class="media-grid">
     <figure>

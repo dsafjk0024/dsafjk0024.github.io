@@ -30,16 +30,11 @@
 
   <h3>Overview</h3>
   <p>
-    An end-to-end framework for learning manipulation skills from human demonstration — covering
-    data collection, policy training, and evaluation on a real robot. It was built to compare
-    modern generative policies on a precision insertion task and to measure them with a rigorous,
-    quantitative pipeline.
-  </p>
-
-  <p>
-    This was a team project, and the split of work is worth stating plainly: I built the
-    teleoperation and data-collection side, while a teammate owned the learning side — the
-    training environment, the imitation learning algorithms, and the training runs themselves.
+    A team framework for learning precision insertion from human demonstration — collection,
+    training and evaluation on a real xArm6. The task board holds connectors with different
+    insertion tolerances, so success depends on sub-millimetre placement rather than on reaching
+    the right area. I built the teleoperation and data-collection side; a teammate owned the
+    learning side.
   </p>
 
   <h3>My contribution — teleoperation &amp; data collection</h3>
@@ -47,11 +42,10 @@
     <li>Wrote the robot-side control code: <b>xArm6 + Robotiq Hand-E gripper</b> driven by a
         <b>SpaceMouse</b> 6-DoF input device, so an operator could demonstrate the task by
         hand instead of scripting trajectories.</li>
-    <li>Mapped SpaceMouse twist input to end-effector motion with the Hand-E on the same
-        loop, and streamed synchronized robot state, gripper state and RealSense frames as the
-        demonstration record.</li>
-    <li>Operated the rig to collect part of the human demonstration dataset the policies were
-        trained on.</li>
+    <li>Mapped SpaceMouse twist input to end-effector motion with the gripper on the same loop,
+        and streamed synchronized arm state, gripper state and RealSense frames as the
+        demonstration record — a demonstration is only usable if those three arrive aligned.</li>
+    <li>Operated the rig to collect part of the demonstration dataset the policies trained on.</li>
   </ul>
 
   <h3>Teammate's contribution — learning &amp; training</h3>
@@ -63,11 +57,13 @@
   </ul>
 
   <h3>Team outcome</h3>
-  <ul>
-    <li>Quantitative evaluation on 7 NIST-derived metrics (success rate, OOD adaptability,
-        real-time performance, …).</li>
-    <li>Live demonstration of the framework at <b>AutomationWorld 2026</b>.</li>
-  </ul>
+  <p>
+    Within the demonstrated range the insertion succeeded consistently, including during the
+    live demonstration at <b>AutomationWorld 2026</b>; performance fell off once the parts were
+    placed outside it. The team also evaluated the framework on seven NIST-derived metrics —
+    success rate, out-of-distribution adaptability, real-time performance and others — but
+    those results are internal and not published here.
+  </p>
 
   <h3>AutomationWorld 2026</h3>
   <div class="media-grid single">
