@@ -26,7 +26,7 @@
   <p class="links"><a href="https://github.com/dsafjk0024/so101-imitation">Code on GitHub →</a></p>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">74%</span><span class="lbl">task completion, 50 real trials</span></div>
+    <div class="stat"><span class="num">74 / 60%</span><span class="lbl">ACT vs flow matching, 50 trials each</span></div>
     <div class="stat"><span class="num">300</span><span class="lbl">teleoperated demonstrations</span></div>
     <div class="stat"><span class="num">30 Hz</span><span class="lbl">closed-loop control</span></div>
     <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
@@ -146,28 +146,60 @@
     again roughly every 0.7&nbsp;s at 30&nbsp;Hz. Actions are denormalized with the statistics
     the checkpoint was trained under — publishing the raw normalized output looks plausible on
     joints centred near zero and throws the wrist joint by more than a radian.
-    <b>Flow matching</b> shares the identical contract and training budget but is
-    <b>not yet run on hardware</b>, so the results below are ACT's alone.
+    <b>Flow matching</b> shares the identical contract, dataset and training budget, and both
+    were evaluated on hardware over the same placements.
   </p>
 
-  <h3>Results — deployed ACT policy</h3>
+  <h3>Results on hardware</h3>
   <p>
-    60 rollouts from one checkpoint in one session. Demonstrations were collected with the
-    cubes randomized around a grid of marked points, so <b>in-distribution</b> means placements
-    inside that range and <b>out-of-distribution</b> means displaced well beyond it. A trial is
-    <b>completed</b> when the cube ends stacked and still standing 3&nbsp;s after release;
-    <b>first attempt</b> is the stricter subset with no regrasp after a miss or a drop.
-    Intervals are Wilson 95%.
+    60 rollouts per policy, one session each, over the same sequence of cube placements.
+    Demonstrations were collected with the cubes randomized around a grid of marked points, so
+    <b>in-distribution</b> means placements inside that range and <b>out-of-distribution</b>
+    means displaced well beyond it. A trial is <b>completed</b> when the cube ends stacked and
+    still standing 3&nbsp;s after release. Intervals are Wilson 95%.
   </p>
   <table class="res-table">
-    <tr><th>Condition</th><th>Completed</th><th>95% CI</th><th>First attempt</th></tr>
-    <tr><td>In-distribution</td><td>37/50 (74%)</td><td>60–84%</td><td>34/50 (68%)</td></tr>
-    <tr><td>Out-of-distribution</td><td>2/10 (20%)</td><td>6–51%</td><td>1/10 (10%)</td></tr>
+    <tr><th>Condition</th><th>ACT</th><th>95% CI</th><th>Flow matching</th><th>95% CI</th></tr>
+    <tr><td>In-distribution</td><td>37/50 (74%)</td><td>60–84%</td><td>30/50 (60%)</td><td>46–72%</td></tr>
+    <tr><td>Out-of-distribution</td><td>2/10 (20%)</td><td>6–51%</td><td>3/10 (30%)</td><td>11–60%</td></tr>
   </table>
   <p>
-    The loop held 29.7–29.9&nbsp;Hz against a 30&nbsp;Hz request throughout, at 3.4&nbsp;ms mean
-    inference. Three rollouts logged a command dropout of a second or more; dropping all three
-    leaves completion at 74% — the failures are the policy's, not the pipeline's.
+    ACT's 14-point lead is not a result. Both policies ran the same placements, so the trials
+    pair: they agreed on 38 of 60, ACT alone succeeded on 14 and flow matching alone on 8, and
+    an exact McNemar test on those discordant pairs gives <b>p&nbsp;=&nbsp;0.29</b>. At 50
+    trials the two are not distinguishable on success rate. Three ACT rollouts logged a command
+    dropout of a second or more; dropping all three leaves its completion at 74%, so the
+    failures are the policy's rather than the pipeline's.
+  </p>
+
+  <h3>ACT vs flow matching</h3>
+  <p>
+    Side by side on the same placement the motion is not visibly different — which is what the
+    table above says numerically. The difference that <em>is</em> measurable is what each costs
+    to run.
+  </p>
+  <div class="media-grid single">
+    <figure>
+      <video src="../videos/so101_act_vs_fbc.mp4" poster="../images/so101_act_vs_fbc_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Same placement, both policies</b> (2×). ACT left, flow matching right,
+        run 28 of the same sequence.</figcaption>
+    </figure>
+  </div>
+  <table class="res-table">
+    <tr><th>Per rollout, median</th><th>ACT</th><th>Flow matching</th></tr>
+    <tr><td>Achieved rate (30 Hz requested)</td><td>29.8 Hz</td><td>26.8 Hz</td></tr>
+    <tr><td>Inference, mean</td><td>3.5 ms</td><td>8.4 ms</td></tr>
+    <tr><td>Inference, p95</td><td>16 ms</td><td>102 ms</td></tr>
+  </table>
+  <p>
+    Flow matching never reached the requested rate in any of its 60 rollouts: its ODE sampler
+    costs about 100&nbsp;ms on the ticks where it replans, against ACT's single forward pass,
+    and that pulls the loop down to 27&nbsp;Hz. On this task the two buy the same success rate
+    and flow matching pays more for it — an argument for ACT <em>here</em>, not a claim about
+    flow matching in general. A short sweep of chunk length and ODE steps (20/20, 20/10, 20/30,
+    10/30, 10/10) ran one in-distribution trial each; all five failed, which is a pilot rather
+    than a comparison.
   </p>
 
   <h3>Where it fails</h3>
@@ -176,7 +208,19 @@
     a second of release, the cube let go slightly off-centre and still moving. That is
     placement precision at the end of the episode, not perception or grasping. Out of
     distribution the failure differs in kind: the arm reaches for where the cube <em>would</em>
-    have been in the demonstrations.
+    have been in the demonstrations. The clips below are ACT's; flow matching fails the same two
+    ways.
+  </p>
+  <p>
+    The failures are also not spread evenly over the workspace. Measuring where the base cube
+    started in the first frame of every recording and splitting the 50 in-distribution
+    placements at the median depth, ACT completed <b>24/25</b> of the near half against
+    <b>13/25</b> of the far half (Fisher exact <b>p&nbsp;=&nbsp;0.001</b>); flow matching,
+    19/25 against 11/25 (p&nbsp;=&nbsp;0.042). Two policies trained on the same data degrade in
+    the same region, which points at the demonstrations rather than at either policy — the far
+    end of the reach is where 300 demonstrations are thinnest. Settling it means comparing the
+    evaluation placements against the demonstration distribution, which is exactly what this
+    session did not log, and is the first thing to fix in the next one.
   </p>
   <div class="media-grid">
     <figure>
