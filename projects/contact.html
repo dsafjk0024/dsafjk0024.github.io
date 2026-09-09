@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Contact Location Estimation on Fingertips · Jusung Kim</title>
+  <title>F/T Fingertip Design &amp; Contact Estimation · Jusung Kim</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="icon" href="data:,">
 </head>
@@ -14,8 +14,8 @@
 
   <div class="detail-head">
     <h1>Contact Location Estimation on Dexterous Hand Fingertips</h1>
-    <p class="detail-meta">KETI · 2024 · Lead / core contributor
-      <span class="award">ICCAS 2024 (Poster)</span></p>
+    <p class="detail-meta">Enabling technology 02 · KETI · May – September 2024 · Fingertip design and contact estimation
+      <span class="award">ICCAS 2024 first-author poster</span></p>
   </div>
 
   <img class="media compact" src="../images/fingertip_cad.png"
@@ -28,29 +28,41 @@
   </div>
 
   <h3>Overview</h3>
-  <p>
-    Once a hand closes on an object, the contact is exactly where the camera cannot see it. This
-    work estimates <em>where</em> on the fingertip surface contact occurred from force/torque
-    signals alone, so manipulation can keep a usable contact estimate under full visual
-    occlusion.
-  </p>
+  <p>An Allegro Hand can occlude an object as grasping begins, interrupting vision-based pose
+    tracking. This work investigates contact information as a complementary signal by
+    estimating where contact occurs on the fingertip using a six-axis force/torque sensor.</p>
+  <p>The completed evaluation is <b>standalone contact-location estimation</b>. Integration
+    into a visual object-pose estimation pipeline was not performed.</p>
 
-  <h3>Approach</h3>
-  <p>
-    A single force/torque sensor measures a wrench, and a wrench carries where it was applied:
-    the moment is the contact position crossed with the force. I designed the fingertip so that
-    inversion is well posed on its surface — one sensor and known geometry instead of a dense
-    tactile array — and built the estimator that maps the measured wrench to a point on that
-    surface. Validated against known applied contact points across the fingertip:
-    <b>0.85&nbsp;mm</b> average error. Presented as a poster at ICCAS 2024.
-  </p>
+  <h3>Fingertip design</h3>
+  <p>The fingertip measures <b>40 × 45 × 28&nbsp;mm</b> and contains one <b>AFT20-D15 six-axis
+    F/T sensor</b>, with no tactile sensor array. Its contact surface combines planar and
+    variable-curvature regions: the flat region supports stable contact and the curved sides
+    support rolling manipulation. The cap has protrusions for normal/shear force transmission;
+    the cover is 3D-printed silicone rubber with Shore A50 hardness.</p>
+  <h3>Contact-location calculation</h3>
+  <p>The measured force and the moment transferred to a local curvature center are combined
+    with the known surface radius. Three curvature regions use their respective radii to
+    calculate a contact location, which is then transformed back into the sensor frame.
+    The formulation handles curved and planar regions.</p>
+  <div class="media-grid">
+<figure><img src="../images/eq_contact_k.png" alt="Coefficient K from force, moment and local curvature radius"><figcaption><b>Geometry coefficient.</b> Local curvature and the measured wrench.</figcaption></figure><figure><img src="../images/eq_contact_c.png" alt="Contact position calculated in the local curvature frame"><figcaption><b>Contact location.</b> The result is transformed into the sensor coordinate frame.</figcaption></figure>
+  </div>
+  <p>The estimator assumes a single contact location and negligible cover deformation.
+    Deformation is a source of error, particularly farther from the sensor.</p>
 
   <h3>Validation</h3>
+  <p>A UR5e-positioned end tool supplies the reference contact location. Approximately 40
+    locations per region were tested across three curvature regions at 1&nbsp;mm spacing,
+    The reported evaluation uses non-deforming-axis data. The reported mean error is
+    <b>0.85&nbsp;mm</b>; the tool contact face has a radius of 1.5&nbsp;mm.</p>
+  <p>Error increases as the contact point moves farther from the sensor. Improving the cover
+    and fingertip deformation model remains future work.</p>
   <div class="media-grid uniform single">
     <figure>
       <img src="../images/fingertip_estimation_results.png" alt="Contact location estimation results">
       <figcaption><b>Estimation results.</b> Estimated contact location against the applied
-        ground truth.</figcaption>
+        reference tool position.</figcaption>
     </figure>
   </div>
   <div class="media-grid uniform tall">
@@ -66,7 +78,7 @@
   </div>
 
   <h3>Stack</h3>
-  <p class="tags">F/T sensing · contact mechanics · SolidWorks · Python · Allegro Hand</p>
+  <p class="tags">six-axis F/T · AFT20-D15 · contact geometry · UR5e · SolidWorks · Python · Allegro Hand</p>
 
 </div>
 </body>

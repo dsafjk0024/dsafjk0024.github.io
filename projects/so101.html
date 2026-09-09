@@ -14,7 +14,7 @@
 
   <div class="detail-head">
     <h1>SO-101: ROS 2 Imitation Learning Pipeline (ACT &amp; Flow Matching)</h1>
-    <p class="detail-meta">Independent research · 2026 – Present · Sole developer (100%)</p>
+    <p class="detail-meta">Independent research · April – August 2026 · Sole developer (100%)</p>
   </div>
 
   <video class="media" src="../videos/so101_success_montage.mp4"
@@ -85,7 +85,7 @@
     </g>
     <g class="topic">
       <rect x="390" y="124" width="210" height="38" rx="19"/>
-      <text x="495" y="148">4 contract topics</text>
+      <text x="495" y="148">4 schema-defined topics</text>
     </g>
     <g class="edge">
       <path d="M870,76 V98 H495 V120" marker-end="url(#ar)"/>
@@ -116,7 +116,7 @@
     <!-- deployment closes the loop -->
     <g class="node">
       <rect x="600" y="360" width="230" height="52" rx="6"/><text x="715" y="383">sync inference node</text>
-      <text class="sub" x="715" y="398">30 Hz · chunked, closed loop</text>
+      <text class="sub" x="715" y="398">30 Hz target · action chunks</text>
     </g>
     <g class="edge">
       <path d="M795,312 V386 H835" marker-end="url(#ar)"/>
@@ -161,22 +161,26 @@
   <table class="res-table">
     <tr><th>Condition</th><th>ACT</th><th>95% CI</th><th>Flow matching</th><th>95% CI</th></tr>
     <tr><td>In-distribution</td><td>37/50 (74%)</td><td>60–84%</td><td>30/50 (60%)</td><td>46–72%</td></tr>
+    <tr><td>In-range, near robot</td><td>24/25 (96%)</td><td>—</td><td>19/25 (76%)</td><td>—</td></tr>
+    <tr><td>In-range, far from robot</td><td>13/25 (52%)</td><td>—</td><td>11/25 (44%)</td><td>—</td></tr>
     <tr><td>Out-of-distribution</td><td>2/10 (20%)</td><td>6–51%</td><td>3/10 (30%)</td><td>11–60%</td></tr>
   </table>
   <p>
-    ACT's 14-point lead is not a result. Both policies ran the same placements, so the trials
-    pair: they agreed on 38 of 60, ACT alone succeeded on 14 and flow matching alone on 8, and
-    an exact McNemar test on those discordant pairs gives <b>p&nbsp;=&nbsp;0.29</b>. At 50
-    trials the two are not distinguishable on success rate. Three ACT rollouts logged a command
-    dropout of a second or more; dropping all three leaves its completion at 74%, so the
-    failures are the policy's rather than the pipeline's.
+    The observed in-range completion difference is 14 percentage points over 50 trials per
+    policy. The reported paired analysis pools the 50 in-range and 10 out-of-range trials:
+    the policies agreed on 38 of 60, ACT alone succeeded on 14 and flow matching alone on eight
+    (exact McNemar <b>p&nbsp;=&nbsp;0.29</b>). This test concerns the pooled 60-trial evaluation;
+    it does not establish equal success rates or separately test the in-range subset.
+    The sessions followed the same placement sequence with one or two mid-session placement
+    changes, so pairing is approximate. Three ACT rollouts also logged command gaps of at least
+    one second; timing and task failures should be interpreted separately.
   </p>
 
   <h3>ACT vs flow matching</h3>
   <p>
-    Side by side on the same placement the motion is not visibly different — which is what the
-    table above says numerically. The difference that <em>is</em> measurable is what each costs
-    to run.
+    The example videos compare behavior on the same nominal placement. The trial results do
+    not establish a success-rate difference; the runtime measurements additionally show a
+    difference in the achieved command-loop rate for these implementations.
   </p>
   <div class="media-grid single">
     <figure>
@@ -188,16 +192,16 @@
   </div>
   <table class="res-table">
     <tr><th>Per rollout, median</th><th>ACT</th><th>Flow matching</th></tr>
-    <tr><td>Achieved rate (30 Hz requested)</td><td>29.8 Hz</td><td>26.8 Hz</td></tr>
+    <tr><td>Command-loop rate (30 Hz requested)</td><td>29.8 Hz</td><td>26.8 Hz</td></tr>
     <tr><td>Inference, mean</td><td>3.5 ms</td><td>8.4 ms</td></tr>
     <tr><td>Inference, p95</td><td>16 ms</td><td>102 ms</td></tr>
   </table>
   <p>
     Flow matching never reached the requested rate in any of its 60 rollouts: its ODE sampler
     costs about 100&nbsp;ms on the ticks where it replans, against ACT's single forward pass,
-    and that pulls the loop down to 27&nbsp;Hz. On this task the two buy the same success rate
-    and flow matching pays more for it — an argument for ACT <em>here</em>, not a claim about
-    flow matching in general. A short sweep of chunk length and ODE steps (20/20, 20/10, 20/30,
+    and that pulls the loop down to 27&nbsp;Hz. The success-rate comparison is inconclusive, while ACT
+    came closer to the requested command-loop rate in this setup. This is specific to the
+    tested implementations and inference settings, not a general result about flow matching. A short sweep of chunk length and ODE steps (20/20, 20/10, 20/30,
     10/30, 10/10) ran one in-distribution trial each; all five failed, which is a pilot rather
     than a comparison.
   </p>

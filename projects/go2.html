@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>World Model Sim-to-Real on Unitree Go2 · Jusung Kim</title>
+  <title>World Model Sim-to-Real &amp; Quadruped RL · Jusung Kim</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="icon" href="data:,">
 </head>
@@ -13,29 +13,28 @@
   <a class="back" href="../index.html">← Back to home</a>
 
   <div class="detail-head">
-    <h1>World Model Sim-to-Real Transfer on Unitree Go2</h1>
-    <p class="detail-meta">KETI · 2026 – Present · Sole developer (100%)</p>
+    <h1>World Model Sim-to-Real &amp; Quadruped RL Tasks</h1>
+    <p class="detail-meta">Project 03 · KETI · January 2025 – Present · SimDist reproduction and hardware deployment</p>
   </div>
 
-  <video class="media" src="../videos/go2_deploy_finetuned.mp4"
-         poster="../images/go2_deploy_finetuned_poster.jpg"
+  <video class="media" src="../videos/go2_deploy_finetuned_s.mp4"
+         poster="../images/go2_deploy_finetuned_s_poster.jpg"
          autoplay muted loop playsinline preload="metadata"></video>
   <p class="media-note">The learned world model planning on a real Unitree&nbsp;Go2 at 50&nbsp;Hz
      after dynamics fine-tuning.</p>
 
   <div class="stat-row">
     <div class="stat"><span class="num">50 Hz</span><span class="lbl">planning on real hardware</span></div>
-    <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
+    <div class="stat"><span class="num">Dynamics</span><span class="lbl">the model component adapted on hardware data</span></div>
   </div>
 
   <h3>Overview</h3>
   <p>
     A latent world model is pretrained in simulation, then planned against on a real
-    quadruped — and the gap between the two is closed by fine-tuning <em>only</em> the dynamics
-    on real-robot data. I am reproducing and deploying this approach, published as
-    <a href="https://sim-dist.github.io/">SimDist</a>, on a Unitree&nbsp;Go2, and rebuilt the
-    training stack into a modular RL framework so world-model variants can be compared under
-    identical conditions.
+    quadruped — and adaptation between the two is performed by fine-tuning <em>only</em> the dynamics
+    on real-robot data. I reproduced this approach, published as
+    <a href="https://sim-dist.github.io/">SimDist</a>, and deployed it on a Unitree&nbsp;Go2 —
+    the method is the original authors'; the work here is getting it to run on the hardware.
   </p>
 
   <h3>Method</h3>
@@ -83,7 +82,7 @@
     <g class="node">
       <rect x="0" y="250" width="300" height="60" rx="6"/>
       <text x="150" y="275">4a · deployment</text>
-      <text class="sub" x="150" y="294">sampling-based planning, 50 Hz</text>
+      <text class="sub" x="150" y="294">MPPI planning, 50 Hz</text>
 
       <rect x="360" y="250" width="220" height="60" rx="6"/>
       <text x="470" y="275">real Unitree Go2</text>
@@ -106,24 +105,32 @@
   </div>
 
   <p>
-    The point of the split is that only the <em>dynamics</em> are wrong on the real robot. The
-    encoder, reward and value models learned in simulation stay frozen, so adaptation is a
-    supervised system-identification problem on a handful of real rollouts rather than another
-    round of reinforcement learning on hardware.
+    During adaptation, the encoder, reward and value models stay frozen and only the dynamics
+    model is fine-tuned on real rollouts. This turns the adaptation step into supervised
+    dynamics learning, without an additional round of reinforcement learning on hardware.
   </p>
+
+  <h3>Training and planning configuration</h3>
+  <ul>
+    <li><b>Expert data.</b> PPO in Isaac Lab with 4,096 parallel environments. The rollout mixture
+      uses expert actions with probability 0.5, 11 intermediate checkpoints and action noise.</li>
+    <li><b>World model.</b> A 64-D latent representation with causal attention, using 25-step
+      context and a 25-step prediction horizon, with dynamics, reward and value predictions.</li>
+    <li><b>MPPI.</b> 450 candidate sequences, eight optimization iterations and 64 elite samples
+      for the weighted update; the controller replans at a target rate of 50&nbsp;Hz.</li>
+    <li><b>Hardware input.</b> Joint positions and velocities, IMU-derived base angular velocity
+      and projected gravity, plus task commands and phase information.</li>
+  </ul>
 
   <h3>What I did</h3>
   <ul>
-    <li>Refactored the reference implementation into a modular RL framework, so world-model
-        variants share one config, one training loop and one evaluation path — a change made
-        because otherwise every ablation is also a code difference.</li>
     <li>Built the proprioceptive observation pipeline over the Unitree SDK — joint positions and
         velocities, projected gravity — and the deployment loop that plans at 50&nbsp;Hz.</li>
-    <li>Deployed on the physical Go2 and compared the simulation-only policy against the
-        dynamics-fine-tuned one.</li>
+    <li>Reproduced simulation pretraining, online planning and deployment on the physical Go2,
+        then compared the simulation-pretrained and dynamics-fine-tuned models.</li>
   </ul>
 
-  <h3>Results so far</h3>
+  <h3>Results</h3>
   <p>
     <em>Qualitative only — a quantitative evaluation is still to be collected.</em> Transferred
     straight from simulation the gait is visibly unstable on hardware; after dynamics
@@ -133,13 +140,13 @@
   </p>
   <div class="media-grid">
     <figure>
-      <video src="../videos/go2_deploy_baseline.mp4" poster="../images/go2_deploy_baseline_poster.jpg"
+      <video src="../videos/go2_deploy_baseline_s.mp4" poster="../images/go2_deploy_baseline_s_poster.jpg"
              controls muted playsinline preload="metadata"></video>
       <figcaption><b>Before dynamics fine-tuning.</b> The world model transferred straight from
         simulation.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/go2_deploy_finetuned.mp4" poster="../images/go2_deploy_finetuned_poster.jpg"
+      <video src="../videos/go2_deploy_finetuned_s.mp4" poster="../images/go2_deploy_finetuned_s_poster.jpg"
              controls muted playsinline preload="metadata"></video>
       <figcaption><b>After dynamics fine-tuning.</b> The same model, dynamics adapted on real
         rollouts.</figcaption>
@@ -147,13 +154,21 @@
     <figure>
       <video src="../videos/go2_sim_evaluation.mp4" poster="../images/go2_sim_evaluation_poster.jpg"
              controls muted playsinline preload="metadata"></video>
-      <figcaption><b>Simulation evaluation.</b> Variants compared under identical conditions
-        before anything reaches hardware.</figcaption>
+      <figcaption><b>Simulation evaluation.</b> The pretrained model planned against in
+        simulation, before anything reaches hardware.</figcaption>
     </figure>
   </div>
 
+  <h3>Related simulation work — mjlab and PPO</h3>
+  <p>Within the same project on multisensory intelligence and robot-platform validation,
+    I also worked on three quadruped tasks in mjlab: flat-ground walking, box jumping and
+    leaping, with task-specific observations, rewards and termination conditions.</p>
+  <p>This work reached the simulation-training stage only. Retained checkpoints, quantitative
+    results and rollout videos are unavailable, so no hardware deployment or task-success
+    claim is made for these mjlab tasks.</p>
+
   <h3>Stack</h3>
-  <p class="tags">world model · sampling-based planning · PPO · Isaac Lab · MuJoCo ·
+  <p class="tags">world model · MPPI · PPO · Isaac Lab · MuJoCo · mjlab ·
      Unitree SDK · Python / PyTorch</p>
 
 </div>

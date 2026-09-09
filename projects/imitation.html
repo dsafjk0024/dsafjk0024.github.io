@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Imitation Framework for Autonomous Manipulation · Jusung Kim</title>
+  <title>Peg-in-Hole &amp; Tactile Imitation Learning · Jusung Kim</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="icon" href="data:,">
 </head>
@@ -13,29 +13,25 @@
   <a class="back" href="../index.html">← Back to home</a>
 
   <div class="detail-head">
-    <h1>Imitation Framework for Autonomous Robot Manipulation</h1>
-    <p class="detail-meta">KETI · 2026 – Present · Contributor (30%) — teleoperation stack &amp; data collection</p>
+    <h1>Peg-in-Hole Imitation Learning &amp; Tactile Policy Extension</h1>
+    <p class="detail-meta">Project 02 · KETI · March 2024 – Present · Teleoperation stack &amp; demonstration collection</p>
   </div>
 
-  <img class="media compact" src="../images/peg_in_hole_setup.jpg"
+  <img class="media compact" src="../images/peg_in_hole_layout.png"
        alt="Peg-in-Hole task board with connectors and the gripper approaching">
-  <p class="media-note">The task board: USB, heavy-duty, D-sub and RJ45 connectors plus a gear
-     set, each with its own insertion tolerance — the xArm6's Robotiq Hand-E enters from the
-     bottom right. Demonstrations were recorded by hand through a SpaceMouse.</p>
+  <p class="media-note">Peg-in-Hole setup for robot manipulation and grasping evaluation: xArm6, Robotiq Hand-E, and connector insertion tasks.</p>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">30%</span><span class="lbl">my contribution</span></div>
+    <div class="stat"><span class="num">XELA</span><span class="lbl">tactile observation extension</span></div>
     <div class="stat"><span class="num">2026</span><span class="lbl">AutomationWorld live demo</span></div>
   </div>
 
   <h3>Overview</h3>
-  <p>
-    A team framework for learning precision insertion from human demonstration — collection,
-    training and evaluation on a real xArm6. The task board holds connectors with different
-    insertion tolerances, so success depends on sub-millimetre placement rather than on reaching
-    the right area. I built the teleoperation and data-collection side; a teammate owned the
-    learning side.
-  </p>
+  <p>A team project on evaluation methods for dexterous robot manipulation and grasping.
+    The Peg-in-Hole framework connects teleoperated demonstrations to policy training and
+    real-robot insertion. My main contribution is the robot teleoperation interface and
+    synchronized demonstration collection. The project progressed from position-controlled
+    insertion shown at AutomationWorld 2026 to a policy with tactile observations.</p>
 
   <h3>My contribution — teleoperation &amp; data collection</h3>
   <ul>
@@ -48,35 +44,43 @@
     <li>Operated the rig to collect part of the demonstration dataset the policies trained on.</li>
   </ul>
 
-  <h3>Teammate's contribution — learning &amp; training</h3>
-  <ul>
-    <li>Set up the imitation learning environment and implemented the generative policies —
-        Diffusion Policy and Flow Matching — in JAX/Flax.</li>
-    <li>Ran policy training and deployed the trained policies on the real robot for
-        Peg-in-Hole precision insertion.</li>
-  </ul>
+  <h3>Team learning and deployment</h3>
+  <p>The team trained Diffusion Policy and flow-matching policies and executed them on the real
+    xArm6. My primary role in the original framework was teleoperation and data collection;
+    the learning side was developed collaboratively within the team.</p>
 
   <h3>Team outcome</h3>
-  <p>
-    Within the demonstrated range the insertion succeeded consistently, including during the
-    live demonstration at <b>AutomationWorld 2026</b>; performance fell off once the parts were
-    placed outside it. The team also evaluated the framework on seven NIST-derived metrics —
-    success rate, out-of-distribution adaptability, real-time performance and others — but
-    those results are internal and not published here.
-  </p>
+  <p>The framework ran live at <b>AutomationWorld 2026 in March 2026</b>. That version used
+    position control without force or tactile sensing, and connector misalignment could block
+    insertion. Repeated-trial insertion success rates are not published here.</p>
 
-  <h3>AutomationWorld 2026</h3>
+  <h3>AutomationWorld 2026 and insertion rollouts</h3>
   <div class="media-grid single">
-    <figure>
-      <img src="../images/automationworld_demo.jpg" alt="KETI booth at AutomationWorld 2026">
-      <figcaption><b>The booth.</b> Our exhibit at AutomationWorld 2026, where the framework
-        ran the insertion task live for visitors.</figcaption>
-    </figure>
+    <figure><video src="../videos/aw_demo.mp4" poster="../images/aw_demo_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>AutomationWorld 2026.</b> Live insertion demonstration.</figcaption></figure>
   </div>
+  <div class="media-grid single">
+    <figure><video src="../videos/peg_in_hole_tactile.mp4" poster="../images/peg_tactile_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Learned insertion policy.</b> Multiple connector rollouts, shown at increased playback speed.</figcaption></figure>
+  </div>
+  <h3>XELA tactile observations for flow matching</h3>
+  <p>XELA sensors on the gripper fingers measure the distribution of contact forces.
+    These measurements were added to the <b>flow-matching policy’s observations</b> during
+    imitation learning. This is a learned tactile-observation extension, not a separate
+    explicit force-control or admittance loop.</p>
+  <p>The policy uses the contact information during insertion, where small alignment errors
+    can prevent position-only execution. The recordings show contact distributions changing
+    over the fingertips as insertion proceeds, alongside the robot’s motion.</p>
+  <div class="media-grid single">
+    <figure><video src="../videos/peg_in_hole_multimodal.mp4" poster="../images/peg_multimodal_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Contact-rich insertion.</b> Side-view video and XELA distributions on two fingertips, with maximum |Fz| displayed. The montage is sped up.</figcaption></figure>
+  </div>
+  <p>The videos demonstrate execution. A controlled tactile/no-tactile comparison of success
+    rate and insertion time has not yet been aggregated.</p>
 
   <h3>Stack</h3>
   <p class="tags">xArm6 · Robotiq Hand-E · SpaceMouse teleoperation · RealSense ·
-     Diffusion Policy · Flow Matching</p>
+     Diffusion Policy · flow matching · XELA tactile sensing</p>
 
 </div>
 </body>

@@ -18,7 +18,7 @@
         I'm a <b>Research Intern</b> at the
         <a href="https://www.keti.re.kr/">Intelligent Robotics Center, KETI</a>
         (Korea Electronics Technology Institute).
-        I build learning-based control for real robots — my work spans
+        I build robot control frameworks, connect simulation to hardware, and deploy learned policies on real robots. My work spans
         <em>reinforcement / imitation learning</em>,
         <em>sim-to-real transfer</em>, and
         <em>robot manipulation &amp; control</em>.
@@ -43,116 +43,99 @@
   <section>
     <h2>News</h2>
     <ul class="news">
-      <li><span class="date">2026</span> Deployed an ACT policy on the real <b><a href="projects/so101.html">SO-101</a></b> arm: 74% task completion over 50 cube-stacking trials, closed-loop at 30&nbsp;Hz.</li>
-      <li><span class="date">2026</span> Built an end-to-end ROS 2 imitation-learning pipeline on a real <b><a href="projects/so101.html">SO-101</a></b> arm pair — teleoperation, dataset conversion, ACT &amp; flow-matching policies, closed-loop inference.</li>
-      <li><span class="date">2026</span> Demonstrated our imitation-learning manipulation framework live at <b>AutomationWorld 2026</b>.</li>
-      <li><span class="date">2026</span> Poster on RBFNN-based disturbance compensation accepted at <b>KRoC 2026</b>.</li>
-      <li><span class="date">2024</span> Poster on fingertip contact-location estimation presented at <b>ICCAS 2024</b>.</li>
-      <li><span class="date">2024</span> Started as a Research Intern at KETI Intelligent Robotics Center.</li>
+      <li><span class="date">2026</span> Deployed a <b><a href="projects/multimodal.html">GASP policy trained with an asymmetric critic</a></b> on the right xArm7 and Allegro Hand for Relocate.</li>
+      <li><span class="date">2026</span> Extended <b><a href="projects/imitation.html">Peg-in-Hole imitation learning</a></b> with XELA tactile observations in a flow-matching policy.</li>
+      <li><span class="date">2026.08</span> Completed the <b><a href="projects/so101.html">SO-101 ROS 2 pipeline</a></b> and real-robot evaluation: ACT 37/50 and flow matching 30/50 completions within the demonstration range.</li>
+      <li><span class="date">2026.06</span> Reproduced <b><a href="projects/go2.html">SimDist on Unitree Go2</a></b>, with MPPI planning at 50&nbsp;Hz and dynamics adaptation from real rollouts.</li>
+      <li><span class="date">2026.03</span> Demonstrated Peg-in-Hole imitation learning live at <b>AutomationWorld 2026</b>.</li>
+      <li><span class="date">2026</span> Presented a first-author poster on RBFNN-based robust grasping at <b>KRoC 2026</b>.</li>
+      <li><span class="date">2025</span> Presented a first-author poster on RBFNN residual torque compensation at the <b>Korean Society of Manufacturing Technology Engineers (KSMTE)</b>.</li>
+      <li><span class="date">2024</span> Presented a first-author fingertip contact-location estimation poster at <b>ICCAS 2024</b>; demonstrated Relocate live at <b>RoboWorld 2024</b>.</li>
+      <li><span class="date">2024.03</span> Joined KETI Intelligent Robotics Center as a Research Intern.</li>
     </ul>
   </section>
 
   <!-- ===================== PROJECTS ===================== -->
   <section>
-    <h2>Projects</h2>
+    <h2>Projects &amp; Research</h2>
+    <p>Three team projects, one independent study, and three enabling technologies.</p>
     <table class="pub-table">
-
-      <!-- ---- entry template: copy this <tr> block per project ---- -->
       <tr>
-        <td class="thumb">
-          <a href="projects/so101.html"><video src="videos/so101_thumb.mp4" poster="images/so101_thumb_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
+        <td class="thumb"><a href="projects/multimodal.html"><video src="videos/gasp_asym_success_c.mp4" poster="images/gasp_asym_success_c_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a></td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/multimodal.html">Multimodal Control, GASP Learning &amp; Real-Robot Deployment</a><br>
+          <span class="venue">Project 01 · KETI · March 2024 – Present</span>
+          <span class="role">Core contribution: control framework, learning integration &amp; deployment</span> <span class="award">RoboWorld 2024 live demo</span><br>
+          <p class="abstract">A vision–tactile control framework extended from a single arm in 2024 to a dual-arm platform in 2026. Shared MuJoCo and hardware interfaces connect teleoperation, GASP learning with a GWS reward, an asymmetric critic, and marker-based safety checks. The asymmetric Actor was deployed on the right xArm7 and Allegro Hand; real sym/asym videos show example outcomes, not a measured success-rate comparison.</p>
+          <span class="tags">GASP · GWS · asymmetric actor–critic · MuJoCo · xArm7 · Allegro Hand</span>
         </td>
+      </tr>
+
+      <tr>
+        <td class="thumb"><a href="projects/imitation.html"><img src="images/peg_in_hole_layout.png" alt="Peg-in-Hole Imitation Learning &amp; Tactile Policy Extension"></a></td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/imitation.html">Peg-in-Hole Imitation Learning &amp; Tactile Policy Extension</a><br>
+          <span class="venue">Project 02 · KETI · March 2024 – Present</span>
+          <span class="role">Core contribution: teleoperation &amp; demonstration collection</span> <span class="award">AutomationWorld 2026 live demo</span><br>
+          <p class="abstract">A team framework for robot manipulation and grasping evaluation: SpaceMouse teleoperation, synchronized robot and camera data, Diffusion Policy and flow-matching rollouts, and a live demonstration at AutomationWorld 2026. The later extension adds XELA tactile measurements to the policy observations for contact-rich insertion.</p>
+          <span class="tags">xArm6 · Robotiq Hand-E · SpaceMouse · RealSense · XELA · flow matching</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb"><a href="projects/go2.html"><video src="videos/go2_deploy_finetuned_s.mp4" poster="images/go2_deploy_finetuned_s_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a></td>
+        <td class="pub-info">
+          <a class="pub-title" href="projects/go2.html">World Model Sim-to-Real &amp; Quadruped RL Tasks</a><br>
+          <span class="venue">Project 03 · KETI · January 2025 – Present</span>
+          <span class="role">Contribution: SimDist reproduction &amp; hardware deployment</span> <br>
+          <p class="abstract">Reproduced SimDist from simulation pretraining to MPPI control on a Unitree Go2 at 50&nbsp;Hz, then adapted only the dynamics model using real rollouts. Real-robot results are qualitative. Related mjlab/PPO work covers walking, box jumping and leaping in simulation; no hardware deployment or retained quantitative results are claimed for those tasks.</p>
+          <span class="tags">world model · MPPI · PPO · Isaac Lab · MuJoCo · mjlab</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="thumb"><a href="projects/so101.html"><video src="videos/so101_thumb.mp4" poster="images/so101_thumb_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a></td>
         <td class="pub-info">
           <a class="pub-title" href="projects/so101.html">SO-101: ROS 2 Imitation Learning Pipeline (ACT &amp; Flow Matching)</a><br>
-          <span class="venue">Independent research · 2026 – Present</span>
-          <span class="role">Sole developer (100%)</span><br>
-          <p class="abstract">End-to-end imitation learning on a real SO-101 arm pair — ROS 2 teleop and episode recorder, rosbag&nbsp;→&nbsp;LeRobot v3.0 conversion, ACT and flow-matching policies, and closed-loop inference on hardware. Both policies were then run on hardware over the same 60 cube placements: 74% versus 60% task completion, statistically indistinguishable (McNemar p&nbsp;=&nbsp;0.29), while flow matching's ODE sampler holds the loop at 27&nbsp;Hz against ACT's 30.</p>
-          <span class="tags">ROS 2 Jazzy · ros2_control · LeRobot · ACT · flow matching · real-robot eval</span>
-          <span class="pub-links"><a href="https://github.com/dsafjk0024/so101-imitation">code</a></span>
+          <span class="venue">Independent research · April – August 2026</span>
+          <span class="role">Sole developer</span> <br>
+          <p class="abstract">Built the complete ROS 2 collection, conversion, training and inference pipeline. With 300 demonstrations and 300k training steps per policy, ACT completed 37/50 in-range trials (74%) and flow matching 30/50 (60%); out-of-range completion was 2/10 and 3/10. This evaluation did not establish a success-rate difference. Measured command-loop rates were 29.8 and 26.8&nbsp;Hz.</p>
+          <span class="tags">ROS 2 Jazzy · ros2_control · LeRobot · ACT · flow matching</span> <span class="pub-links"><a href="https://github.com/dsafjk0024/so101-imitation">code</a></span>
         </td>
       </tr>
 
       <tr>
-        <td class="thumb">
-          <a href="projects/go2.html"><video src="videos/go2_deploy_finetuned.mp4" poster="images/go2_deploy_finetuned_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
-        </td>
+        <td class="thumb"><a href="projects/rbfnn.html"><video src="videos/rbfnn_after_c.mp4" poster="images/rbfnn_after_c_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a></td>
         <td class="pub-info">
-          <a class="pub-title" href="projects/go2.html">World Model Sim-to-Real Transfer on Unitree Go2</a><br>
-          <span class="venue">KETI · 2026 – Present</span>
-          <span class="role">Sole developer (100%)</span><br>
-          <p class="abstract">Planning against a latent world model on a real Unitree Go2 at 50&nbsp;Hz, with only the dynamics fine-tuned on real rollouts — reproducing the SimDist approach. Qualitative so far: unstable transferred straight from simulation, walking after adaptation.</p>
-          <span class="tags">world model · sampling-based planning · PPO · Isaac Lab · Unitree SDK</span>
+          <a class="pub-title" href="projects/rbfnn.html">RBFNN Residual Torque Compensation for a Dexterous Hand</a><br>
+          <span class="venue">Enabling technology 01 · KETI · September – November 2025</span>
+          <span class="role">Controller design &amp; real-robot validation</span> <span class="award">2025 &amp; KRoC 2026 posters</span><br>
+          <p class="abstract">An online RBFNN compensation layer added to the Allegro Hand’s existing PD controller, with wrist-relative gravity as an input. On hand joint 7, tracking error changed from roughly ±0.6&nbsp;rad to ±0.15&nbsp;rad. The same control structure was used for grasp holding under disturbances; trial counts were not recorded.</p>
+          <span class="tags">RBFNN · adaptive control · residual torque · Allegro Hand</span>
         </td>
       </tr>
 
       <tr>
-        <td class="thumb">
-          <a href="projects/imitation.html"><img src="images/peg_in_hole_setup.jpg" alt="Peg-in-Hole task board with the xArm6 gripper"></a>
-        </td>
+        <td class="thumb"><a href="projects/contact.html"><img src="images/fingertip_cad.png" alt="F/T-Sensor Fingertip Design &amp; Contact Location Estimation"></a></td>
         <td class="pub-info">
-          <a class="pub-title" href="projects/imitation.html">Imitation Framework for Autonomous Robot Manipulation</a><br>
-          <span class="venue">KETI · 2026 – Present</span>
-          <span class="role">Contributor (30%) — teleoperation &amp; data collection</span><br>
-          <p class="abstract">Team framework taking teleoperated demonstrations to real-robot rollout with Diffusion Policy &amp; Flow Matching on Peg-in-Hole insertion. My part: the xArm6 + Robotiq Hand-E + SpaceMouse teleoperation stack and part of the demonstration dataset.</p>
-          <span class="tags">Diffusion Policy · Flow Matching · xArm6 · Robotiq Hand-E · SpaceMouse</span>
+          <a class="pub-title" href="projects/contact.html">F/T-Sensor Fingertip Design &amp; Contact Location Estimation</a><br>
+          <span class="venue">Enabling technology 02 · KETI · May – September 2024</span>
+          <span class="role">Fingertip design &amp; contact estimation</span> <span class="award">ICCAS 2024 first-author poster</span><br>
+          <p class="abstract">A 40 × 45 × 28&nbsp;mm fingertip with one six-axis F/T sensor and curved plus planar contact regions. Contact locations were evaluated against a UR5e-positioned tool across three regions, with 0.85&nbsp;mm mean error. This validates contact estimation independently; integration into a vision-based pose estimator was not performed.</p>
+          <span class="tags">six-axis F/T · AFT20-D15 · UR5e · contact geometry · SolidWorks</span>
         </td>
       </tr>
 
       <tr>
-        <td class="thumb">
-          <a href="projects/rbfnn.html"><video src="videos/rbfnn_after.mp4" poster="images/rbfnn_after_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
-        </td>
+        <td class="thumb"><a href="projects/collision.html"><video src="videos/gjk_real_robot.mp4" poster="images/gjk_real_robot_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a></td>
         <td class="pub-info">
-          <a class="pub-title" href="projects/rbfnn.html">RBFNN-Based Online Disturbance Compensation for Robust Grasping</a><br>
-          <span class="venue">KETI · 2025 – Present</span>
-          <span class="role">Sole developer (100%)</span>
-          <span class="award">KRoC 2026 (Poster)</span><br>
-          <p class="abstract">A radial-basis network between the trajectory controller and the joint torque command, estimating residual torque online — peak joint error ±0.15&nbsp;rad against ±0.6 under fixed-gain PD, on an xArm7 with an Allegro Hand.</p>
-          <span class="tags">RBFNN · online learning · torque control · xArm7 · Allegro Hand</span>
+          <a class="pub-title" href="projects/collision.html">GJK Distance-Based Velocity Damping for Collision Avoidance</a><br>
+          <span class="venue">Enabling technology 03 · KETI · January – April 2025</span>
+          <span class="role">Core contribution: distance-based control &amp; sim-to-real validation</span> <br>
+          <p class="abstract">Robot links and obstacles are approximated by capsules for GJK distance queries. Obstacles come from a RealSense D435i point cloud; clearance scales motion speed without path replanning. Validated in MuJoCo and on an xArm6 at 30&nbsp;Hz, using a depth camera without dedicated proximity sensors.</p>
+          <span class="tags">GJK · capsule geometry · RealSense · velocity damping · MuJoCo</span>
         </td>
       </tr>
-
-      <tr>
-        <td class="thumb">
-          <a href="projects/collision.html"><video src="videos/gjk_real_robot.mp4" poster="images/gjk_real_robot_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
-        </td>
-        <td class="pub-info">
-          <a class="pub-title" href="projects/collision.html">Real-Time Collision Avoidance from Point Clouds</a><br>
-          <span class="venue">KETI · 2024 – 2025</span>
-          <span class="role">Core contributor (50%)</span><br>
-          <p class="abstract">Reactive collision avoidance on a real xArm6 with no proximity sensors — GJK distance straight from the point cloud, driving a velocity-damping layer at 30&nbsp;Hz.</p>
-          <span class="tags">GJK · point cloud · velocity damping · xArm6</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td class="thumb">
-          <a href="projects/multimodal.html"><video src="videos/multimodal_thumb.mp4" poster="images/multimodal_thumb_poster.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
-        </td>
-        <td class="pub-info">
-          <a class="pub-title" href="projects/multimodal.html">Multimodal Sensing Integration &amp; Unified Control Framework</a><br>
-          <span class="venue">KETI · 2024 – Present</span>
-          <span class="role">Core contributor (50%)</span>
-          <span class="award">RoboWorld 2024 live demo</span><br>
-          <p class="abstract">Vision, tactile and force in one control loop — multi-process orchestration with state buffering, rebuilt for a dual-arm xArm7 + Allegro platform with a marker-based safety shield between policy and hardware.</p>
-          <span class="tags">multiprocessing · xArm7 ×2 · Allegro Hand · MuJoCo · Vision Pro teleop · safety shield</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td class="thumb">
-          <a href="projects/contact.html"><img src="images/fingertip_cad.png" alt="Sensorized fingertip CAD"></a>
-        </td>
-        <td class="pub-info">
-          <a class="pub-title" href="projects/contact.html">Contact Location Estimation on Dexterous Hand Fingertips</a><br>
-          <span class="venue">KETI · 2024</span>
-          <span class="role">Lead / core contributor</span>
-          <span class="award">ICCAS 2024 (Poster)</span><br>
-          <p class="abstract">Estimated where contact lands on a fingertip from force/torque signals alone — 0.85&nbsp;mm average error, usable under full visual occlusion.</p>
-          <span class="tags">F/T sensing · contact mechanics · fingertip design</span>
-        </td>
-      </tr>
-
     </table>
   </section>
 
@@ -165,7 +148,7 @@
           <span class="pub-title">A Method for Estimating Contact Location on Dexterous Hand Fingertips</span> —
           <span class="authors"><b>Jusung Kim</b>, et al.</span>
           <span class="venue">ICCAS 2024, Jeju, Korea</span>
-          <span class="award">Poster</span>
+          <span class="award">First-author poster</span>
         </td>
       </tr>
       <tr>
@@ -173,7 +156,15 @@
           <span class="pub-title">RBFNN-Based Online Disturbance Compensation for Robust Grasping</span> —
           <span class="authors"><b>Jusung Kim</b>, et al.</span>
           <span class="venue">KRoC 2026</span>
-          <span class="award">Poster</span>
+          <span class="award">First-author poster</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="pub-info">
+          <span class="pub-title">Adaptive Control of a Multi-Fingered Dexterous Hand via RBFNN-based Residual Torque Compensation</span> —
+          <span class="authors"><b>Jusung Kim</b>, et al.</span>
+          <span class="venue">Korean Society of Manufacturing Technology Engineers (KSMTE), 2025</span>
+          <span class="award">First-author poster</span>
         </td>
       </tr>
     </table>
@@ -184,13 +175,13 @@
     <h2>Skills</h2>
     <div class="skills">
       <div class="skill-row"><span class="skill-cat">Programming &amp; AI</span>
-        Python · PyTorch · Isaac Lab · MuJoCo · PPO · world models · Diffusion Policy · flow matching · ACT</div>
+        Python · PyTorch · Isaac Lab · MuJoCo · mjlab · PPO · NPG/DAPG · GASP · asymmetric actor–critic · world models · Diffusion Policy · flow matching · ACT · RBFNN</div>
       <div class="skill-row"><span class="skill-cat">Robotics &amp; Control</span>
         xArm6 &amp; 7 · UR5e · Allegro Hand · Robotiq Hand-E · Unitree Go2 · SO-101 · sim-to-real · torque control</div>
       <div class="skill-row"><span class="skill-cat">Software &amp; Infrastructure</span>
         ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · Pixi / conda · pytest · Git</div>
       <div class="skill-row"><span class="skill-cat">Sensing &amp; Perception</span>
-        RealSense D435i (RGB-D) · DIGIT tactile · F/T sensor</div>
+        RealSense D435i · FoundationPose · XELA tactile · DIGIT tactile · six-axis F/T · Apple Vision Pro teleoperation</div>
       <div class="skill-row"><span class="skill-cat">Design &amp; CAD</span>
         SolidWorks</div>
     </div>
@@ -198,7 +189,7 @@
 
   <footer>
     <p>Template style borrowed from <a href="https://jonbarron.info/">Jon Barron</a>.
-    Last updated August 2026.</p>
+    Last updated September 2026.</p>
   </footer>
 
 </div>

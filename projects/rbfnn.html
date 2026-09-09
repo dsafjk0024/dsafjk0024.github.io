@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RBFNN Online Disturbance Compensation · Jusung Kim</title>
+  <title>RBFNN Dexterous-Hand Torque Compensation · Jusung Kim</title>
   <link rel="stylesheet" href="../style.css">
   <link rel="icon" href="data:,">
 </head>
@@ -13,75 +13,85 @@
   <a class="back" href="../index.html">← Back to home</a>
 
   <div class="detail-head">
-    <h1>RBFNN-Based Online Disturbance Compensation for Robust Grasping</h1>
-    <p class="detail-meta">KETI · 2025 – Present · Sole developer (100%)
-      <span class="award">KRoC 2026 (Poster)</span></p>
+    <h1>RBFNN Residual Torque Compensation for a Dexterous Hand</h1>
+    <p class="detail-meta">Enabling technology 01 · KETI · September – November 2025 · Controller design and validation
+      <span class="award">2025 &amp; KRoC 2026 first-author posters</span></p>
   </div>
 
   <div class="media-grid">
     <figure>
-      <video src="../videos/rbfnn_before.mp4" poster="../images/rbfnn_before_poster.jpg"
+      <video src="../videos/rbfnn_before_c.mp4" poster="../images/rbfnn_before_c_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>Without compensation.</b> An external disturbance drives the residual
-        torque past what the nominal controller holds, and the object drops.</figcaption>
+      <figcaption><b>Without compensation.</b> The object drops during the shown disturbance trial.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/rbfnn_after.mp4" poster="../images/rbfnn_after_poster.jpg"
+      <video src="../videos/rbfnn_after_c.mp4" poster="../images/rbfnn_after_c_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>With online RBFNN compensation.</b> The residual torque is estimated and
-        cancelled in real time, and the grip survives the same disturbance.</figcaption>
+      <figcaption><b>With online RBFNN compensation.</b> The object remains grasped during the shown disturbance trial.</figcaption>
     </figure>
   </div>
 
   <div class="stat-row">
-    <div class="stat"><span class="num">±0.15 rad</span><span class="lbl">peak joint error, vs ±0.6 under PD</span></div>
+    <div class="stat"><span class="num">±0.15 rad</span><span class="lbl">tracking-error range, vs about ±0.6 rad under PD</span></div>
     <div class="stat"><span class="num">Online</span><span class="lbl">adaptation, no offline retraining</span></div>
     <div class="stat"><span class="num">xArm7</span><span class="lbl">+ Allegro Hand</span></div>
   </div>
 
   <h3>Overview</h3>
-  <p>
-    A held object is dropped not because the grasp force was wrong but because the arm loses
-    the pose it was commanded: an external push produces torque the model does not account for,
-    and a fixed-gain controller can only answer it after the error has already grown. This adds
-    a <b>Radial Basis Function Neural Network</b> between the trajectory controller and the
-    joint torque command, estimating that residual torque online and cancelling it — so the
-    disturbance is compensated rather than out-muscled by gain.
-  </p>
+  <p>Nonlinear hand dynamics, friction and modeling errors leave residual torques that degrade
+    joint tracking. Changing wrist orientation changes the gravity direction relative to the
+    hand. I added a <b>Radial Basis Function Neural Network (RBFNN)</b> compensation layer to
+    the Allegro Hand’s existing PD controller to estimate and compensate these torques online.</p>
+  <p>The work has two stages: tracking multi-frequency trajectories without a grasped object
+    across wrist orientations, and adapting the same control structure to hold a grasped
+    object under disturbances.</p>
 
-  <h3>Why online</h3>
-  <p>
-    The disturbances are not known in advance, so there is nothing to pretrain against. The
-    network's weights update while the arm is moving, from the tracking error it is producing
-    right then; nothing is collected, retrained offline and redeployed. Tested on an
-    <b>xArm7</b> with an <b>Allegro Hand</b>: without compensation the grasp gave way every
-    time, and with it the object was never dropped. Trial counts were not logged, so that is an
-    observed outcome rather than a measured rate — the tracking plots below are the quantitative
-    part.
-  </p>
+  <h3>Online adaptive compensation</h3>
+  <p>The network takes joint position and velocity, tracking error and its time derivative,
+    and a normalized gravity vector expressed relative to the hand. Gaussian basis functions
+    map these inputs to a residual torque estimate; an adaptation law derived from Lyapunov
+    analysis updates the weights at each control step.</p>
+  <p>The RBFNN torque is added to the existing PD torque command. The gravity input makes
+    wrist orientation explicit. Tracking tests and grasp-holding tests use the same control
+    structure but represent separate evaluations.</p>
+  <div class="media-grid single">
+<figure><img src="../images/RBFNN_framework.png" alt="RBFNN residual torque compensation added to a PD controller"><figcaption><b>Control structure.</b> The learned compensation torque is summed with the PD output.</figcaption></figure>
+  </div>
+  <div class="media-grid">
+<figure><img src="../images/eq_rbfnn_input.png" alt="RBFNN inputs: position, velocity, tracking error, error derivative and normalized gravity"><figcaption><b>Input vector.</b> State, error and gravity direction.</figcaption></figure><figure><img src="../images/eq_rbfnn_torque.png" alt="Residual torque estimated from Gaussian basis functions and adaptive weights"><figcaption><b>Torque estimate.</b> Gaussian basis functions and adaptive weights.</figcaption></figure><figure><img src="../images/eq_rbfnn_s.png" alt="Integral sliding variable defined from tracking error"><figcaption><b>Adaptation signal.</b> Error, its derivative and its integral.</figcaption></figure><figure><img src="../images/eq_rbfnn_update.png" alt="Online RBFNN weight update at each control step"><figcaption><b>Online update.</b> The continuous adaptation law is discretized at the control interval.</figcaption></figure><figure><img src="../images/eq_rbfnn_tau.png" alt="Command torque equals PD torque plus RBFNN compensation"><figcaption><b>Command.</b> PD torque plus RBFNN compensation.</figcaption></figure>
+  </div>
 
   <h3>Tracking results</h3>
   <p>
-    The same trajectory on the xArm7, run under the nominal PD controller and with the RBFNN
-    compensation layer active. Joint&nbsp;7 carries the most residual torque in this motion.
+    The comparison uses <b>Allegro Hand joint&nbsp;7</b> with the same multi-frequency reference
+    trajectory under the built-in PD controller and PD plus RBFNN compensation. Tests were
+    repeated across wrist orientations. The plotted error ranges are approximately
+    −0.6 to 0.6&nbsp;rad for PD and −0.15 to 0.15&nbsp;rad with compensation.
   </p>
   <div class="media-grid">
     <figure>
       <img src="../images/RBFNN_joint.png" alt="Joint 7 trajectory tracking: reference vs RBFNN vs PD">
       <figcaption><b>Trajectory tracking.</b> The RBFNN controller (blue) follows the reference
         (dashed) almost on top of it, while the PD controller (orange) lags the reference and
-        overshoots at every direction change.</figcaption>
+        shows larger tracking deviations.</figcaption>
     </figure>
     <figure>
       <img src="../images/RBFNN_error.png" alt="Joint 7 trajectory error: RBFNN vs PD">
       <figcaption><b>Tracking error.</b> The same run as error: PD swings to roughly
-        ±0.6&nbsp;rad, the RBFNN stays inside about ±0.15&nbsp;rad — the residual torque is
-        being estimated and cancelled rather than fought by feedback gain.</figcaption>
+        ±0.6&nbsp;rad, the RBFNN stays inside about ±0.15&nbsp;rad in the plotted trajectory.</figcaption>
     </figure>
   </div>
 
+  <h3>Grasp holding and research outputs</h3>
+  <p>No object drop was observed in the compensated grasp-holding trials shown. Trial counts
+    were not recorded, so this is qualitative evidence rather than a success-rate estimate.</p>
+  <p>The tracking-control work was presented as <em>Adaptive Control of a Multi-Fingered
+    Dexterous Hand via RBFNN-based Residual Torque Compensation</em> in 2025. The grasp-holding
+    work was presented as <em>RBFNN-Based Online Disturbance Compensation for Robust Grasping</em>
+    at KRoC 2026. Both are first-author posters; the two evaluations are reported separately.</p>
+
   <h3>Stack</h3>
-  <p class="tags">RBFNN · online learning · torque control · Python</p>
+  <p class="tags">RBFNN · adaptive control · torque compensation · Allegro Hand · xArm7 · Python</p>
 
 </div>
 </body>
