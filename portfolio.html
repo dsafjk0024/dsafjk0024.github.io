@@ -1,0 +1,1890 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jusung Kim — Portfolio 2026</title>
+
+<!-- 한글 본문 Noto Sans KR, 라틴 Inter, 코드 JetBrains Mono.
+     Inter 를 앞에 둬야 라틴이 Inter 로 잡히고 한글만 Noto 로 폴스루된다.
+     오프라인/사내망이면 이 3줄을 지우고 --font-sans 를 시스템 폰트로 바꾼다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;700&display=swap">
+
+<style>
+/* ============================================================ 1. 테마 토큰
+   여기만 바꾸면 덱 전체 룩이 바뀐다. 다른 팔레트는 references/themes.md 참고. */
+/* 섹션 테마 — 프로젝트(블루) · 개별 연구(그린) · 요소기술(브론즈) · 성과(그레이) */
+[data-sec="task"]{ --accent:#1E6FA8; --accent-2:#17547E; --accent-soft:rgba(30,111,168,.10) }
+[data-sec="solo"]{ --accent:#0E7A57; --accent-2:#0B5C42; --accent-soft:rgba(14,122,87,.10) }
+[data-sec="tech"]{ --accent:#9A5B12; --accent-2:#74440D; --accent-soft:rgba(154,91,18,.10) }
+[data-sec="pub"] { --accent:#4A4F57; --accent-2:#343840; --accent-soft:rgba(74,79,87,.10) }
+.tbl td.tg{ font-family:var(--font-mono); font-size:.92em; font-weight:600; white-space:nowrap }
+table.ovw td:nth-child(3){ white-space:nowrap }
+table.ovw td:nth-child(2){ width:34% }
+.tbl td.tg.task{ color:#1E6FA8 } .tbl td.tg.solo{ color:#0E7A57 } .tbl td.tg.tech{ color:#9A5B12 }
+.subt{ font-size:.9em; font-weight:700; color:var(--accent-2); margin-top:-.35em }
+a{ color:var(--accent-2); text-decoration:none; border-bottom:1px solid var(--accent-2);
+   padding-bottom:1px }
+a:hover{ color:var(--accent); border-color:var(--accent) }
+
+:root{
+  --w:1920; --h:1080;                    /* stage 저작 해상도 (16:9) */
+  --scale:1;                             /* JS 가 매기는 유일한 자유도 */
+  --measure-stage:1200px;                /* stage 모드 콘텐츠 컬럼 */
+  --measure-web:680px;                   /* fullbleed 모드 콘텐츠 컬럼 */
+  --dur:520ms; --ease:cubic-bezier(.22,.85,.36,1);
+
+  --bg:#FFFFFF;  --panel:#F2F5F3;  --panel-2:#F7F9F8;  --line:#DCE3DF;
+  --fg:#101613;  --mute:#31403A;   --dim:#6E7A74;
+  --accent:#0E7A57; --accent-2:#127D5C; --accent-soft:rgba(14,122,87,.08);
+
+  --font-sans:'Inter','Noto Sans KR',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+*{ box-sizing:border-box }
+html,body{ height:100%; margin:0; padding:0 }
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:var(--font-sans); font-weight:400;
+  overflow:hidden;                       /* 스크롤 없음 — 이동은 전부 JS */
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+
+/* ==================================================== 2. viewport + stage
+   두 레이아웃을 한 엔진으로: <body data-layout="stage"> 또는 "fullbleed". */
+.viewport{
+  position:fixed; inset:0; overflow:hidden;   /* scale() 은 레이아웃 크기를 안 줄인다 */
+  display:grid; place-items:center;           /* 넘치는 stage 가 좌우 대칭으로 넘침 */
+  touch-action:pinch-zoom;                    /* 확대는 살리고 pan/double-tap 은 죽임 */
+  padding:env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.viewport::before{                            /* 앰비언트 글로우 (지워도 무해) */
+  content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(120% 82% at 12% -8%,   rgba(14,122,87,.055), transparent 62%),
+    radial-gradient(100% 76% at 104% 108%, rgba(14,122,87,.07),  transparent 66%);
+}
+
+/* stage: 1920×1080 고정 조판. 배율 하나로 폰트·gap·보더·좌표가 전부 비례. */
+[data-layout="stage"] .stage{
+  position:relative; overflow:hidden;
+  width:calc(var(--w) * 1px); height:calc(var(--h) * 1px);
+  transform:scale(var(--scale));              /* origin=center → 반픽셀 오프셋 회피 */
+  font-size:27.18px;                          /* 기존 7번 슬라이드의 실측 기준 크기 */
+  background:var(--bg);
+}
+/* fullbleed: 레터박스 없이 화면을 꽉 채움. */
+[data-layout="fullbleed"] .stage{ position:absolute; inset:0 }
+
+/* ============================================= 3. 슬라이드 스택 (3-상태)
+   .is-past 와 .is-future 를 .is-current 양쪽의 서로 다른 정지 위치로 정의하면
+   클래스 한 번 교체로 나가는 장과 들어오는 장이 동시에 움직인다. */
+.slide{
+  position:absolute; inset:0; z-index:1;
+  display:grid; place-items:center;
+  opacity:0;
+  transition:transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+[data-layout="stage"] .slide{ padding:96px 128px }
+[data-layout="fullbleed"] .slide{ padding:clamp(56px,7vh,96px) clamp(22px,5vw,56px) }
+
+.slide.is-current{ opacity:1; transform:none; z-index:2 }
+.slide.is-past, .slide.is-future{ opacity:0 }              /* 기본 = fade */
+
+/* 절제된 이동이 고급스럽다. 100% 씩 날리면 싸구려로 보인다. */
+[data-transition="rise"].is-past   { transform:translateY(-3.5%) scale(.988) }
+[data-transition="rise"].is-future { transform:translateY(3.5%)  scale(.988) }
+[data-transition="slide"].is-past  { transform:translateX(-6%) }
+[data-transition="slide"].is-future{ transform:translateX(6%) }
+[data-transition="zoom"].is-past   { transform:scale(1.05) }
+[data-transition="zoom"].is-future { transform:scale(.95) }
+
+/* ==================================================== 4. 콘텐츠 컬럼
+   같은 마크업이 두 레이아웃에서 다 읽히게 하는 지점. */
+.measure{ display:grid; gap:.9em }
+[data-layout="stage"] .measure{ width:min(var(--measure-stage),100%) }
+[data-layout="fullbleed"] .measure{
+  width:min(var(--measure-web),100%);
+  /* 중간식에 rem 항을 섞어야 브라우저 확대가 동작한다 (W3C F94) */
+  font-size:clamp(15px,.62rem + .55vw,20px);
+}
+[data-layout="stage"] .measure.wide{ width:min(1560px,100%) }
+[data-layout="fullbleed"] .measure.wide{ width:min(calc(var(--measure-web) + 160px),100%) }
+
+/* ==================================================== 5. 타이포 */
+h1,h2,h3,h4{ margin:0; font-weight:700; letter-spacing:-.022em; line-height:1.12 }
+h1{ font-size:2.6em } h2{ font-size:1.72em } h3{ font-size:.82em }
+p { margin:0; font-size:.92em; line-height:1.68; color:var(--mute) }
+p.lead{ font-size:1.02em; color:var(--fg) }
+ul,ol{ margin:0; padding-left:1.15em; font-size:.9em; line-height:1.7; color:var(--mute) }
+li{ margin:.3em 0 } li::marker{ color:var(--accent-2) }
+strong,b{ color:var(--fg); font-weight:700 }
+em{ color:var(--accent); font-style:normal; font-weight:600 }
+
+.kicker{ font-family:var(--font-mono); font-size:.68em; font-weight:600;
+         letter-spacing:.22em; text-transform:uppercase; color:var(--accent) }
+.rule{ height:1px; margin:.2em 0;
+       background:linear-gradient(90deg,var(--accent-2),transparent) }
+.note{ font-size:.78em; color:var(--dim); line-height:1.6 }
+
+:not(pre) > code{                        /* 전역 code{display:block} 은 쓰면 안 된다 */
+  font-family:var(--font-mono); font-size:.86em; color:var(--fg);
+  background:var(--panel); border:1px solid var(--line); border-radius:5px;
+  padding:.1em .38em;
+}
+
+/* ==================================================== 6. 컴포넌트 */
+.cards{ display:grid; gap:.6em }
+.cards.c2{ grid-template-columns:1fr 1fr }
+.cards.c3{ grid-template-columns:repeat(3,1fr) }
+.card{ background:var(--panel-2); border:1px solid var(--line); border-radius:11px;
+       padding:.82em .92em; min-width:0 }
+.card h3{ margin-bottom:.4em; color:var(--accent);
+          font-family:var(--font-mono); font-weight:600 }
+.card p{ font-size:.78em; line-height:1.55 }
+
+.tbl{ overflow-x:auto; background:var(--panel-2);
+      border:1px solid var(--line); border-radius:11px }
+table{ width:100%; border-collapse:collapse; font-size:.76em }
+th,td{ padding:.62em .8em; text-align:left; vertical-align:top; line-height:1.5 }
+th{ font-family:var(--font-mono); font-weight:600; font-size:.9em;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--dim);
+    border-bottom:1px solid var(--line) }
+td{ color:var(--mute); border-bottom:1px solid var(--line) }
+tr:last-child td{ border-bottom:0 }
+td strong{ color:var(--accent) }
+
+.stack{ display:grid; gap:.45em }
+.row{ display:grid; grid-template-columns:auto 1fr; gap:.7em; align-items:baseline;
+      padding:.5em .8em; background:var(--panel-2); border:1px solid var(--line);
+      border-left:2px solid var(--accent-2); border-radius:0 9px 9px 0 }
+.row b{ font-family:var(--font-mono); font-size:.76em; color:var(--accent);
+        white-space:nowrap }
+.row span{ font-size:.8em; color:var(--mute); line-height:1.55 }
+
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:1.4em; align-items:center }
+
+/* .items — 레퍼런스식 항목 나열. 라벨 없이 "~개발/설계/구축" 명사형 한 줄. */
+.items{ list-style:none; padding-left:0; display:grid; gap:.5em; font-size:.92em }
+.items li{ margin:0; padding-left:1.35em; position:relative;
+           color:var(--mute); line-height:1.62 }
+.items li::before{ content:'\25AA'; position:absolute; left:.15em; color:var(--accent) }
+.items li b{ color:var(--fg); font-weight:700 }
+.items .sub-items{ list-style:none; padding-left:0; margin:.3em 0 0;
+                   display:grid; gap:.22em }
+.items .sub-items li{ padding-left:1em; font-size:.94em; color:var(--dim) }
+.items .sub-items li::before{ content:'\2013'; color:var(--dim) }
+
+/* ==================================================== 7b. 다이어그램
+   1560 폭 stage 에 맞춘 인라인 SVG. 색은 전부 토큰에서 가져온다. */
+.split{ display:grid; grid-template-columns:1.45fr 1fr; gap:1.2em; align-items:start }
+.split .figs{ gap:.6em }
+.shieldrow{ display:grid; grid-template-columns:1.15fr 1fr 1fr; gap:.7em; align-items:start }
+
+/* 자리표시 레이아웃 — 실제 이미지·영상으로 교체할 칸 */
+.phrow{ display:grid; gap:.7em }
+.phrow.c2{ grid-template-columns:1fr 1fr }
+.phrow.c3{ grid-template-columns:repeat(3,1fr) }
+.ph{ display:grid; place-items:center; text-align:center; padding:.8em;
+     background:var(--panel-2); border:2px dashed var(--line); border-radius:12px }
+.ph .lbl{ font-family:var(--font-mono); font-size:.7em; letter-spacing:.04em;
+          color:var(--dim); line-height:1.6 }
+.ph .hint{ margin-top:.5em; font-size:.64em; color:var(--dim); opacity:.75; line-height:1.5 }
+.ph.h1{ min-height:13.5em } .ph.h2{ min-height:8.6em } .ph.h3{ min-height:4.2em }
+.split.gws{ grid-template-columns:.85fr 1.35fr; align-items:center; gap:1.6em }
+.split.wide{ grid-template-columns:1.7fr 1fr; align-items:center; gap:1.2em }
+.ph.h4{ min-height:6.8em }
+.figs.wideplot .fig img{ aspect-ratio:auto; height:auto; max-height:none; object-fit:contain;
+                          background:#fff; padding:.4em; border:1px solid var(--line) }
+.split.fw{ grid-template-columns:1.35fr 1fr; align-items:center; gap:1.4em }
+.fig.fwfig img{ aspect-ratio:auto; height:auto; max-height:none; object-fit:contain;
+                background:none; border:0; padding:0 }
+.eqimgs{ display:grid; gap:.7em }
+.eqimgs .eqi{ display:grid; gap:.25em; justify-items:start }
+.eqimgs .eqi img{ max-width:100%; height:2.6em; width:auto; display:block;
+                  background:#F2F2F2; border:1px solid var(--line); border-radius:8px }
+.eqimgs .eqi i{ font-style:normal; font-size:.72em; color:var(--dim); line-height:1.5 }
+.eqimgs.lg .eqi img{ max-height:4.4em }
+.eqimgs.xl .eqi img{ max-height:5.4em }
+.eqrow{ display:grid; grid-template-columns:4.09fr 6.25fr; gap:1.3em; align-items:start }
+.eqrow .eqi{ display:grid; gap:.3em }
+.eqrow .eqi img{ width:100%; height:auto; max-height:none; display:block;
+                 background:#F2F2F2; border:1px solid var(--line); border-radius:8px; padding:.25em .4em }
+.eqrow .eqi i{ font-style:normal; font-size:.72em; color:var(--dim); line-height:1.5 }
+.ct3{ display:grid; grid-template-columns:1.15fr .78fr 1.3fr; gap:.9em; align-items:start }
+.pg3{ display:grid; grid-template-columns:repeat(3,1fr); gap:.9em; align-items:start }
+.pg3 .fig img, .pg3 .fig video{ width:100%; height:9.4em; object-fit:cover; max-height:none; aspect-ratio:auto }
+.split.tac{ grid-template-columns:.62fr 1fr; align-items:center; gap:1.6em }
+.fig.tacvid video{ width:100%; height:auto; aspect-ratio:auto; max-height:none; object-fit:contain }
+.ct3 .fig img{ width:100%; height:9.2em; object-fit:contain; max-height:none; background:#fff }
+.eqlist{ display:grid; gap:.5em }
+.eqlist .eq{ font-family:var(--font-mono); font-size:.8em; line-height:1.5; color:var(--fg);
+             background:var(--panel-2); border:1px solid var(--line);
+             border-left:2px solid var(--accent-2); border-radius:0 8px 8px 0; padding:.5em .7em }
+.eqlist .eq i{ display:block; margin-top:.25em; font-style:normal;
+               font-family:var(--font-sans); font-size:.82em; color:var(--dim) }
+.gwsrow{ display:grid; grid-template-columns:.82fr 1fr 1fr; gap:1em; align-items:center }
+.split.rw{ grid-template-columns:1.15fr 1fr; gap:1.4em; align-items:center }
+.gwsrow2{ display:grid; grid-template-columns:.85fr 1fr; gap:.9em; align-items:center }
+.gwsrow2 .fig img{ width:100%; height:auto; aspect-ratio:auto; max-height:9.5em;
+                   object-fit:contain; background:none; border:0; border-radius:0; padding:0 }
+.gwsrow2 figcaption{ text-align:center }
+.gwsrow .fig img{ width:100%; height:auto; aspect-ratio:auto; max-height:13.5em;
+                  object-fit:contain; background:none; border:0; border-radius:0; padding:0 }
+.gwsrow figcaption{ text-align:center }
+.shieldrow .fig img{ width:100%; height:11.5em; object-fit:cover; max-height:none }
+.fig video{ display:block; width:100%; aspect-ratio:16/9; object-fit:cover; max-height:13em;
+            background:var(--panel-2); border:1px solid var(--line); border-radius:10px }
+.figs.sm .fig video{ max-height:8.5em }
+.natrow{ display:flex; gap:1.4em; align-items:flex-start; justify-content:flex-start }
+.natrow .fig{ flex:0 0 auto }
+.natrow .fig img, .natrow .fig video{ height:11.5em; width:auto; max-width:none; max-height:none;
+                                      aspect-ratio:auto; object-fit:contain }
+.natrow figcaption{ text-align:center }
+.rbpair{ display:flex; gap:1.6em; align-items:flex-start; justify-content:flex-start }
+.rbpair .fig{ flex:0 0 auto }
+.rbpair .fig video{ height:13.5em; width:auto; max-width:none; max-height:none;
+                    aspect-ratio:auto; object-fit:contain }
+.rbpair figcaption{ text-align:center }
+.ct3 .fig video{ width:100%; height:9.2em; object-fit:contain; max-height:none; background:#fff }
+.vidpair{ display:flex; gap:4.2em; align-items:flex-start; justify-content:flex-start }
+.vidpair .fig{ flex:0 0 auto; min-width:0 }
+.vidpair .fig video{ height:17em; width:auto; max-width:none; aspect-ratio:auto;
+                     object-fit:contain }
+.vidpair figcaption{ text-align:center }
+.figs.mid .fig video{ height:9.5em; object-fit:contain; background:var(--panel-2) }
+.figs.mid.tall .fig img, .figs.mid.tall .fig video{ width:100%; height:13.5em; max-height:none;
+                        aspect-ratio:auto; object-fit:contain; background:var(--panel-2) }
+.figs.mid .fig img{ width:100%; height:9.5em; object-fit:contain; max-height:none;
+                     background:var(--panel-2) }
+.diagram{ width:100%; height:auto; display:block }
+.diagram .box{ fill:var(--panel-2); stroke:var(--line); stroke-width:1 }
+.diagram .box.learned{ fill:var(--accent-soft); stroke:var(--accent-2) }
+.diagram .frame{ fill:none; stroke:var(--line) }
+.diagram text{ font-family:var(--font-sans); fill:var(--fg) }
+.diagram .t{ font-size:24px; font-weight:700 }
+.diagram .s{ font-size:18px; fill:var(--mute) }
+.diagram .cap{ font-size:16px; fill:var(--dim) }
+.diagram .lane{ font-family:var(--font-mono); font-size:13px; font-weight:600;
+                letter-spacing:.14em; fill:var(--dim) }
+.diagram .edge{ fill:none; stroke:var(--dim); stroke-width:1.6 }
+.diagram .edge.dash{ stroke-dasharray:6 5; stroke:var(--accent-2) }
+.diagram .elabel{ font-family:var(--font-mono); font-size:17px; fill:var(--accent) }
+.diagram .grp{ fill:none; stroke-width:2; stroke-dasharray:11 9 }
+.diagram .grp.sim{ stroke:#4A7FD4 }
+.diagram .grp.real{ stroke:var(--accent-2) }
+.diagram .lane.sim{ fill:#4A7FD4 }
+.diagram .lane.real{ fill:var(--accent-2) }
+.diagram .t2{ font-size:18px; font-weight:700 }
+.diagram .t2.ac{ fill:var(--accent) }
+.diagram .s2{ font-size:16px; fill:var(--mute) }
+.diagram .s2.mid{ font-weight:600 }
+.diagram .s2.ac{ fill:var(--accent) }
+.diagram .s2.dim{ fill:var(--dim) }
+.diagram .chip{ fill:var(--panel); stroke:var(--line) }
+.diagram .pill{ fill:var(--accent-soft); stroke:var(--accent-2) }
+.diagram .chip.act{ fill:var(--accent-soft); stroke:var(--accent-2) }
+.diagram .traj{ fill:none; stroke-width:2 }
+.diagram .traj.hi{ stroke:var(--accent) }
+.diagram .traj.hi.bold{ stroke-width:3.5 }
+.diagram .traj.mid{ stroke:var(--mute); opacity:.75 }
+.diagram .traj.low{ stroke:var(--dim); opacity:.45 }
+.diagram .dot{ fill:var(--accent) }
+.diagram .edge.thin{ stroke-width:1.2 }
+.cards.c4{ grid-template-columns:repeat(4,1fr) }
+.card p .sub, .sub{ font-size:.85em; color:var(--dim) }
+
+/* 그림 — PDF 에서는 영상이 재생되지 않으므로 실행 영상에서 뽑은 정지 프레임을 쓴다 */
+.figs{ display:grid; gap:.55em }
+.figs.f2{ grid-template-columns:1fr 1fr }
+.figs.f3{ grid-template-columns:repeat(3,1fr) }
+.fig{ display:grid; gap:.3em; margin:0; min-width:0 }
+.fig img{
+  display:block; width:100%; aspect-ratio:16/9;
+  object-fit:contain;                  /* 근거 사진을 잘라내지 않는다 */
+  max-height:13em;                     /* em 기준 → 자동 축소가 이미지에도 적용된다 */
+  background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+}
+/* 16:9 가 아닌 원본은 강제 박스를 씌우지 않는다 — 세로·정사각 사진이
+   16:9 박스에 들어가면 대부분이 잘리거나 좌우 여백만 남는다 */
+.fig.free img{
+  aspect-ratio:auto; width:auto; height:auto;
+  max-width:100%; max-height:11em; margin-inline:auto;
+}
+.figs.sm .fig.free img{ max-height:9em }
+.fig.leftfig img{ margin-inline:0 }
+.figs.f1{ grid-template-columns:minmax(0,1fr) }
+.fig figcaption{ font-size:.58em; line-height:1.45; color:var(--dim) }
+.fig figcaption strong{ color:var(--mute) }
+/* 그래프·도면은 잘라내지 않고 흰 바탕 위에 담는다 */
+.fig.plot img{ object-fit:contain; background:#fff; padding:.5em; aspect-ratio:16/9;
+               border:1px solid var(--line) }
+.figs.sm .fig img{ max-height:8.5em }        /* 텍스트가 많은 장용 */
+
+/* ============================== 7. 코드 블록 + 라인 하이라이트
+   줄당 span.line 하나. 들여쓰기하지 말고 각 줄이 실제 개행으로 끝나야
+   복붙 공백이 안 깨진다. 코드 안의 < 는 &lt; 로 escape.
+   정적:  <code data-hi="3-5">
+   단계별: <code data-hi-steps="0|1-2|4-6">   (스텝 커서를 소비한다) */
+pre{ margin:0; padding:.85em 0; overflow-x:auto; font-size:.78em;
+     background:var(--panel-2); border:1px solid var(--line); border-radius:11px }
+pre > code{ display:block; white-space:pre; font-size:1em;
+            font-family:var(--font-mono); line-height:1.78; color:var(--mute) }
+code .line{ display:block; padding:0 1.1em; border-left:2px solid transparent;
+            transition:opacity 300ms var(--ease), background-color 300ms var(--ease) }
+pre.has-hi code .line{ opacity:.32 }
+pre.has-hi code .line.hi{ opacity:1; color:var(--fg);
+                          background:var(--accent-soft); border-left-color:var(--accent) }
+code .c{ color:var(--dim) }              /* 주석 */
+code .k{ color:var(--accent) }           /* 키워드 */
+
+/* ====================================== 8. 등장 애니메이션 (둘 중 골라 쓴다)
+   .stagger — 진입 시 자동 순차 등장. 키를 소비하지 않는다(키 1 = 페이지 1 유지).
+   .frag    — 발표자가 키로 하나씩 공개. 논지를 나르는 빌드에 쓴다. */
+.stagger > *{
+  opacity:0; transform:translateY(9px);
+  transition:opacity 520ms var(--ease), transform 520ms var(--ease);
+  transition-delay:calc(var(--i,0) * 62ms + 110ms);
+}
+.is-current .stagger > *{ opacity:1; transform:none }
+.slide:not(.is-current) .stagger > *{ transition-delay:0ms }   /* 퇴장은 즉시 */
+.stagger>:nth-child(1){--i:0} .stagger>:nth-child(2){--i:1} .stagger>:nth-child(3){--i:2}
+.stagger>:nth-child(4){--i:3} .stagger>:nth-child(5){--i:4} .stagger>:nth-child(6){--i:5}
+.stagger>:nth-child(7){--i:6} .stagger>:nth-child(n+8){--i:7}  /* 딜레이 상한 */
+
+/* 미공개 빌드는 흐름에 남긴다. display:none 은 공개마다 리플로우를 일으킨다. */
+.frag{ opacity:0; transform:translateY(.35em);
+       transition:opacity 380ms var(--ease), transform 380ms var(--ease) }
+.frag.shown{ opacity:1; transform:none }
+
+/* ==================================================== 9. 크롬
+   stage 에 transform 이 걸리면 fixed 자손의 기준이 stage 가 되므로
+   크롬은 반드시 .viewport 밖(body 직계)에 둔다. */
+.bar{ position:fixed; left:0; right:0; bottom:0; height:3px; z-index:30;
+      background:linear-gradient(90deg,var(--accent-2),var(--accent));
+      transform-origin:left center; transform:scaleX(0);
+      transition:transform 420ms var(--ease) }
+.counter{ position:fixed; z-index:30; pointer-events:none;
+          right:clamp(18px,3.2vw,34px); bottom:clamp(16px,2.6vh,26px);
+          font-family:var(--font-mono); font-size:11.5px; font-weight:600;
+          letter-spacing:.14em; color:var(--dim); font-variant-numeric:tabular-nums }
+.counter i{ color:var(--accent); font-style:normal }
+.brand{ position:fixed; z-index:30; pointer-events:none;
+        left:clamp(18px,3.2vw,34px); bottom:clamp(16px,2.6vh,26px);
+        font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em;
+        text-transform:uppercase; color:var(--dim) }
+
+/* aria-live 리전은 초기 HTML 에 반드시 존재해야 한다. 리전과 텍스트를 같은
+   프레임에 넣으면 스크린리더가 대부분 아무것도 읽지 않는다. */
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden;
+          clip-path:inset(50%); white-space:nowrap }
+
+/* 화자 노트 — hidden 은 UA display:none 이라 @media print 로 되살릴 수 있다 */
+.notes[hidden]{ display:none }
+
+.help{ position:fixed; inset:auto 22px 46px auto; z-index:40; display:none;
+       max-width:340px; padding:15px 17px; border-radius:13px;
+       background:rgba(255,255,255,.96); border:1px solid var(--line);
+       font-size:12.5px; line-height:2; color:var(--mute); backdrop-filter:blur(10px) }
+.help.open{ display:block }
+.help b{ color:var(--accent); font-family:var(--font-mono); font-weight:600 }
+
+/* ==================================================== 10. 발표자 화면 (?presenter) */
+.pv{ display:none }
+body.presenter .viewport, body.presenter .help, body.presenter .brand,
+body.presenter .counter, body.presenter .bar{ display:none }
+body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+                    gap:20px; padding:20px; height:100dvh }
+.pv section{ display:flex; flex-direction:column; gap:20px; min-width:0 }
+.pv .box{ background:var(--panel-2); border:1px solid var(--line);
+          border-radius:13px; padding:16px 18px; min-width:0 }
+.pv h4{ margin:0 0 .7em; font-family:var(--font-mono); font-size:10.5px;
+        font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--dim) }
+#pvNotes{ flex:1; overflow:auto; font-size:16px; line-height:1.7; color:var(--fg) }
+#pvClock{ font-family:var(--font-mono); font-weight:600; font-size:38px; line-height:1;
+          color:var(--accent); font-variant-numeric:tabular-nums }
+#pvWall,#pvPos{ margin-top:6px; font-family:var(--font-mono); font-size:12px;
+                color:var(--dim); font-variant-numeric:tabular-nums }
+#pvPreview{ flex:1; overflow:hidden; padding:18px; background:var(--bg);
+            border:1px solid var(--line); border-radius:11px }
+#pvPreview .measure{ width:100%; font-size:13px; gap:.8em }
+#pvPreview .stagger > *, #pvPreview .frag{ opacity:1; transform:none; transition:none }
+
+/* ================ 11. 모션 최소화 — transition 을 없애지 않고 1ms 로.
+   settle() 이 실제 애니메이션을 읽으므로 JS 분기가 필요 없다. */
+@media (prefers-reduced-motion: reduce){
+  .slide{ transition:opacity 1ms }
+  .slide.is-past, .slide.is-future{ transform:none }
+  .stagger > *, .frag{ transition-duration:1ms; transition-delay:0ms }
+  .bar{ transition:none }
+}
+
+/* ================ 12. 인쇄 / PDF — transform 을 풀고 정적 흐름으로.
+   스케일된 콘텐츠는 페이지네이션되지 않아 잘린 한 장이 나온다. */
+@media print{
+  @page{ size:1920px 1080px; margin:0 }
+  /* 덱 자신의 팔레트를 그대로 인쇄한다. 여기서 color 를 덮으면
+     색상 지정이 없는 요소(h1 등)가 배경과 같은 색이 되어 사라진다. */
+  body{ overflow:visible }
+  .viewport{ position:static; display:block; overflow:visible; padding:0 }
+  .viewport::before{ display:none }
+  [data-layout="stage"] .stage,
+  [data-layout="fullbleed"] .stage{ position:static; transform:none; overflow:visible;
+                                    width:auto; height:auto }
+  .slide{ position:static; width:1920px; height:1080px;
+          opacity:1 !important; transform:none !important;
+          break-after:page; page-break-after:always }
+  /* 마지막 장 뒤의 강제 개페이지는 빈 페이지를 하나 만든다 */
+  .slide:last-of-type{ break-after:auto; page-break-after:auto }
+  .stagger > *, .frag{ opacity:1 !important; transform:none !important }
+  pre.has-hi code .line{ opacity:1 !important }
+  .fig, .figs, .cards, .stack, .tbl{ break-inside:avoid }
+  .fig img{ print-color-adjust:exact }
+  .notes[hidden]{ display:none }   /* 제출용 PDF — 노트 제외 */
+  .bar,.counter,.brand,.help,.pv,.sr-only{ display:none !important }
+  *{ print-color-adjust:exact; -webkit-print-color-adjust:exact }
+}
+</style>
+</head>
+
+<!-- data-layout="stage"     → 1920×1080 고정 조판. 투사·PDF 용. 창이 16:9 가 아니면 레터박스.
+     data-layout="fullbleed" → 레터박스 없이 화면 꽉. 웹 공유·링크 용. -->
+<body data-layout="stage">
+
+<div class="viewport" id="viewport">
+  <div class="stage" id="stage" aria-roledescription="슬라이드 덱" aria-label="Jusung Kim 포트폴리오">
+
+    <!-- ======================= 1  ======================= -->
+    <section class="slide" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">portfolio · 2026</p>
+        <h1>Jusung&nbsp;Kim</h1>
+        <div class="rule"></div>
+        <p class="lead">Learning-based Control for Real Robots<br>
+          강화 · 모방학습 &nbsp;·&nbsp; sim-to-real &nbsp;·&nbsp; 로봇 매니퓰레이션</p>
+        <p class="note">Research Intern · 지능로보틱스연구센터, 한국전자기술연구원(KETI)<br>
+          <b>Email</b> dsafjk0024@naver.com &nbsp;·&nbsp;
+          <b>Homepage</b> <a href="https://dsafjk0024.github.io" target="_blank" rel="noopener">dsafjk0024.github.io</a> &nbsp;·&nbsp;
+          <b>GitHub</b> <a href="https://github.com/dsafjk0024" target="_blank" rel="noopener">github.com/dsafjk0024</a></p>
+      </div>
+      <aside class="notes" hidden>표지. 한 줄로 무엇을 하는 사람인지만.</aside>
+    </section>
+
+    <!-- ======================= 2 한눈에 ======================= -->
+    <section class="slide" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">overview</p>
+        <h2>프로젝트 3건 · 개별 연구 1건 · 요소기술 3건</h2>
+        <div class="tbl"><table class="ovw">
+          <thead><tr><th>구분</th><th>프로젝트명</th><th>기간</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td class="tg task">프로젝트 01</td><td>시촉각 센싱기반 모방학습에 의한 자율조작파지기술개발</td>
+              <td>2024. 03 – 진행 중</td><td>비전 · 촉각 통합 제어 프레임워크 → 양팔 확장 → 강화학습 정책 실기 배포</td></tr>
+            <tr><td class="tg task">프로젝트 02</td><td>숙련된 로봇 조작 및 파지 성능을 지원하기 위한 평가방법 개발연구</td>
+              <td>2024. 03 – 진행 중</td><td>Peg-in-Hole 모방학습 · 촉각 관측을 더한 삽입 정책</td></tr>
+            <tr><td class="tg task">프로젝트 03</td><td>AI 내장형 다중감각지능 통합모듈 및 로봇플랫폼 실증기술 개발</td>
+              <td>2025. 01 – 진행 중</td><td>World Model sim-to-real 구현</td></tr>
+            <tr><td class="tg solo">개별 연구</td><td>SO-101 ROS 2 모방학습 파이프라인</td>
+              <td>2026. 04 – 08</td><td>데이터 수집 · 학습 · 추론 전 과정 단독 구축 · ACT vs flow matching 실기 비교</td></tr>
+            <tr><td class="tg tech">요소기술</td><td>RBFNN 잔차 토크 보상 · F/T 기반 손끝 접촉 위치 추정 · GJK 실시간 충돌 회피</td>
+              <td>2024 – 2025</td><td>KRoC 2026 · ICCAS 2024 포스터</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <aside class="notes" hidden>30초 안에 전체 그림. 프로젝트는 팀 공동 수행, 개별 연구는 단독,
+        요소기술은 프로젝트 수행 중 만든 재사용 가능한 모듈이라는 구분을 말한다.
+        기여 비율은 표에 적지 않고 물어보면 답한다.</aside>
+    </section>
+
+    <!-- ======================= 3 섹션 1. 프로젝트 ======================= -->
+    <section class="slide" data-sec="task" data-transition="zoom" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">section 01</p>
+        <h1>1. 프로젝트</h1>
+        <div class="rule"></div>
+      </div>
+      <aside class="notes" hidden>섹션 구분.</aside>
+    </section>
+
+    <!-- ======================= 4  ======================= -->
+    <section class="slide" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · 개요</p>
+        <h2>시촉각 센싱기반 모방학습에 의한 자율조작파지기술개발</h2>
+        <p class="subt">비전 · 촉각 통합 제어 프레임워크 — 2024 단일팔 → 2026 양팔 확장</p>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>KETI · 2024. 03 – 진행 중</span></div>
+        </div>
+        <ul class="items">
+          <li>2024 — 비전 · 촉각 센서를 하나의 제어 루프로 묶는 <b>단일팔 제어 프레임워크</b> 구축
+            (센서 I/O와 제어 연산 프로세스 분리 · 상태 버퍼 설계)</li>
+          <li><a href="https://yzqin.github.io/dexmv/" target="_blank" rel="noopener">DexMV</a> 구조에
+            <b>촉각 입력을 추가</b>한 구성(DexMVT)으로 학습한 정책을 이 프레임워크로 실기 배포 —
+            RoboWorld 2024 라이브 시연 (Relocate 성공률 53%)</li>
+          <li>2026 — <b>양팔 플랫폼</b>으로 확장, 안전 장치와 강화학습 정책 배포까지 하나의 명령 경로로 통합</li>
+        </ul>
+        <div class="figs f2 mid tall">
+          <figure class="fig"><img src="images/roboworld_demo.jpg" alt="RoboWorld 2024 단일팔 라이브 시연 장면">
+            <figcaption>[2024 단일팔 — RoboWorld 라이브, Relocate 성공률 53%]</figcaption></figure>
+          <figure class="fig"><video src="videos/dualarm_act_c.mp4" poster="images/dualarm_act_c_poster.jpg" aria-label="양팔 플랫폼에서 pick-and-place 롤아웃"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[2026 양팔 — pick-and-place 롤아웃]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>53%는 비전·촉각을 한 루프에 넣은 실기 라이브라는 맥락과 함께 말한다.
+        2024 단일팔 → 2026 양팔 재구축으로 이어지는 하나의 프레임워크.</aside>
+    </section>
+
+    <!-- ======================= 5  ======================= -->
+    <section class="slide" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · 전체 구조</p>
+        <h2>[실기 · 시뮬레이션 공용 통합 제어 프레임워크]</h2>
+        <svg class="diagram" viewBox="-26 -32 1612 700" role="img"
+             aria-label="30 Hz 지각이 물체 자세를 추적해 공유 메모리에 올리고, observation 을 받은 정책이 action chunk를 만든다. marker shield가 통과시킨 샘플만 action buffer 에 들어가고, 200 Hz 제어 루프가 보간해 장치로 보낸다. 측정 상태는 state buffer 를 거쳐 다시 observation 으로 돌아온다.">
+          <defs>
+            <marker id="mmar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+
+          <!-- ============ 지각 · 정책 그룹 ============ -->
+          <rect class="grp sim" x="-14" y="4" width="1588" height="130" rx="16"/>
+          <text class="lane sim" x="-8" y="-10">PERCEPTION · POLICY · 30 / 20–30 Hz</text>
+
+          <rect class="box" x="0" y="26" width="280" height="82" rx="12"/>
+          <text class="t" x="20" y="58">RGB-D 카메라</text>
+          <text class="s" x="20" y="86">고정 overview 1대 · 30 Hz</text>
+
+          <rect class="box" x="320" y="26" width="280" height="82" rx="12"/>
+          <text class="t" x="340" y="58">물체 자세 추적</text>
+          <text class="s" x="340" y="86">6-DoF 자세 정합 · 추적</text>
+
+          <rect class="box" x="640" y="26" width="280" height="82" rx="12"/>
+          <text class="t" x="660" y="58">공유 메모리</text>
+          <text class="s" x="660" y="86">오래된 프레임 폐기</text>
+
+          <rect class="box" x="960" y="26" width="280" height="82" rx="12"/>
+          <text class="t" x="980" y="58">Observation</text>
+          <text class="s" x="980" y="86">31-D · 팔 · 손 · 물체</text>
+
+          <rect class="box learned" x="1280" y="26" width="280" height="82" rx="12"/>
+          <text class="t" x="1300" y="58">정책</text>
+          <text class="s" x="1300" y="86">31-D → 22 targets</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M280,67 H316" marker-end="url(#mmar2)"/>
+            <path d="M600,67 H636" marker-end="url(#mmar2)"/>
+            <path d="M920,67 H956" marker-end="url(#mmar2)"/>
+            <path d="M1240,67 H1276" marker-end="url(#mmar2)"/>
+          </g>
+
+          <!-- ============ 명령 경로 · 실행 그룹 ============ -->
+          <g transform="translate(0 24)">
+          <rect class="grp real" x="-14" y="190" width="1588" height="430" rx="16"/>
+          <text class="lane real" x="-8" y="176">COMMAND PATH · EXECUTION · 200 Hz</text>
+
+          <rect class="box" x="1240" y="216" width="320" height="82" rx="12"/>
+          <text class="t" x="1260" y="248">어댑터</text>
+          <text class="s" x="1260" y="276">[-1, 1] → 관절 범위 환산 · IK · 클리핑</text>
+
+          <rect class="box" x="900" y="216" width="300" height="82" rx="12"/>
+          <text class="t" x="920" y="248">Action chunk</text>
+          <text class="s" x="920" y="276">200 Hz 기준 10 샘플</text>
+
+          <rect class="box learned" x="480" y="216" width="380" height="82" rx="12"/>
+          <text class="t ac" x="500" y="248">Marker Shield</text>
+          <text class="s" x="500" y="276">몸통 · 테이블 안전거리 검사</text>
+
+          <rect class="box" x="10" y="216" width="300" height="82" rx="12"/>
+          <text class="t" x="30" y="248">차단 시 정지 유지</text>
+          <text class="s" x="30" y="276">감속 후 정지 유지</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M1420,110 V212" marker-end="url(#mmar2)"/>
+            <path d="M1240,257 H1204" marker-end="url(#mmar2)"/>
+            <path d="M900,257 H864" marker-end="url(#mmar2)"/>
+            <path d="M480,257 H314" marker-end="url(#mmar2)"/>
+          </g>
+          <text class="elabel" x="368" y="288">unsafe</text>
+
+          <rect class="box" x="480" y="380" width="380" height="82" rx="12"/>
+          <text class="t" x="500" y="412">Action buffer</text>
+          <text class="s" x="500" y="440">두 팔을 같은 틱에 기록</text>
+
+          <rect class="box" x="900" y="380" width="300" height="82" rx="12"/>
+          <text class="t" x="920" y="412">제어 루프 200 Hz</text>
+          <text class="s" x="920" y="440">청크 보간 · 관절 클리핑</text>
+
+          <rect class="box" x="1240" y="380" width="320" height="82" rx="12"/>
+          <text class="t" x="1260" y="412">장치</text>
+          <text class="s" x="1260" y="440">xArm7 ×2 · Allegro</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M670,298 V376" marker-end="url(#mmar2)"/>
+            <path d="M860,421 H896" marker-end="url(#mmar2)"/>
+            <path d="M1200,421 H1236" marker-end="url(#mmar2)"/>
+          </g>
+          <text class="elabel" x="690" y="345">shield 통과분만</text>
+
+          <rect class="box" x="1000" y="510" width="560" height="82" rx="12"/>
+          <text class="t" x="1020" y="542">State buffer · latest-only</text>
+          <text class="s" x="1020" y="570">단일 락 snapshot() — 양팔 상태 일관 스냅샷</text>
+
+          <g class="edge dash" color="var(--accent-2)">
+            <path d="M1400,462 V506" marker-end="url(#mmar2)"/>
+            <path d="M1000,551 H880 V126 H1100 V90" marker-end="url(#mmar2)"/>
+          </g>
+          <text class="elabel" x="1420" y="494">측정 상태</text>
+          <text class="elabel" x="890" y="148">다음 틱 observation</text>
+          </g>
+        </svg>
+        <p class="note"><b>장치마다 실기 · MuJoCo 두 구현을 두고 config 로만 전환</b> —
+          지각 · 정책 · shield · 버퍼 · 제어 루프 코드는 그대로 두고 하드웨어만 갈아끼운다.
+          새 정책과 새 동작을 시뮬레이션에서 먼저 검증한 뒤 같은 코드로 실기에 올릴 수 있는 이유.
+          텔레오퍼레이션(Apple Vision Pro)도 정책 출력과 가중 블렌딩되어 <b>같은 명령 경로</b>를 통과한다.</p>
+      </div>
+      <aside class="notes" hidden>레이트: 지각 30 Hz · 정책 20 Hz(파지) ~ 30 Hz(모방학습) · 제어 200 Hz · 텔레옵 60 Hz ·
+        장치 250/333 Hz. 요지는 "느린 정책이 팔을 멈추지 못한다". 사내 모듈명은 일반화해서 표기.
+        어댑터: 정책 출력은 [-1, 1] 정규화 값이라 actuator 범위의 중앙 + 정규값 x 반폭으로 되돌린 뒤(코드의 denormalize_action),
+        TCP 목표는 IK로 관절각으로 풀고 관절 한계로 클리핑한다.</aside>
+    </section>
+
+    <!-- ======================= 6  ======================= -->
+    <section class="slide" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · 안전 장치</p>
+        <h2>[마커 기반 몸통 · 테이블 충돌 방지]</h2>
+        <ul class="items">
+          <li>팔 · 손 표면 충돌 위험 지점에 마커 <b>64개</b> 배치 (xArm7 링크 48 · 손바닥 8 · 손가락 8)</li>
+          <li>명령 전송 전 후보 관절 자세를 <b>별도 MjData에서 순기구학으로 계산</b>해 마커 위치를 구하고,
+            몸통 · 테이블 박스(OBB)와의 부호거리가 마진 이내면 명령 차단</li>
+          <li>학습 환경과 실기 배포가 <b>동일한 거리 계산 모듈</b>을 공유 — 마진은 환경별 설정 (학습 25 mm · 실기 경고 50 / 정지 30 / 복구 40 mm)</li>
+        </ul>
+        <div class="figs f2 mid tall">
+          <figure class="fig"><video src="videos/shield_mujoco.mp4" poster="images/shield_mujoco_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[MuJoCo 검증 — 몸통 정지 → 테이블 정지]</figcaption></figure>
+          <figure class="fig"><video src="videos/shield_real.mp4" poster="images/shield_real_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[실기 검증 — 몸통 정지 → 테이블 정지]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>영상은 각각 몸통 검증 → 테이블 검증을 이어붙인 8.6 초 합본. 왼쪽 MuJoCo, 오른쪽 실기.
+        구현: env/safety_shield.py — 마커는 MuJoCo site(수학적 점, 렌더 크기는 시각화용).
+        후보 자세를 private MjData 에 써서 mj_fwdPosition 한 번, 환경 상태는 건드리지 않는다.
+        거리: 마커를 오른팔 base 프레임으로 옮겨 OBB 부호거리(밖 +, 안 −). 기본 정지 마진 25 mm.
+        학습 환경에서는 트리거 시 에피소드 종료 + 보상 −1 로 정책이 회피를 배우게 했다.
+        실기 배포의 단계형 마진(경고 50 / 정지 30 / 복구 40 mm)은 별도 설정.</aside>
+    </section>
+
+    <!-- ======================= 7  ======================= -->
+    <section class="slide" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · 강화학습</p>
+        <h2>[Relocate 정책 강화학습]</h2>
+        <ul class="items">
+          <li>MuJoCo 학습 환경과 실기 제어 인터페이스 연결 — xArm7 + Allegro Hand 16관절</li>
+          <li>Apple Vision Pro 텔레오퍼레이션으로 MuJoCo에서 <b>상태 · 행동 기반 시연 데이터 수집</b></li>
+          <li>관측 31-D (말단 자세 6 · 손 관절 16 · 상대 위치 9) → 행동 22-D (말단 목표 6 · 손 관절 목표 16)</li>
+        </ul>
+        <svg class="diagram" viewBox="-26 -34 1612 560" role="img"
+             aria-label="Vision Pro 텔레오퍼레이션 시연이 BC 초기화와 density model 학습에 쓰인다. 학습 루프에서는 정책 롤아웃의 advantage 에 시연 유사도 점수를 더해 NPG 신뢰영역으로 정책을 갱신한다.">
+          <defs>
+            <marker id="gsar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+
+          <rect class="grp sim" x="-14" y="4" width="1588" height="196" rx="16"/>
+          <text class="lane sim" x="-8" y="-10">COLLECTED DATA · demo path</text>
+
+          <rect class="box" x="0" y="26" width="520" height="150" rx="12"/>
+          <text class="t" x="24" y="64">Vision Pro 텔레옵 수집</text>
+          <text class="s" x="24" y="96">MuJoCo · state 기반 관측 · 행동</text>
+
+          <rect class="box" x="580" y="26" width="980" height="66" rx="12"/>
+          <text class="t" x="604" y="54">BC 초기화</text>
+          <text class="s" x="604" y="80">정책 초기 가중치</text>
+
+          <rect class="box learned" x="580" y="110" width="980" height="66" rx="12"/>
+          <text class="t" x="604" y="138">Density model</text>
+          <text class="s" x="604" y="164">demo obs vs policy obs 판별 (BCE)</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M520,59 H576" marker-end="url(#gsar)"/>
+            <path d="M520,143 H576" marker-end="url(#gsar)"/>
+          </g>
+
+          <rect class="grp real" x="-14" y="250" width="1588" height="270" rx="16"/>
+          <text class="lane real" x="620" y="236">GASP 학습 루프 · 시연 증강 정책경사 + NPG 갱신</text>
+
+          <rect class="box" x="0" y="276" width="360" height="100" rx="12"/>
+          <text class="t" x="24" y="312">정책 롤아웃</text>
+          <text class="s" x="24" y="344">Sampled path</text>
+
+          <rect class="box" x="420" y="276" width="380" height="100" rx="12"/>
+          <text class="t" x="444" y="312">Critic → advantage</text>
+          <text class="s" x="444" y="344">가치 추정 · 정규화</text>
+
+          <rect class="box learned" x="860" y="276" width="340" height="100" rx="12"/>
+          <text class="t ac" x="884" y="312">+ 시연 판별 점수</text>
+          <text class="s" x="884" y="344">density score 가산</text>
+
+          <rect class="box" x="1260" y="276" width="300" height="100" rx="12"/>
+          <text class="t" x="1284" y="312">NPG 갱신</text>
+          <text class="s" x="1284" y="344">KL 신뢰영역</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M360,326 H416" marker-end="url(#gsar)"/>
+            <path d="M800,326 H856" marker-end="url(#gsar)"/>
+            <path d="M1200,326 H1256" marker-end="url(#gsar)"/>
+            <path d="M1200,176 V228 H1030 V272" marker-end="url(#gsar)"/>
+            <path d="M580,59 H540 V240 H180 V272" marker-end="url(#gsar)"/>
+          </g>
+          <text class="elabel" x="1046" y="222">시연 관측 판별 점수</text>
+          <text class="elabel" x="200" y="234">초기 가중치</text>
+
+          <g class="edge dash" color="var(--accent-2)">
+            <path d="M1410,376 V450 H180 V380" marker-end="url(#gsar)"/>
+          </g>
+          <text class="elabel" x="560" y="474">갱신된 정책으로 다시 롤아웃 — demo 가중치는 iteration 마다 감소</text>
+        </svg>
+      </div>
+      <aside class="notes" hidden>팀 공동 기반 위의 통합 · 학습 · 배포. GASP를 새로 제안했다는 주장이 아니다.
+        학습 대상은 오른팔·오른손이며 양팔 동시 RL이 아니다. 상대 위치 9 = grasp–object / grasp–target / object–target 각 3.
+        행동 22차원은 관절 22개가 아니다. 근거: gasp/train_relocate.py, env/relocate_env.py.</aside>
+    </section>
+
+    <!-- ======================= 8  ======================= -->
+    <section class="slide" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · 보상 설계</p>
+        <h2>[파지 품질을 보상에 더한 GWS 항]</h2>
+        <ul class="items">
+          <li><b>GWS</b> — 접촉힘이 만들어낼 수 있는 모든 wrench <b>w = [f ; τ] ∈ ℝ⁶</b> 의 집합 ·
+            마찰 원뿔 경계 힘을 근사하고 토크를 길이 척도로 정규화해 convex hull 계산</li>
+          <li><b>Ferrari-Canny ε = min ‖w‖</b>, w ∈ ∂conv(GWS) — 원점이 hull 내부일 때의 최소 거리</li>
+          <li>동일 접촉 모델 · 단위 법선력 가정에서 <b>여러 방향 외란에 저항하는 정도</b>를 나타내는 파지 품질 지표 — 태스크 보상에 가산</li>
+          <li>GWS 항만 추가한 통제 비교 (그 외 보상 · 설정 · seed 동일) — 리턴 25,000 도달까지 <b>8,000 → 1,200 iteration</b> <span class="sub">시뮬레이션</span></li>
+        </ul>
+        <div class="split rw">
+          <div class="tbl"><table>
+            <thead><tr><th>단계</th><th>보상 항</th></tr></thead>
+            <tbody>
+              <tr><td>접근</td><td>−0.1 · ‖손 − 물체‖</td></tr>
+              <tr><td>접촉</td><td>+0.1 &nbsp;·&nbsp; +50 · 들어올린 높이</td></tr>
+              <tr><td>들어올림 (&gt; 15 mm)</td><td>+2.0 &nbsp;·&nbsp; −0.5 · ‖손 − 목표‖ &nbsp;·&nbsp; −1.5 · ‖물체 − 목표‖</td></tr>
+              <tr><td>목표 근접 (&lt; 0.1 m)</td><td>+1 ⁄ (거리 + 0.01)</td></tr>
+              <tr><td><strong>파지 품질</strong></td><td><strong>+ ε (Ferrari-Canny)</strong> ← 이 단계에서 추가</td></tr>
+            </tbody>
+          </table></div>
+          <div class="gwsrow2">
+            <figure class="fig"><img src="images/GWS_3d.png" alt="3D 힘 공간에서의 접촉힘 분포와 hull">
+              <figcaption>[force 공간 — 접촉힘과 hull]</figcaption></figure>
+            <figure class="fig"><img src="images/GWS_force.png" alt="Fx-Fy 평면으로 투영한 wrench 집합과 convex hull">
+              <figcaption>[투영 — force Fx · Fy]</figcaption></figure>
+          </div>
+        </div>
+      </div>
+      <aside class="notes" hidden>보상 표는 RelocateEnv._compute_reward() 그대로다 — 접근·접촉·들어올림·목표근접의 단계형 보상 위에 ε를 가산.
+        torque 투영 그림은 슬라이드에서 빼고 질문 오면 원본 포스터로 보여준다.
+        코드 근거: env/reward_utils.py, RelocateEnv._compute_reward().
+        fn=1.0 마찰 원뿔 경계 힘(K=4), wrench=[f, (r×f)/L], hull 밖·계산 불가 시 ε=0, 가중치 +ε.
+        8,000→1,200 은 팀 공동 실험 수치로 인용했다 — 발표 전 확인할 것:
+        (1) GWS 항 유무만 다른 통제 비교였는지 (2) 학습 seed 수 (3) 리턴 25,000 기준의 근거.
+        실기 성공률 개선과는 별개 지표다.
+        GWS 유무 효과와 asymmetric 유무 효과는 별개 비교.
+        ε 크기 자체는 리턴에서 매우 작은 비중이다 — 단계형 보상이 만드는 25,000 리턴에 비해 스텝당 ε는 1% 미만 수준.
+        즉 8,000→1,200 은 ε가 리턴 척도를 부풀려서 기준선을 쉽게 넘긴 게 아니라, 파지 자세를 잡는 방향으로 탐색을 유도한 결과로 읽는다.</aside>
+    </section>
+
+    <!-- ======================= 9  ======================= -->
+    <section class="slide" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · asymmetric actor–critic</p>
+        <h2>[관측 오차를 고려한 asymmetric actor–critic 학습]</h2>
+        <svg class="diagram" viewBox="-26 -34 1612 420" role="img"
+             aria-label="실기에서 얻는 31차원 관측은 Actor 와 Critic 모두에 들어간다. 시뮬레이터 참값 기반 상대 위치 6차원은 학습 중 Critic에만 추가된다. 배포에는 Actor만 사용한다.">
+          <defs>
+            <marker id="rlar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+
+          <rect class="grp sim" x="-14" y="4" width="1160" height="352" rx="16"/>
+          <text class="lane sim" x="-8" y="-10">TRAINING · 시뮬레이션</text>
+
+          <rect class="box" x="0" y="26" width="440" height="92" rx="12"/>
+          <text class="t" x="24" y="60">Actor obs · 31-D</text>
+          <text class="s" x="24" y="90">실기에서 얻는 값 + 물체 위치 bias</text>
+
+          <rect class="box" x="0" y="232" width="440" height="92" rx="12"/>
+          <text class="t" x="24" y="266">Privileged state · 6-D</text>
+          <text class="s" x="24" y="296">grasp site–object / object–target</text>
+
+          <rect class="box learned" x="640" y="26" width="480" height="92" rx="12"/>
+          <text class="t ac" x="664" y="60">Actor · 31-D → 22-D</text>
+          <text class="s" x="664" y="90">대조군과 동일한 입력 · 출력</text>
+
+          <rect class="box learned" x="640" y="232" width="480" height="92" rx="12"/>
+          <text class="t ac" x="664" y="266">Critic · 31 + 6 = 37-D</text>
+          <text class="s" x="664" y="296">학습 중 value 추정에만 사용</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M440,72 H636" marker-end="url(#rlar)"/>
+            <path d="M440,278 H636" marker-end="url(#rlar)"/>
+            <path d="M220,118 V196 H636 V228" marker-end="url(#rlar)"/>
+          </g>
+          <text class="elabel" x="250" y="188">같은 obs 가 Critic에도</text>
+
+          <rect class="grp real" x="1200" y="4" width="374" height="352" rx="16"/>
+          <text class="lane real" x="1206" y="-10">DEPLOY · 실기</text>
+
+          <rect class="box" x="1214" y="26" width="346" height="92" rx="12"/>
+          <text class="t" x="1238" y="60">실기 배포</text>
+          <text class="s" x="1238" y="90">Actor만으로 행동 추론</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M1120,72 H1210" marker-end="url(#rlar)"/>
+          </g>
+          <text class="elabel" x="1238" y="262">privileged 입력은</text>
+          <text class="elabel" x="1238" y="286">배포에 쓰이지 않음</text>
+        </svg>
+        <div class="split wide">
+          <ul class="items">
+            <li>실기 물체 위치는 <b>D435i 1대(egocentric view) + FoundationPose</b> 추정 — 값이 흔들리고 오차가 위치마다 다름</li>
+            <li>축별 <b>±15 mm 물체 위치 bias</b> 로 지속 편향 모사 — FoundationPose 실측 오차에 마진을 둔 값, 에피소드 단위 고정</li>
+            <li>Actor obs 유지 · <b>Critic에만 privileged state 6-D 추가</b> — 오차 조건에서 가치 추정 안정화를 유도</li>
+          </ul>
+          <figure class="fig plot"><img src="images/foundation_pose.png" alt="FoundationPose 로 추정한 물체 자세가 실기 영상에 overlay 된 화면">
+            <figcaption>[FoundationPose 추정 — 물체 자세 overlay · registration score]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>추가 입력은 접촉력·질량이 아니라 참값 기반 상대 위치 6-D. dynamics randomization 미사용.
+        목적과 구현을 설명하는 장이며 성공률 향상을 확정하지 않는다. cfg 기본값 CRITIC_PRIVILEGED=false 가 대조군.
+        개선 수치 인용 전 원본 로그 · checkpoint · 학습 seed 수를 확인한다.</aside>
+    </section>
+
+    <!-- ======================= 10  ======================= -->
+    <section class="slide" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 01 · sim-to-real</p>
+        <h2>[Relocate 정책의 실기 배포 · 동작 확인]</h2>
+        <ul class="items">
+          <li>실행 입력: 실제 로봇 상태 + 비전 기반 물체 위치 + 목표 위치 → Actor 관측 구성 ·
+            출력은 역정규화 · IK · 관절 범위 제한을 거쳐 안전 검사 → 명령 버퍼 → 제어 루프로</li>
+          <li><b>asymmetric으로 학습한 Actor를 실기 배포</b> — 대조군(Critic obs = Actor obs)은 파지 실패, asymmetric 정책은 파지 후 목표까지 이동 성공</li>
+        </ul>
+        <div class="figs f2 mid tall">
+          <figure class="fig"><video src="videos/gasp_sym_fail_c.mp4" poster="images/gasp_sym_fail_c_poster.jpg" aria-label="대조군 정책이 물체 파지에 실패하는 실기 롤아웃"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[대조군 — 파지 실패]</figcaption></figure>
+          <figure class="fig"><video src="videos/gasp_asym_success_c.mp4" poster="images/gasp_asym_success_c_poster.jpg" aria-label="asymmetric 정책이 물체를 파지해 목표로 옮기는 실기 롤아웃"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[asymmetric 적용 — 파지 후 목표 이동 성공]</figcaption></figure>
+        </div>
+        <p class="note">두 영상은 <b>같은 태스크의 예시 롤아웃</b>이다 — 반복 성공률 · 도달 오차 · 완료 시간은 미집계.</p>
+      </div>
+      <aside class="notes" hidden>영상은 실기 대조 예시 2건(대조군 실패 / asymmetric 성공)이며 성공률 비교가 아니다 —
+        물어보면 정량 비교는 미집계라고 답한다. 촬영 시점이 달라 카메라 앵글이 다르다는 점도 먼저 밝힌다.
+        추가 실패 사례 영상 1건 더 있음(gasp_sym_실패2.mp4).
+        실기 배포 정책은 asymmetric. 배포 checkpoint 파일명과 촬영 자료를 연결할 것.
+        RoboWorld 2024 의 53% 를 이 정책 결과로 재사용하지 않는다.
+        필요한 결과 · 자료 목록: docs/project03-rl-evidence.md.</aside>
+    </section>
+
+    <!-- ======================= 11  ======================= -->
+    <section class="slide" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 02 · 개요</p>
+        <h2>숙련된 로봇 조작 및 파지 성능을 지원하기 위한 평가방법 개발연구</h2>
+        <p class="subt">Peg-in-Hole 모방학습 프레임워크 — 텔레옵 수집부터 촉각 기반 삽입까지</p>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>KETI · 2024. 03 – 진행 중</span></div>
+        </div>
+        <ul class="items">
+          <li>xArm6 + Robotiq Hand-E를 SpaceMouse 6-DoF로 구동하는 텔레오퍼레이션 제어 코드 구현</li>
+          <li>로봇 · 그리퍼 상태와 RealSense 프레임 동기 기록 · 시연 데이터셋 수집</li>
+          <li>Diffusion Policy · flow matching 정책 학습 및 실기 롤아웃</li>
+          <li>AutomationWorld 2026 라이브 시연 (2026. 03)</li>
+        </ul>
+        <div class="pg3">
+          <figure class="fig"><img src="images/peg_in_hole_layout.png" alt="Peg-in-Hole 실험 구성">
+            <figcaption>[Peg-in-Hole 실험 구성]</figcaption></figure>
+          <figure class="fig"><video src="videos/aw_demo.mp4" poster="images/aw_demo_poster.jpg" aria-label="AutomationWorld 2026 라이브 시연 장면"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[AutomationWorld 2026 라이브 시연]</figcaption></figure>
+          <figure class="fig"><video src="videos/peg_in_hole_tactile.mp4" poster="images/peg_tactile_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[학습 정책 삽입 롤아웃 — 여러 커넥터 · 배속]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>공동 수행 과제. 내 비중이 큰 쪽은 텔레옵 스택과 데이터 수집이므로,
+        세부 질문이 그쪽으로 오면 그렇게 답한다. NIST 기반 7개 지표로 정량 평가했으나 수치는 사내 자료 —
+        슬라이드에서 빼고, 물어보면 그때 언급한다.</aside>
+    </section>
+
+    <!-- ======================= 12  ======================= -->
+    <section class="slide" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 02 · 촉각 센서 확장</p>
+        <h2>[XELA 촉각 관측을 더한 삽입 정책]</h2>
+        <ul class="items">
+          <li>AutomationWorld 2026 시연은 <b>힘 · 촉각 센서 없이</b> 위치 제어만으로 수행 —
+            커넥터 정렬이 조금만 어긋나면 삽입이 막히는 한계 확인</li>
+          <li>그리퍼 손가락에 <b>XELA 촉각 센서</b>를 부착해 접촉력 분포 측정</li>
+          <li>측정한 힘 데이터를 <b>모방학습(flow matching) 정책 입력에 추가</b>해 학습 — 명시적 힘 제어 루프가 아니라 관측 확장</li>
+          <li>위치 정확도에 의존하던 삽입을 <b>접촉 기반 삽입</b>으로 전환</li>
+        </ul>
+        <div class="split tac">
+          <figure class="fig tacvid"><video src="videos/peg_in_hole_multimodal.mp4" poster="images/peg_multimodal_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[상단 측면 카메라 · 하단 XELA 접촉력 분포 — 손가락 팁 2개, 최대 |F<sub>z</sub>| 표기]</figcaption></figure>
+          <ul class="items">
+            <li>삽입 진행에 따라 <b>팁별 접촉력 분포가 이동</b> — 어느 방향으로 눌리는지가 데이터로 드러남</li>
+            <li>이 힘을 제어 입력으로 되먹여, 위치 오차가 남아 있어도 접촉을 잃지 않고 삽입을 완료</li>
+            <li>삽입 <b>공차가 위치 제어 오차보다 작은</b> 커넥터는 정렬만으로는 걸림 —
+              접촉력을 조절해 맞물릴 때까지 자세를 미세 보정</li>
+          </ul>
+        </div>
+      </div>
+      <aside class="notes" hidden>요지는 공차 문제다 — 가림(occlusion)이 아니라, 삽입 공차가 위치 오차보다 작아서
+        위치 제어만으로는 끼워지지 않는 구간을 접촉력 조절로 넘긴다.
+        스토리: 위치 제어만으로 나간 AutomationWorld 시연에서 정렬 민감도가 한계로 드러났고,
+        그 다음 단계로 촉각 센서를 넣어 접촉력 피드백으로 삽입하도록 바꿨다.
+        정량 비교(촉각 유무 성공률 · 삽입 시간)는 아직 집계하지 않았다 — 물어보면 그렇게 답한다.
+        영상은 여러 시행을 이어붙인 배속본이며 원본은 videos/peg_in_hole_데모2.mp4.</aside>
+    </section>
+
+    <!-- ======================= 13  ======================= -->
+    <section class="slide" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 03 · 개요</p>
+        <h2>AI 내장형 다중감각지능 통합모듈 및 로봇플랫폼 실증기술 개발</h2>
+        <p class="subt">World Model 기반 sim-to-real 구현 (SimDist)</p>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>KETI · 2025. 01 – 진행 중</span></div>
+        </div>
+        <ul class="items">
+          <li><a href="https://sim-dist.github.io/" target="_blank" rel="noopener">SimDist</a> 공개 구현을 기반으로 사전학습 → 계획 → 실기 배포 전 과정 재현</li>
+          <li>실물 4족 보행로봇(Unitree Go2)에서 <b>world model · MPPI 기반 제어기 50 Hz 실기 실행</b> · 동작 검증</li>
+          <li>시뮬레이션 전이 정책과 dynamics fine-tuning 정책의 실기 대조</li>
+        </ul>
+        <div class="figs f2">
+          <figure class="fig"><video src="videos/go2_deploy_baseline_m.mp4" poster="images/go2_deploy_baseline_m_poster.jpg" aria-label="다이내믹스 튜닝 없이 배포한 baseline 정책"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[튜닝 전 — 시뮬레이션에서 그대로 전이]</figcaption></figure>
+          <figure class="fig"><video src="videos/go2_deploy_finetuned_s.mp4" poster="images/go2_deploy_finetuned_s_poster.jpg" aria-label="다이내믹스 튜닝 후 배포한 정책"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[dynamics fine-tuning 후 — 동일 world model]</figcaption></figure>
+        </div>
+        <p class="note">방법론은 원 논문(<a href="https://sim-dist.github.io/" target="_blank" rel="noopener">SimDist</a>)의 것이고, 이 프로젝트의 범위는 <b>실물 하드웨어에서의 재현과 배포</b>다.
+          sim-to-real 격차는 정책을 다시 학습해서가 아니라, 수집한 실기 롤아웃으로 world model의
+          dynamics를 지도학습으로 보정해 줄인다. 실기 결과는 정성적 관찰 — 정량 보행 지표는 미측정.</p>
+      </div>
+      <aside class="notes" hidden>world model · PPO · Isaac Lab · MuJoCo · Unitree SDK.
+        재현 프로젝트라는 것을 먼저 말한다 — 기여를 부풀리지 않는 것이 방어에 유리.
+        정량 지표가 없다는 점도 먼저 말한다. 논문 링크: sim-dist.github.io</aside>
+    </section>
+
+    <!-- ======================= 14  ======================= -->
+    <section class="slide" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">프로젝트 03 · 전체 구조</p>
+        <h2>[사전학습 → MPPI 계획 → 실기 배포 · dynamics 적응]</h2>
+        <svg class="diagram" viewBox="-26 -38 1612 800" role="img"
+             aria-label="시뮬레이션에서 PPO 전문가 정책을 학습하고, 전문가와 중간 체크포인트로 품질이 섞인 롤아웃을 생성해 잠재 world model을 사전학습한다. 실기에서는 MPPI가 world model 안에서 행동 시퀀스를 샘플링해 50 Hz로 계획하고, 수집된 실기 데이터로 dynamics head만 미세조정해 다시 계획에 사용한다.">
+          <defs>
+            <marker id="g2ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            <clipPath id="g2imgA"><rect x="24" y="100" width="432" height="140" rx="8"/></clipPath>
+            <clipPath id="g2imgE"><rect x="624" y="500" width="372" height="130" rx="8"/></clipPath>
+            <clipPath id="g2vizB"><rect x="520" y="96" width="480" height="160"/></clipPath>
+          </defs>
+
+          <!-- ================= 시뮬레이션 그룹 ================= -->
+          <rect class="grp sim" x="-14" y="4" width="1588" height="282" rx="16"/>
+          <text class="lane sim" x="-8" y="-12">SIMULATION · 사전학습</text>
+
+          <rect class="box" x="0" y="30" width="480" height="240" rx="12"/>
+          <text class="t" x="24" y="62">1 · 전문가 정책 학습</text>
+          <text class="s" x="24" y="88">PPO · Isaac Lab · 4096 병렬 환경</text>
+          <image href="images/go2_sim_evaluation_poster.jpg" clip-path="url(#g2imgA)"
+                 x="24" y="100" width="432" height="140" preserveAspectRatio="xMidYMid slice"/>
+          <text class="cap" x="24" y="258">[시뮬레이션 학습 · 평가 환경]</text>
+
+          <rect class="box" x="520" y="30" width="480" height="240" rx="12"/>
+          <text class="t" x="544" y="62">2 · 롤아웃 데이터 생성</text>
+          <text class="s" x="544" y="88">다양한 성능 수준의 정책으로 수집</text>
+          <g clip-path="url(#g2vizB)">
+            <path class="traj hi" d="M548,132 Q590,126 632,132 T716,132 T800,132 T884,132"/>
+            <path class="traj mid" d="M548,172 Q590,158 632,172 T716,172 T800,172 T884,172"/>
+            <path class="traj low" d="M548,212 Q580,184 612,212 T676,212 T740,212 T804,212 T868,212"/>
+          </g>
+          <text class="s2 ac" x="900" y="138">expert · 50%</text>
+          <text class="s2" x="900" y="178">중간 ckpt</text>
+          <text class="s2" x="900" y="218">초기 ckpt</text>
+          <text class="cap" x="544" y="258">expert + 중간 체크포인트 11종 + 행동 노이즈</text>
+
+          <rect class="box learned" x="1040" y="30" width="520" height="240" rx="12"/>
+          <text class="t" x="1064" y="62">3 · World Model 사전학습</text>
+          <text class="s" x="1064" y="88">다음 상태 · 보상 · 가치 예측</text>
+          <rect class="chip" x="1064" y="112" width="112" height="44" rx="7"/>
+          <text class="s2 mid" x="1120" y="140" text-anchor="middle">encoder</text>
+          <rect class="chip" x="1204" y="112" width="132" height="44" rx="7"/>
+          <text class="s2 mid" x="1270" y="140" text-anchor="middle">dynamics</text>
+          <rect class="chip" x="1364" y="96" width="112" height="36" rx="7"/>
+          <text class="s2 mid" x="1420" y="119" text-anchor="middle">reward</text>
+          <rect class="chip" x="1364" y="138" width="112" height="36" rx="7"/>
+          <text class="s2 mid" x="1420" y="161" text-anchor="middle">value</text>
+          <g class="edge thin" color="var(--dim)">
+            <path d="M1176,134 H1200" marker-end="url(#g2ar)"/>
+            <path d="M1336,134 H1360" marker-end="url(#g2ar)"/>
+          </g>
+          <text class="cap" x="1064" y="258">latent 64 · causal attention · 25스텝 → 25스텝 예측</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M480,150 H515" marker-end="url(#g2ar)"/>
+            <path d="M1000,150 H1035" marker-end="url(#g2ar)"/>
+          </g>
+
+          <!-- ================= 전이 ================= -->
+          <g class="edge" color="var(--dim)">
+            <path d="M1300,270 V324 H240 V422" marker-end="url(#g2ar)"/>
+          </g>
+          <text class="elabel" x="600" y="314">사전학습된 world model</text>
+
+          <!-- ================= 실기 그룹 ================= -->
+          <rect class="grp real" x="-14" y="412" width="1588" height="336" rx="16"/>
+          <text class="lane real" x="-8" y="398">REAL WORLD · 배포 · 적응</text>
+
+          <rect class="box" x="0" y="430" width="560" height="240" rx="12"/>
+          <text class="t" x="24" y="462">4a · MPPI 온라인 계획 · 50 Hz</text>
+          <text class="s" x="24" y="488">후보 행동 시퀀스의 예측 리턴 평가</text>
+          <g class="fan">
+            <path class="traj low" d="M60,570 C160,570 240,532 420,504"/>
+            <path class="traj low" d="M60,570 C160,570 240,548 420,530"/>
+            <path class="traj low" d="M60,570 C160,570 250,606 420,638"/>
+            <path class="traj low" d="M60,570 C160,570 250,594 420,612"/>
+            <path class="traj mid" d="M60,570 C160,570 245,558 420,546"/>
+            <path class="traj mid" d="M60,570 C160,570 245,582 420,592"/>
+            <path class="traj hi bold" d="M60,570 C160,570 245,570 420,568"/>
+          </g>
+          <circle class="dot" cx="60" cy="570" r="5"/>
+          <text class="s2" x="436" y="510">450 샘플</text>
+          <text class="s2" x="436" y="550">elite 64</text>
+          <text class="s2 ac" x="436" y="576">가중평균</text>
+          <text class="cap" x="24" y="656">450 샘플 × 8회 반복 · 상위 64개 가중평균 · 매 스텝 재계획</text>
+
+          <rect class="box" x="600" y="430" width="420" height="240" rx="12"/>
+          <text class="t" x="624" y="462">실물 Unitree Go2</text>
+          <text class="s" x="624" y="488">관절 상태 · IMU · 3-DoF 속도 명령</text>
+          <image href="images/go2_deploy_finetuned_poster.jpg" clip-path="url(#g2imgE)"
+                 x="624" y="500" width="372" height="130" preserveAspectRatio="xMidYMid slice"/>
+          <text class="cap" x="624" y="656">[dynamics fine-tuning 후 실기 보행]</text>
+
+          <rect class="box learned" x="1060" y="430" width="500" height="240" rx="12"/>
+          <text class="t" x="1084" y="462">4b · dynamics fine-tuning</text>
+          <text class="s" x="1084" y="488">표현 · 보상 · 가치 고정, dynamics만 적응</text>
+          <rect class="chip" x="1084" y="506" width="212" height="42" rx="7"/>
+          <text class="s2 mid dim" x="1190" y="533" text-anchor="middle">encoder · reward · value</text>
+          <text class="s2 dim" x="1310" y="533">고정</text>
+          <rect class="chip act" x="1084" y="560" width="212" height="42" rx="7"/>
+          <text class="s2 mid ac" x="1190" y="587" text-anchor="middle">dynamics</text>
+          <text class="s2 ac" x="1310" y="587">학습</text>
+          <text class="cap" x="1084" y="656">실기 롤아웃에 대한 지도학습 — 하드웨어 RL 없음</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M560,550 H595" marker-end="url(#g2ar)"/>
+            <path d="M1020,550 H1055" marker-end="url(#g2ar)"/>
+          </g>
+
+          <g class="edge dash" color="var(--accent-2)">
+            <path d="M1310,670 V702 H280 V674" marker-end="url(#g2ar)"/>
+          </g>
+          <text class="elabel" x="560" y="730">적응된 dynamics 가 곧바로 다음 계획에 사용</text>
+        </svg>
+      </div>
+      <aside class="notes" hidden>관측: 관절 위치 · 속도 · 몸체 각속도 · 투영중력 · 보행 위상 (외부 인식 센서 미사용).
+        선택 기준은 reward + terminal value 의 discounted 합.
+        SimDist 재현. 숫자 근거: MPPI 450 샘플 · 8 iteration · elite 64 · temperature 0.25,
+        데이터 생성은 4096 병렬 환경 25k 스텝, expert 확률 0.5 + 중간 ckpt 11종(iter 0~2000) + 구간 행동 노이즈.
+        fine-tuning은 dynamics head만(loss·head 모두 dynamics only), encoder·reward·value 고정.
+        왜 품질 섞인 데이터인가 → 계획이 나쁜 행동의 결과도 예측해야 하므로.</aside>
+    </section>
+
+    <!-- ======================= 15 섹션 2. 개별 연구 ======================= -->
+    <section class="slide" data-sec="solo" data-transition="zoom" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">section 02</p>
+        <h1>2. 개별 연구</h1>
+        <div class="rule"></div>
+      </div>
+      <aside class="notes" hidden>섹션 구분.</aside>
+    </section>
+
+    <!-- ======================= 16  ======================= -->
+    <section class="slide" data-sec="solo" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">개별 연구 · 개요</p>
+        <h2>SO-101 — ROS 2 모방학습 파이프라인</h2>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>2026. 04 – 08 (완료) · 독립 연구</span></div>
+        </div>
+        <ul class="items">
+          <li>ROS 2 기반 데이터 수집 · 학습 · 추론 파이프라인 구축</li>
+          <li>ACT · flow matching 정책 학습 및 실기 폐루프 평가</li>
+        </ul>
+        <div class="figs f2 mid">
+          <figure class="fig"><video src="videos/so101_success_montage.mp4" poster="images/so101_success_montage_poster.jpg" aria-label="학습된 정책이 큐브를 파지해 목표 위에 적재하는 성공 롤아웃"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[성공 롤아웃 — 파지 후 목표 위에 적재]</figcaption></figure>
+          <figure class="fig"><video src="videos/so101_indist_failures.mp4" poster="images/so101_indist_failures_poster.jpg" aria-label="적재 직후 스택이 미끄러져 무너지는 실패 장면"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[실패 — 물체를 놓은 직후 적재물 붕괴]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>ROS 2 Jazzy · ros2_control · Feetech STS3215 · rosbag2/MCAP · LeRobot v3.0 · PyTorch. 300 시연, 정책별 300k 스텝.
+        종료 사유: 실기에서 시연을 모아 정책을 배포·평가하는 단계는 목표를 달성해 8월에 종료.
+        다음 단계는 시뮬레이션에서 데이터를 수집해 모방학습 / 모방학습+RL로 sim-to-real 하는 방향 —
+        실기 수집의 한계(시연 수, 커버리지)를 시뮬레이션으로 넘기는 것이 목적.</aside>
+    </section>
+
+    <!-- ======================= 17  ======================= -->
+    <section class="slide" data-sec="solo" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">개별 연구 · 파이프라인</p>
+        <h2>[ROS 2 데이터 수집 · 학습 · 추론 파이프라인 구축]</h2>
+        <svg class="diagram" viewBox="-26 -32 1660 600" role="img"
+             aria-label="사람이 리더 팔을 손으로 안내하면 teleop 노드가 팔로워 명령 토픽을 발행하고 팔로워 팔이 따라간다. 같은 토픽과 카메라를 기록해 rosbag2 로 남기고 30 Hz 고정 주기로 정렬해 LeRobot 데이터셋으로 변환한 뒤 ACT 와 flow matching 정책을 학습한다. 학습된 정책은 추론 노드로 같은 명령 토픽에 사람 대신 올라간다.">
+          <defs>
+            <marker id="s1ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+
+          <!-- ============ 실시간 그룹 ============ -->
+          <rect class="grp sim" x="-14" y="4" width="1588" height="246" rx="16"/>
+          <text class="lane sim" x="-8" y="-10">REAL TIME · ROS 2 JAZZY</text>
+
+          <rect class="box" x="0" y="26" width="190" height="80" rx="12"/>
+          <text class="t" x="20" y="58">사람 손</text>
+          <text class="s" x="20" y="84">수동 안내</text>
+
+          <rect class="box" x="230" y="26" width="230" height="80" rx="12"/>
+          <text class="t" x="250" y="58">리더 팔</text>
+          <text class="s" x="250" y="84">STS3215 × 6</text>
+
+          <rect class="box" x="500" y="26" width="250" height="80" rx="12"/>
+          <text class="t" x="520" y="58">teleop 노드</text>
+          <text class="s" x="520" y="84">50 Hz · stale guard</text>
+
+          <rect class="pill" x="790" y="38" width="390" height="56" rx="28"/>
+          <text class="t ac" x="812" y="75">/follower/…/commands</text>
+
+          <rect class="box" x="1220" y="26" width="340" height="80" rx="12"/>
+          <text class="t" x="1240" y="58">팔로워 팔</text>
+          <text class="s" x="1240" y="84">ros2_control</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M190,66 H225" marker-end="url(#s1ar)"/>
+            <path d="M460,66 H495" marker-end="url(#s1ar)"/>
+            <path d="M750,66 H785" marker-end="url(#s1ar)"/>
+            <path d="M1180,66 H1215" marker-end="url(#s1ar)"/>
+          </g>
+
+          <rect class="box learned" x="790" y="150" width="390" height="80" rx="12"/>
+          <text class="t" x="812" y="182">추론 노드</text>
+          <text class="s" x="812" y="208">30 Hz 재관측 · chunk 실행</text>
+          <g class="edge dash" color="var(--accent-2)">
+            <path d="M985,150 V100" marker-end="url(#s1ar)"/>
+          </g>
+          <text class="elabel" x="1200" y="184">학습된 정책이 사람 자리에서</text>
+          <text class="elabel" x="1200" y="208">같은 토픽으로 발행</text>
+
+          <!-- ============ 오프라인 그룹 ============ -->
+          <rect class="grp real" x="-14" y="300" width="1588" height="240" rx="16"/>
+          <text class="lane real" x="-8" y="286">OFFLINE · 데이터셋 · 학습</text>
+
+          <rect class="box" x="0" y="326" width="290" height="80" rx="12"/>
+          <text class="t" x="20" y="358">관절 상태 · 카메라 2</text>
+          <text class="s" x="20" y="384">손목 + 상단 · 480×640</text>
+
+          <rect class="box" x="330" y="326" width="230" height="80" rx="12"/>
+          <text class="t" x="350" y="358">기록기</text>
+          <text class="s" x="350" y="384">규격에 정의한 4개 토픽</text>
+
+          <rect class="box" x="600" y="326" width="210" height="80" rx="12"/>
+          <text class="t" x="620" y="358">rosbag2</text>
+          <text class="s" x="620" y="384">MCAP</text>
+
+          <rect class="box" x="850" y="326" width="290" height="80" rx="12"/>
+          <text class="t" x="870" y="358">변환기</text>
+          <text class="s" x="870" y="384">30 Hz 고정 주기 정렬</text>
+
+          <rect class="box" x="1180" y="326" width="380" height="80" rx="12"/>
+          <text class="t" x="1200" y="358">LeRobot v3.0 데이터셋</text>
+          <text class="s" x="1200" y="384">시연 300 에피소드</text>
+
+          <rect class="box learned" x="1100" y="440" width="460" height="80" rx="12"/>
+          <text class="t" x="1120" y="472">ACT · flow matching 학습</text>
+          <text class="s" x="1120" y="498">동일 데이터 · 정책별 300k 스텝</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M290,366 H325" marker-end="url(#s1ar)"/>
+            <path d="M560,366 H595" marker-end="url(#s1ar)"/>
+            <path d="M810,366 H845" marker-end="url(#s1ar)"/>
+            <path d="M1140,366 H1175" marker-end="url(#s1ar)"/>
+            <path d="M1370,406 V436" marker-end="url(#s1ar)"/>
+            <path d="M830,94 V130 H445 V322" marker-end="url(#s1ar)"/>
+            <path d="M1560,480 H1606 V190 H1184" marker-end="url(#s1ar)"/>
+          </g>
+          <text class="elabel" x="500" y="122">같은 토픽을 그대로 기록</text>
+          <text class="elabel" x="1380" y="286">체크포인트</text>
+        </svg>
+        <p class="note">관측 · 행동 규격을 YAML 하나로 고정해 <b>기록 · 변환 · 학습 · 추론 네 단계에서 모두 검증</b>하고,
+          위반은 경고가 아니라 실패로 처리한다. 배포 노드는 하나 — 체크포인트만 바꿔 두 정책을 교체한다.</p>
+      </div>
+      <aside class="notes" hidden>수치가 아니라 시스템 설계가 이 장의 논지.
+        세부 질문 오면 max_age_s, 에피소드 폐기 기준, LeRobot이 시간을 frame_index/fps 로 합성하는 문제를 설명.
+        학습 스텝 수는 프로젝트 페이지 기준(정책별 동일 스텝).</aside>
+    </section>
+
+    <!-- ======================= 18  ======================= -->
+    <section class="slide" data-sec="solo" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">개별 연구 · 실기 평가</p>
+        <h2>[동일 조건 실기 비교 — ACT vs flow matching]</h2>
+        <div class="figs f2 mid">
+          <figure class="fig"><video src="videos/so101_act_vs_fbc.mp4" poster="images/so101_act_vs_fbc_poster.jpg" aria-label="같은 큐브 배치에서 ACT와 flow matching 정책의 롤아웃 비교"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[같은 배치 · 두 정책 롤아웃 — ACT | flow matching]</figcaption></figure>
+          <figure class="fig"><video src="videos/so101_ood_failures.mp4" poster="images/so101_ood_failures_poster.jpg" aria-label="분포 밖 배치에서 팔이 시연에 있던 위치로 향하는 실패 장면"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[분포 밖 실패 — 시연 범위를 벗어난 배치]</figcaption></figure>
+        </div>
+        <div class="two">
+          <div class="tbl"><table>
+            <thead><tr><th>지표</th><th>ACT</th><th>flow matching</th></tr></thead>
+            <tbody>
+              <tr><td>시연 범위 내 · 50회</td><td>37회 성공 (74%)</td><td>30회 성공 (60%)</td></tr>
+              <tr><td><span class="sub">└ 로봇과 가까운 25회</span></td><td><span class="sub">24회 (96%)</span></td><td><span class="sub">19회 (76%)</span></td></tr>
+              <tr><td><span class="sub">└ 로봇과 먼 25회</span></td><td><span class="sub">13회 (52%)</span></td><td><span class="sub">11회 (44%)</span></td></tr>
+              <tr><td>시연 범위 밖 · 10회</td><td>2회 성공 (20%)</td><td>3회 성공 (30%)</td></tr>
+              <tr><td>제어 주기 (30 Hz 요청)</td><td>29.8 Hz</td><td>26.8 Hz</td></tr>
+            </tbody>
+          </table></div>
+          <ul class="items">
+            <li>이번 평가에서 두 정책의 성공률 차이는 <b>통계적으로 확인되지 않음</b> — 동등하다는 뜻은 아님</li>
+            <li>큐브가 로봇에서 멀어지면 두 정책 모두 성공률이 절반 수준으로 떨어짐</li>
+            <li>flow matching은 30 Hz를 못 맞춤 — ODE 샘플러가 재계획마다 시간을 더 씀</li>
+          </ul>
+        </div>
+      </div>
+      <aside class="notes" hidden>74% vs 60%을 "이겼다"로 말하지 않는다.
+        통계 근거(프로젝트 페이지): 범위 내 50 + 범위 밖 10 = 60회 전체를 대응표본으로 비교했고,
+        한쪽만 성공한 22회가 14:8. 동전 던지기와 구분 안 되는 수준(McNemar p = 0.29).
+        위치별 실패 쏠림은 Fisher p = 0.001. 물어보면 그때 꺼낸다.
+        flow matching의 ODE 샘플러가 replan당 ~100 ms라 27 Hz.
+        "왜 끝냈나" 질문 오면: 실기 시연 수집의 커버리지 한계가 실패 분포로 드러났고,
+        다음 단계는 시뮬레이션에서 데이터를 모아 모방학습 / 모방학습+RL 로 sim-to-real 하는 방향.</aside>
+    </section>
+
+    <!-- ======================= 19 섹션 3. 요소기술 ======================= -->
+    <section class="slide" data-sec="tech" data-transition="zoom" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">section 03</p>
+        <h1>3. 요소기술</h1>
+        <div class="rule"></div>
+      </div>
+      <aside class="notes" hidden>섹션 구분.</aside>
+    </section>
+
+    <!-- ======================= 20  ======================= -->
+    <section class="slide" data-sec="tech" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">요소기술 01 · 개요</p>
+        <h2>다관절 로봇 손 RBFNN 잔차 토크 보상 제어기 설계</h2>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>KETI · 2025. 09 – 11 (완료)</span></div>
+        </div>
+        <ul class="items">
+          <li>문제 정의: 다관절 손의 비선형 동역학 · 마찰 · 모델링 오차가 <b>잔차 토크</b>로 남아 관절 궤적 추종을 방해 —
+            손목 자세가 바뀌면 중력 방향이 달라져 오차가 더 커짐</li>
+          <li>내장 PD 제어기를 교체하지 않고 <b>RBFNN 보상 계층</b>을 덧붙여 잔차 토크를 온라인 추정 · 상쇄</li>
+          <li><b>1단계 — 궤적 추종</b>: 물체를 잡지 않은 상태에서 다중 주파수 자유 궤적을 추종, 여러 손목 자세에서 오차 감소</li>
+          <li><b>2단계 — 파지 유지</b>: 물체를 파지한 상태에서 파지 자세를 유지하도록 학습 — 외란에도 놓치지 않게</li>
+        </ul>
+        <div class="figs f2 mid tall">
+          <figure class="fig"><video src="videos/rbfnn_before_c.mp4" poster="images/rbfnn_before_c_poster.jpg" aria-label="보상 없이 외란을 받아 물체를 놓치는 장면"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[보상 없음 — 외란에 물체 낙하]</figcaption></figure>
+          <figure class="fig"><video src="videos/rbfnn_after_c.mp4" poster="images/rbfnn_after_c_poster.jpg" aria-label="RBFNN 보상으로 같은 외란에서 파지를 유지하는 장면"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[RBFNN 보상 — 같은 외란에서 파지 유지]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>xArm7 + Allegro Hand. 낙하 시험은 시행 횟수를 기록하지 않았으므로 "관찰 결과"로만 말한다.</aside>
+    </section>
+
+    <!-- ======================= 21  ======================= -->
+    <section class="slide" data-sec="tech" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">요소기술 01 · 제어 구조</p>
+        <h2>[내장 PD 위에 얹은 RBFNN 보상 계층]</h2>
+        <div class="split fw">
+          <figure class="fig fwfig"><img src="images/RBFNN_framework.png" alt="RBFNN 보상 계층과 PD 제어기가 합산되어 토크 명령을 만드는 구조도">
+            <figcaption>[RBFNN 이 추정한 보상 토크가 PD 출력에 더해져 τ<sub>cmd</sub> 로 나간다]</figcaption></figure>
+          <div>
+            <div class="eqimgs">
+              <div class="eqi"><img src="images/eq_rbfnn_input.png" alt="RBFNN 입력 벡터 X = [q, q̇, e, ė, ĝ]">
+                <i>관절 위치 · 속도, 추종 오차와 오차의 시간 미분, <b>정규화 중력 벡터 ĝ</b>(손목 자세)</i></div>
+              <div class="eqi"><img src="images/eq_rbfnn_torque.png" alt="RBFNN 보상 토크 = 가중치 전치 곱하기 가우시안 기저">
+                <i>가우시안 기저 φ — 센터 · 폭은 입력 공간을 균일하게 덮도록 설정</i></div>
+              <div class="eqi"><img src="images/eq_rbfnn_s.png" alt="적분 슬라이딩 표면 s">
+                <i>적분 슬라이딩 표면</i></div>
+              <div class="eqi"><img src="images/eq_rbfnn_update.png" alt="RBFNN 가중치 온라인 갱신식">
+                <i>Lyapunov 기반 적응 법칙 — 제어 주기 Δt마다 온라인 갱신</i></div>
+              <div class="eqi"><img src="images/eq_rbfnn_tau.png" alt="최종 명령 토크 = PD 출력 + RBFNN 보상 토크">
+                <i>내장 PD 출력에 보상 토크를 더해 인가</i></div>
+            </div>
+            <p class="note">손목 자세를 중력 방향으로 입력에 넣어 자세 변화에 강건하게 만들고,
+              같은 보상 구조를 파지 유지 구간에 그대로 적용한다.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="notes" hidden>수식은 생산제조 2025 포스터 원문 기준.
+        핵심: 내장 PD 를 교체하지 않고 잔차 토크만 추정해 더한다. ĝ 는 손목 자세를 중력 방향으로 표현한 입력.
+        s 는 적분 슬라이딩 표면이고, 갱신식은 Lyapunov 기반 적응 법칙을 제어 주기로 이산화한 것.
+        질문 오면: 왜 목표 궤적이 아니라 q·q̇·e·ė·ĝ 인가 → 잔차 토크는 현재 상태와 오차, 중력 방향에 의존하므로.</aside>
+    </section>
+
+    <!-- ======================= 22  ======================= -->
+    <section class="slide" data-sec="tech" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">요소기술 01 · 결과</p>
+        <h2>[추종 오차 ±0.6 rad (PD) → ±0.15 rad (RBFNN + PD)]</h2>
+        <div class="figs f2 wideplot">
+          <figure class="fig"><img src="images/RBFNN_joint.png" alt="RBFNN 보상 유무에 따른 궤적 추적 비교">
+            <figcaption>[궤적 추종 — RBFNN + PD 는 기준에 겹치고 PD 는 오버슈트]</figcaption></figure>
+          <figure class="fig"><img src="images/RBFNN_error.png" alt="RBFNN 보상 유무에 따른 추적 오차 비교">
+            <figcaption>[추종 오차 — PD 약 ±0.6 rad, RBFNN + PD 약 ±0.15 rad]</figcaption></figure>
+        </div>
+        <ul class="items">
+          <li>비교 조건: <b>Allegro Hand 7번 관절</b>, 내장 PD 제어기와 동일한 다중 주파수 궤적으로 대조</li>
+          <li>추종 오차 범위 약 −0.6 ~ 0.6 rad (PD) → −0.15 ~ 0.15 rad (RBFNN + PD) · 여러 손목 자세에서 반복</li>
+          <li>같은 보상 구조를 파지 유지에 적용 — 외란 시험에서 물체 낙하가 관찰되지 않음 <span class="sub">시행 횟수 미기록</span></li>
+        </ul>
+        <p class="note">파지 유지 시험의 시행 횟수는 기록하지 않아 성공률로는 제시하지 않는다 — 관찰된 결과로만 적었다.</p>
+      </div>
+      <aside class="notes" hidden>게인 튜닝과 보상의 차이를 물으면: PD는 오차가 생긴 뒤 반응, RBFNN은 잔차 토크를 추정해 선보상.
+        궤적 추종 결과(생산제조 2025 포스터)와 파지 유지 결과(KRoC 2026 포스터)는 원래 별개 발표이며 원리가 같아 한 프로젝트로 묶어 말한다.
+        물어보면 두 발표로 나뉘어 있다고 답한다. 그래프는 Allegro Hand 7번 관절 기준.</aside>
+    </section>
+
+    <!-- ======================= 23  ======================= -->
+    <section class="slide" data-sec="tech" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">요소기술 02 · 설계 · 결과</p>
+        <h2>6축 F/T 센서 내장 손끝 설계와 접촉 위치 추정</h2>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>KETI · 2024. 05 – 09 (완료) · ICCAS 2024 제1저자 포스터</span></div>
+        </div>
+        <ul class="items">
+          <li>문제 정의: Allegro Hand 가 파지 중 물체를 가려 비전 기반 자세 추정(FoundationPose 등)이 끊김 —
+            가려진 구간을 접촉 정보로 메우는 것이 목적</li>
+          <li>Cap part 는 법선 · 전단력 측정을 돕는 돌기 형상, Cover 는 실리콘 러버(Shore A50) 3D 프린팅 — 평면은 안정 접촉, 측면 곡률은 굴림 조작용</li>
+          <li>손끝(40 × 45 × 28 mm) 내부에 <b>6축 F/T 센서 1개</b>(AFT20-D15)만 두고 <b>가변 곡률 + 평면 영역</b>을 함께 갖도록 형상 설계 — 촉각 센서 배열 미사용</li>
+          <li>검증: UR5e 로 이동시킨 <b>end-tool 접촉 위치를 기준값</b>으로 사용 —
+            곡률 영역 3개에서 영역당 약 40점, <b>1 mm 간격</b> 인가 (비변형 축 데이터 기준)</li>
+          <li><b>평균 오차 0.85 mm</b> — end-tool 접촉면 반경 1.5 mm 대비 · <b>접촉 위치 추정의 단독 검증</b>까지 (자세 추정 파이프라인 통합은 미수행)</li>
+          <li>한계: 센서에서 접촉점이 <b>멀수록 오차 증가</b> — 손끝 변형 영향, 설계 개선이 다음 과제</li>
+        </ul>
+        <div class="ct3">
+          <figure class="fig plot"><img src="images/fingertip_cad.png" alt="F/T 센서를 중심으로 설계한 손끝 CAD">
+            <figcaption>[손끝 CAD — F/T 센서 · Cap part · Cover · JIG]</figcaption></figure>
+          <figure class="fig"><img src="images/fingertip_validation_2.jpg" alt="설계한 손끝 실물에 접촉을 인가하는 장면">
+            <figcaption>[실물 손끝 — 알려진 접촉점 인가]</figcaption></figure>
+          <figure class="fig plot"><img src="images/fingertip_estimation_results.png" alt="추정 접촉 위치와 end-tool 기준값 비교 그래프">
+            <figcaption>[추정 vs 실측 — 평균 오차 0.85 mm]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>동기: 파지 접근까지는 비전으로 물체 자세를 추정하지만, Allegro Hand 는 손이 커서
+        파지 순간 물체를 덮어 자세 추정이 끊긴다. 그 구간을 접촉 위치로 메우려는 것.
+        센서를 늘리는 대신 기구 설계와 추정 모델로 풀었다는 것이 논지. ICCAS 2024 ThPos.53, 제주.
+        공저: 이승원 · 백영기 · 민세웅 · 정민기 · 박선미 · 박종범(교신).</aside>
+    </section>
+
+    <!-- ======================= 24  ======================= -->
+    <section class="slide" data-sec="tech" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">요소기술 02 · 추정 원리</p>
+        <h2>[힘 · 토크 기반 접촉점 산출식]</h2>
+        <div class="eqrow">
+          <div class="eqi"><img src="images/eq_contact_k.png" alt="곡률 반경을 반영하는 계수 K 의 정의">
+            <i>손끝 곡률 반경 r<sub>0</sub> 를 반영하는 계수 K</i></div>
+          <div class="eqi"><img src="images/eq_contact_c.png" alt="측정 힘과 토크로부터 3차원 접촉점 c를 구하는 식">
+            <i>측정 힘 f · 토크 m′로부터 3-D 접촉점 c를 직접 계산</i></div>
+        </div>
+        <ul class="items">
+          <li>입력은 6축 F/T가 측정한 힘 <b>f</b> 와 <b>곡률 중심 기준으로 옮긴 모멘트 m′</b> — 접촉면 곡률 반경 r<sub>0</sub> 가 계수 K에 들어감</li>
+          <li>접촉면을 <b>곡률에 따라 3개 영역</b>으로 나누고, 각 영역의 r<sub>0</sub> 로 곡률 중심 기준 c를 계산한 뒤 <b>센서 좌표계로 변환</b></li>
+          <li>같은 식이 곡면과 평면을 함께 다루므로 접촉 시나리오마다 알고리즘을 바꾸지 않음</li>
+          <li>전제: 단일 접촉점 · 커버 변형 없음 — 센서에서 멀어질 때 오차가 커지는 원인도 변형</li>
+        </ul>
+      </div>
+      <aside class="notes" hidden>m′ 은 센서 좌표계로 옮긴 토크. 렌치만으로는 작용선까지만 결정되고,
+        표면 방정식을 하나 더 걸어야 점이 유일해진다는 것이 이 식의 요지.
+        평면은 r₀ → ∞ 극한. 전제(단일 접촉 · 강체)가 깨지는 경우가 포스터의 future work.</aside>
+    </section>
+
+    <!-- ======================= 25  ======================= -->
+    <section class="slide" data-sec="tech" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">요소기술 03</p>
+        <h2>GJK 거리 기반 속도 감쇠 충돌 회피</h2>
+        <div class="stack">
+          <div class="row"><b>기간</b><span>KETI · 2025. 01 – 04 (완료)</span></div>
+        </div>
+        <ul class="items">
+          <li>로봇 링크는 <b>캡슐</b>, 장애물은 <b>RealSense D435i</b> 포인트클라우드의 <b>convex hull</b>로 근사 —
+            두 볼록 형상 사이 최소거리를 <b>GJK</b>로 계산</li>
+          <li>장애물이 <b>임계 거리</b> 안에 들어오면 거리에 비례해 동작 속도를 감쇠 —
+            경로 재계획 없이 매 제어 주기에 즉시 반응</li>
+          <li>MuJoCo 시스템 식별로 sim-to-real 전이</li>
+          <li>실물 xArm6에서 30 Hz 폐루프 검증 — <b>전용 근접 센서 없이</b> 깊이 카메라만으로</li>
+        </ul>
+        <div class="figs f2">
+          <figure class="fig"><video src="videos/gjk_simulation.mp4" poster="images/gjk_simulation_poster.jpg" aria-label="시뮬레이션에서 포인트클라우드 기반 속도 감쇠"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[시뮬레이션 — 이동 중 박스가 갑자기 생성되면 즉시 인지,
+              임계 거리 안에서 속도 감쇠]</figcaption></figure>
+          <figure class="fig"><video src="videos/gjk_real_robot.mp4" poster="images/gjk_real_robot_poster.jpg" aria-label="실물 xArm6에서 근접 센서 없이 동작하는 동일 제어기"
+                   autoplay muted loop playsinline preload="metadata"></video>
+            <figcaption>[실물 xArm6 — 동일 제어기, 전용 근접 센서 없이]</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>sim-to-real이 먼저 해결돼야 실기 반응 제어가 가능했다는 순서가 중요.</aside>
+    </section>
+
+    <!-- ======================= 26 섹션 4. 연구 성과 ======================= -->
+    <section class="slide" data-sec="pub" data-transition="zoom" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">section 04</p>
+        <h1>4. 연구 성과</h1>
+        <div class="rule"></div>
+      </div>
+      <aside class="notes" hidden>섹션 구분.</aside>
+    </section>
+
+    <!-- ======================= 27  ======================= -->
+    <section class="slide" data-sec="pub" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">publications &amp; demonstrations</p>
+        <h2>게재 및 발표 실적</h2>
+        <div class="tbl"><table>
+          <thead><tr><th>구분</th><th>제목</th><th>학회 · 행사</th><th>연도</th></tr></thead>
+          <tbody>
+            <tr><td><strong>포스터</strong></td><td>A Method for Estimating Contact Location on Dexterous Hand Fingertips
+              <span class="sub">— 제1저자</span></td><td>ICCAS 2024, 제주</td><td>2024</td></tr>
+            <tr><td><strong>포스터</strong></td><td>RBFNN-Based Online Disturbance Compensation for Robust Grasping
+              <span class="sub">— 제1저자</span></td><td>KRoC 2026</td><td>2026</td></tr>
+            <tr><td><strong>포스터</strong></td><td>Adaptive Control of a Multi-Fingered Dexterous Hand via
+              RBFNN-based Residual Torque Compensation <span class="sub">— 제1저자</span></td><td>생산제조 2025</td><td>2025</td></tr>
+            <tr><td>라이브 데모</td><td>다중센서 통합 제어 프레임워크 — Relocate</td><td>RoboWorld 2024</td><td>2024</td></tr>
+            <tr><td>라이브 데모</td><td>모방학습 매니퓰레이션 — Peg-in-Hole 삽입</td><td>AutomationWorld 2026</td><td>2026. 03</td></tr>
+          </tbody>
+        </table></div>
+        <p class="note">라이브 데모는 실물 로봇을 관람객 앞에서 실시간 구동한 것이다.</p>
+      </div>
+      <aside class="notes" hidden>실기 라이브 2회 = 연구가 실험실 밖에서 동작했다는 증거.</aside>
+    </section>
+
+    <!-- ======================= 28  ======================= -->
+    <section class="slide" data-sec="pub" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">technical stack</p>
+        <h2>기술 스택</h2>
+        <div class="stack">
+          <div class="row"><b>AI · 학습</b><span>PyTorch · Isaac Lab · MuJoCo · mjlab · on-policy RL (PPO · NPG/DAPG) · world model ·
+            Diffusion Policy · flow matching · ACT · RBFNN</span></div>
+          <div class="row"><b>로봇 · 제어</b><span>xArm6 · xArm7 ×2 · UR5e · Allegro Hand · Robotiq Hand-E · Unitree Go2 · SO-101 · 잔차 토크 보상</span></div>
+          <div class="row"><b>소프트웨어</b><span>Python · ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · Git</span></div>
+          <div class="row"><b>센싱</b><span>RealSense D435i · XELA 촉각 · DIGIT 촉각 · 6축 F/T 센서 · Apple Vision Pro 텔레옵</span></div>
+          <div class="row"><b>설계</b><span>SolidWorks</span></div>
+        </div>
+      </div>
+      <aside class="notes" hidden>스킬은 프로젝트와 연결해서 말한다.</aside>
+    </section>
+
+    <!-- ======================= 29  ======================= -->
+    <section class="slide" data-transition="zoom" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">thank you</p>
+        <h1>감사합니다</h1>
+        <div class="rule"></div>
+        <p class="lead">실행 영상 · 소스 코드 · 프로젝트별 상세 문서</p>
+        <div class="stack">
+          <div class="row"><b>홈페이지</b><span><a href="https://dsafjk0024.github.io" target="_blank" rel="noopener">dsafjk0024.github.io</a>
+            <span class="sub">— 프로젝트별 상세 페이지와 실행 영상</span></span></div>
+          <div class="row"><b>코드 공개</b><span><a href="https://github.com/dsafjk0024/so101-imitation" target="_blank" rel="noopener">github.com/dsafjk0024/so101-imitation</a>
+            <span class="sub">— SO-101 모방학습 파이프라인</span></span></div>
+          <div class="row"><b>Email</b><span><a href="mailto:dsafjk0024@naver.com">dsafjk0024@naver.com</a></span></div>
+        </div>
+      </div>
+      <aside class="notes" hidden>마지막 장. 링크로 유도.</aside>
+    </section>
+
+  </div>
+</div>
+
+<div class="bar" data-progress aria-hidden="true"></div>
+<div class="brand" aria-hidden="true">Jusung Kim · Portfolio</div>
+<div class="counter" data-counter aria-hidden="true"></div>
+<div class="sr-only" data-live aria-live="polite" aria-atomic="true"></div>
+
+<div class="help" role="dialog" aria-label="키보드 단축키">
+  <b>→ / Space / PageDown</b> &nbsp;다음<br>
+  <b>← / ⇧Space / PageUp</b> &nbsp;이전<br>
+  <b>Home / End</b> &nbsp;처음 / 끝<br>
+  <b>f</b> 전체화면 &nbsp; <b>s</b> 발표자 화면<br>
+  <b>?</b> 이 창 닫기
+</div>
+
+<div class="pv">
+  <section>
+    <div class="box" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <h4>화자 노트</h4><div id="pvNotes"></div>
+    </div>
+    <div class="box">
+      <h4>타이머</h4><div id="pvClock">00:00</div>
+      <div id="pvWall"></div><div id="pvPos"></div>
+    </div>
+  </section>
+  <section>
+    <div class="box" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <h4>다음 페이지</h4><div id="pvPreview"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const LAYOUT    = document.body.dataset.layout === 'fullbleed' ? 'fullbleed' : 'stage';
+const W = 1920, H = 1080, DUR = 520;
+const PRESENTER = new URLSearchParams(location.search).has('presenter');
+document.body.classList.toggle('presenter', PRESENTER);
+
+const viewport = document.getElementById('viewport');
+const stage    = document.getElementById('stage');
+const slides   = [...stage.querySelectorAll('.slide')];
+const bar      = document.querySelector('[data-progress]');
+const counter  = document.querySelector('[data-counter]');
+const live     = document.querySelector('[data-live]');
+const help     = document.querySelector('.help');
+const pvNotes  = document.getElementById('pvNotes');
+const pvPos    = document.getElementById('pvPos');
+const pvPrev   = document.getElementById('pvPreview');
+const LAST     = slides.length - 1;
+
+let si = 0, step = 0, busy = false;
+
+/* ------------------------------------------------------------------- 배율
+   자유도 하나. 소수 3자리로 라운드해 래스터가 안정된 배율에 안착 → 블러 방지. */
+function fit(){
+  if (LAYOUT !== 'stage') return;
+  const r = viewport.getBoundingClientRect();
+  stage.style.setProperty('--scale',
+    Math.round(Math.min(r.width / W, r.height / H) * 1000) / 1000);
+}
+
+/* ------------------------------------------------------ "3-5,8" -> Set{3,4,5,8} */
+function ranges(spec){
+  const out = new Set();
+  for (const part of String(spec).split(',')){
+    const m = /^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/.exec(part);
+    if (!m) continue;
+    const a = +m[1], b = m[2] ? +m[2] : a;
+    for (let i = Math.min(a,b); i <= Math.max(a,b); i++) out.add(i);
+  }
+  return out;                                  // "0" → 빈 Set → 아무것도 안 켜짐
+}
+function paintLines(code, spec){
+  const lit = ranges(spec);
+  code.closest('pre').classList.toggle('has-hi', lit.size > 0);
+  code._lines.forEach((ln,i) => ln.classList.toggle('hi', lit.has(i + 1)));
+}
+
+/* --------------------------------------------------------- 스텝 인덱스 부여
+   워터마크 모델: 원소는 index <= step 이면 보인다. "몇 개 보이는가"를 세지 않으니
+   역방향이 undo 장부 없이 순수 재계산이 된다.
+   빌드가 없는 슬라이드는 _max = 0 → 자동으로 키 1번 = 페이지 1장. */
+for (const s of slides){
+  let auto = 0;
+  s._frags = [...s.querySelectorAll('.frag')];
+  for (const f of s._frags) f._step = f.dataset.step ? +f.dataset.step : ++auto;
+
+  s._codes = [...s.querySelectorAll('code[data-hi-steps]')];
+  for (const c of s._codes){
+    c._states = c.dataset.hiSteps.split('|');
+    c._lines  = [...c.querySelectorAll('.line')];
+  }
+  s._max = Math.max(0,
+    ...s._frags.map(f => f._step),
+    ...s._codes.map(c => c._states.length - 1));   // 코드 상태 수를 빼먹으면 마지막 상태 도달 불가
+}
+/* 정적 하이라이트는 부팅 시 1회 확정 */
+for (const c of stage.querySelectorAll('code[data-hi]')){
+  c._lines = [...c.querySelectorAll('.line')];
+  paintLines(c, c.dataset.hi);
+}
+
+const clampSlide = i => Math.max(0, Math.min(LAST, i));
+const clampStep  = (i,v) => Math.max(0, Math.min(slides[i]._max, v));
+
+/* ------------------------------------------------------------------- 미디어
+   현재 장의 영상만 처음부터 재생한다. 두 영상을 나란히 비교하는 장에서
+   진입 시점이 어긋나지 않게 하려면 매번 currentTime 을 0 으로 되돌려야 한다. */
+function syncMedia(cur){
+  document.querySelectorAll('.slide video').forEach(v => {
+    if (cur && cur.contains(v)){
+      try { v.currentTime = 0; } catch(e){}
+      const play = () => v.play().catch(() => {});
+      if (v.readyState >= 1) play(); else v.addEventListener('loadedmetadata', play, { once:true });
+    } else {
+      v.pause();
+      try { v.currentTime = 0; } catch(e){}
+    }
+  });
+}
+
+/* -------------------------------------------------------------------- 렌더
+   (si, step) → DOM. 순수 함수로 두면 어떤 경로로 들어와도 같은 화면이 나온다. */
+function render({ broadcast = true } = {}){
+  slides.forEach((s,i) => {
+    s.classList.toggle('is-current', i === si);
+    s.classList.toggle('is-past',    i <  si);
+    s.classList.toggle('is-future',  i >  si);
+    // hidden(=display:none) 은 전환 애니메이션을 죽인다. inert 로 상호작용만 차단.
+    // opacity:0 만으로는 여전히 포커스되고 Ctrl+F 로 찾아진다.
+    s.toggleAttribute('inert', i !== si);
+    s.setAttribute('aria-hidden', String(i !== si));
+  });
+
+  syncMedia(slides[si]);
+
+  const s = slides[si];
+  for (const f of s._frags){
+    const on = f._step <= step;
+    f.classList.toggle('shown', on);
+    f.toggleAttribute('inert', !on);
+  }
+  for (const c of s._codes) paintLines(c, c._states[Math.min(step, c._states.length - 1)]);
+
+  if (bar) bar.style.transform = `scaleX(${LAST ? si / LAST : 1})`;
+  if (counter) counter.innerHTML =
+    `<i>${String(si + 1).padStart(2,'0')}</i> / ${String(slides.length).padStart(2,'0')}`;
+  if (live){
+    const t = (s.querySelector('h1,h2')?.textContent || '').trim().replace(/\s+/g,' ');
+    live.textContent = `${si + 1} / ${slides.length} 페이지${t ? ': ' + t : ''}`;
+  }
+
+  writeHash();
+  if (PRESENTER) paintPV();
+  if (broadcast && chan) chan.postMessage({ si, step });
+}
+
+/* ----------------------------------------------------------------- URL 해시
+   replaceState 로 쓴다. pushState/replaceState 는 hashchange·popstate 를
+   발생시키지 않으므로 "해시→슬라이드→해시" 루프가 구조적으로 불가능하다.
+   (location.hash = … 로 쓰면 루프가 실제로 돈다.) 대가: 장 간 back/forward 포기. */
+let hashTimer = 0;
+function writeHash(){
+  clearTimeout(hashTimer);
+  hashTimer = setTimeout(() => {
+    const h = step ? `#/${si + 1}/${step}` : `#/${si + 1}`;
+    try { history.replaceState(null, '', h); } catch {}   // 과빈도 호출은 SecurityError
+  }, 120);
+}
+function readHash(){
+  const m = /^#\/?(\d+)(?:\/(\d+))?/.exec(location.hash);
+  if (!m) return null;
+  const i = clampSlide(+m[1] - 1);
+  return { si:i, step:clampStep(i, +(m[2] || 0)) };
+}
+addEventListener('hashchange', () => {                    // 주소창 수동 편집 대응
+  const t = readHash();
+  if (t && !(t.si === si && t.step === step)) jump(t.si, t.step);
+});
+
+/* ------------------------------------------------------------- 전환 + 입력 잠금
+   모션은 CSS transition(연타 시 현재 계산값에서 자동 재타깃), 완료 신호는 WAAPI.
+   transitionend 로 플래그를 풀면 반드시 언젠가 박힌다 — display:none, 0s,
+   값 미변경, 중간 취소에서 안 오고, 게다가 자식에서 버블링돼 조기 해제된다. */
+function settle(els){
+  const anims = els.flatMap(el => el.getAnimations());
+  if (!anims.length) return Promise.resolve();            // reduced-motion 등
+  return Promise.race([
+    Promise.all(anims.map(a => a.finished.catch(() => {}))),  // cancel 시 reject 함
+    new Promise(r => setTimeout(r, DUR + 160)),               // 백스톱
+  ]);
+}
+
+async function jump(nsi, nstep = 0){
+  if (busy) return;
+  const target = clampSlide(nsi);
+  if (target === si){                                    // 스텝만 변경 → 잠금 불필요
+    const ns = clampStep(target, nstep);
+    if (ns === step) return;
+    step = ns; render(); return;
+  }
+  busy = true;
+  const pair = [slides[si], slides[target]];
+  si = target; step = clampStep(target, nstep);
+  pair.forEach(el => el.style.willChange = 'transform, opacity');
+  render();
+  try {
+    await new Promise(requestAnimationFrame);   // ★ 없으면 getAnimations() 가 [] 를 반환해
+    await settle(pair);                         //   잠금이 즉시 풀린다
+  } finally {
+    pair.forEach(el => el.style.willChange = ''); // 상시 걸어두면 영구 레이어가 쌓인다
+    busy = false;                                 // 예외에도 반드시 해제
+  }
+}
+
+function next(){
+  if (step < slides[si]._max) jump(si, step + 1);         // 슬라이드 내부 빌드 먼저
+  else if (si < LAST) jump(si + 1, 0);
+}
+function prev(){
+  if (step > 0) jump(si, step - 1);
+  else if (si > 0) jump(si - 1, slides[si - 1]._max);     // 완전 전개 상태로 착지
+}
+
+/* ------------------------------------------------------------------ 키보드
+   event.key 를 쓴다. keyCode 는 deprecated, code 는 물리 위치라 Dvorak/AZERTY 에서
+   'f' 가 깨진다. Space 는 key === " " ("Space" 는 code 다). */
+function isTyping(){
+  const el = document.activeElement;
+  return !!el && (el.isContentEditable === true ||
+                  /^(input|textarea|select)$/i.test(el.tagName));
+}
+document.addEventListener('keydown', e => {
+  if (isTyping() || e.ctrlKey || e.metaKey || e.altKey) return;   // Shift 는 허용
+  if (e.repeat){ e.preventDefault(); return }                    // 눌림 유지 자동반복 무시
+  let handled = true;
+  switch (e.key){
+    case 'ArrowRight': case 'PageDown': next(); break;   // PageDown/Up = 프리젠터 리모컨
+    case 'ArrowLeft':  case 'PageUp':   prev(); break;
+    case ' ': e.shiftKey ? prev() : next(); break;
+    case 'ArrowDown': jump(si + 1, 0); break;            // 빌드 무시하고 장 단위
+    case 'ArrowUp':   jump(si - 1, 0); break;
+    case 'Home': jump(0, 0); break;
+    case 'End':  jump(LAST, 0); break;
+    case 'f': case 'F': toggleFS(); break;
+    case '?': case '/': help.classList.toggle('open'); break;
+    case 's': case 'S':
+      if (!PRESENTER) open(location.pathname + '?presenter', 'presenter',
+                           'width=1200,height=820');
+      break;
+    // Escape 를 전체화면 종료로 매핑하지 않는다 — 브라우저가 이미 처리한다.
+    case 'Escape': help.classList.remove('open'); handled = false; break;
+    default: handled = false;
+  }
+  if (handled) e.preventDefault();               // 소비한 키만 (Space 스크롤 차단)
+});
+
+/* 전체화면은 사용자 제스처가 필수이고 Promise 가 reject 될 수 있다. */
+function toggleFS(){
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+  else document.exitFullscreen?.().catch(() => {});
+}
+
+/* ---------------------------------------------------------------- 스와이프
+   .viewport 에 붙인다. document/window/body 는 touch 계열이 passive 기본이라
+   거기선 preventDefault 가 무음 실패한다. 의도는 CSS touch-action 으로 선언했다. */
+const pointers = new Map();
+let gesture = null;
+const SWIPE_MIN = 52, SWIPE_RATIO = 1.4;
+
+viewport.addEventListener('pointerdown', e => {
+  pointers.set(e.pointerId, e);
+  if (pointers.size > 1){ gesture = null; return }         // 핀치/멀티터치 폐기
+  if (e.isPrimary) gesture = { id:e.pointerId, x:e.clientX, y:e.clientY };
+});
+viewport.addEventListener('pointermove', e => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, e);
+  if (pointers.size > 1) gesture = null;
+});
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if (!gesture || gesture.id !== e.pointerId){ if (!pointers.size) gesture = null; return }
+  const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+  gesture = null;
+  if (Math.abs(dx) < SWIPE_MIN) return;
+  if (Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;   // 수직 제스처였다
+  dx < 0 ? next() : prev();
+}
+viewport.addEventListener('pointerup', endPointer);
+viewport.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); gesture = null });
+
+/* --------------------------------------------------- 발표자 화면 동기화
+   BroadcastChannel: 같은 origin, 발신자는 자기 메시지를 못 받아 에코 루프가 없다.
+   file:// origin 은 opaque 라 동기화가 조용히 실패한다 → localhost 로 서빙할 것.
+   채널이 죽어도 각 창은 독립 동작한다. */
+let chan = null;
+try { chan = new BroadcastChannel('vanilla-slides') } catch {}
+if (chan) chan.onmessage = e => {
+  const d = e.data;
+  if (typeof d?.si !== 'number') return;
+  const t = clampSlide(d.si), ns = clampStep(t, d.step || 0);
+  if (t === si && ns === step) return;
+  si = t; step = ns;
+  render({ broadcast:false });                   // 수신 측은 재방송하지 않음
+};
+
+function paintPV(){
+  const s = slides[si], nx = slides[si + 1];
+  pvNotes.innerHTML = s.querySelector('.notes')?.innerHTML
+    ?? '<em style="color:#6E7A74">노트 없음</em>';
+  pvPos.textContent = `${si + 1} / ${slides.length} 페이지 · 스텝 ${step}/${s._max}`;
+  pvPrev.replaceChildren();
+  if (!nx){ pvPrev.innerHTML = '<em style="color:#6E7A74;font-size:13px">마지막 페이지</em>'; return }
+  const c = nx.querySelector('.measure').cloneNode(true);
+  c.querySelectorAll('.notes').forEach(n => n.remove());
+  pvPrev.append(c);
+}
+
+if (PRESENTER){
+  const pvClock = document.getElementById('pvClock');
+  const pvWall  = document.getElementById('pvWall');
+  const t0 = Date.now();
+  setInterval(() => {
+    const t = Math.floor((Date.now() - t0) / 1000);
+    pvClock.textContent =
+      `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+    pvWall.textContent =
+      new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+  }, 1000);
+}
+
+/* ----------------------------------------------------------------- 초기화 */
+addEventListener('resize', fit);
+addEventListener('orientationchange', fit);
+visualViewport?.addEventListener('resize', fit);   // iOS 는 window resize 를 늘 안 쏜다
+new ResizeObserver(fit).observe(viewport);
+fit();
+
+/* 타이포는 기존 7번 기준으로 고정한다.
+   슬라이드별 font-size 자동 축소를 제거해 같은 역할의 글자가 항상 같은 크기를 갖는다. */
+
+const boot = readHash();
+if (boot){ si = boot.si; step = boot.step }
+render({ broadcast:false });
+})();
+</script>
+</body>
+</html>
