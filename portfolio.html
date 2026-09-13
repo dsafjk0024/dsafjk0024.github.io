@@ -528,9 +528,9 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>2026 — <b>양팔 플랫폼</b>으로 확장, 안전 장치와 강화학습 정책 배포까지 하나의 명령 경로로 통합</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><img src="images/multimodal/roboworld_demo.jpg" alt="RoboWorld 2024 단일팔 라이브 시연 장면">
+          <figure class="fig"><img src="images/dualarm/roboworld_demo.jpg" alt="RoboWorld 2024 단일팔 라이브 시연 장면">
             <figcaption>[2024 단일팔 — RoboWorld 라이브, Relocate 성공률 53%]</figcaption></figure>
-          <figure class="fig"><video src="videos/multimodal/dualarm_act_c.mp4" poster="images/multimodal/dualarm_act_c_poster.jpg" aria-label="양팔 플랫폼에서 pick-and-place 롤아웃"
+          <figure class="fig"><video src="videos/dualarm/dualarm_act_c.mp4" poster="images/dualarm/dualarm_act_c_poster.jpg" aria-label="양팔 플랫폼에서 pick-and-place 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[2026 양팔 — pick-and-place 롤아웃]</figcaption></figure>
         </div>
@@ -665,10 +665,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>학습 환경과 실기 배포가 <b>동일한 거리 계산 모듈</b>을 공유 — 마진은 환경별 설정 (학습 25 mm · 실기 경고 50 / 정지 30 / 복구 40 mm)</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><video src="videos/multimodal/shield_mujoco.mp4" poster="images/multimodal/shield_mujoco_poster.jpg"
+          <figure class="fig"><video src="videos/dualarm/shield_mujoco.mp4" poster="images/dualarm/shield_mujoco_poster.jpg"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[MuJoCo 검증 — 몸통 정지 → 테이블 정지]</figcaption></figure>
-          <figure class="fig"><video src="videos/multimodal/shield_real.mp4" poster="images/multimodal/shield_real_poster.jpg"
+          <figure class="fig"><video src="videos/dualarm/shield_real.mp4" poster="images/dualarm/shield_real_poster.jpg"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[실기 검증 — 몸통 정지 → 테이블 정지]</figcaption></figure>
         </div>
@@ -782,9 +782,9 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
             </tbody>
           </table></div>
           <div class="gwsrow2">
-            <figure class="fig"><img src="images/multimodal/GWS_3d.png" alt="3D 힘 공간에서의 접촉힘 분포와 hull">
+            <figure class="fig"><img src="images/dualarm/GWS_3d.png" alt="3D 힘 공간에서의 접촉힘 분포와 hull">
               <figcaption>[force 공간 — 접촉힘과 hull]</figcaption></figure>
-            <figure class="fig"><img src="images/multimodal/GWS_force.png" alt="Fx-Fy 평면으로 투영한 wrench 집합과 convex hull">
+            <figure class="fig"><img src="images/dualarm/GWS_force.png" alt="Fx-Fy 평면으로 투영한 wrench 집합과 convex hull">
               <figcaption>[투영 — force Fx · Fy]</figcaption></figure>
           </div>
         </div>
@@ -858,7 +858,7 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
             <li>축별 <b>±15 mm 물체 위치 bias</b> 로 지속 편향 모사 — FoundationPose 실측 오차에 마진을 둔 값, 에피소드 단위 고정</li>
             <li>Actor obs 유지 · <b>Critic에만 privileged state 6-D 추가</b> — 오차 조건에서 가치 추정 안정화를 유도</li>
           </ul>
-          <figure class="fig plot"><img src="images/multimodal/foundation_pose.png" alt="FoundationPose 로 추정한 물체 자세가 실기 영상에 overlay 된 화면">
+          <figure class="fig plot"><img src="images/dualarm/foundation_pose.png" alt="FoundationPose 로 추정한 물체 자세가 실기 영상에 overlay 된 화면">
             <figcaption>[FoundationPose 추정 — 물체 자세 overlay · registration score]</figcaption></figure>
         </div>
       </div>
@@ -878,10 +878,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li><b>asymmetric으로 학습한 Actor를 실기 배포</b> — 대조군(Critic obs = Actor obs)은 파지 실패, asymmetric 정책은 파지 후 목표까지 이동 성공</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><video src="videos/multimodal/gasp_sym_fail_c.mp4" poster="images/multimodal/gasp_sym_fail_c_poster.jpg" aria-label="대조군 정책이 물체 파지에 실패하는 실기 롤아웃"
+          <figure class="fig"><video src="videos/dualarm/gasp_sym_fail_c.mp4" poster="images/dualarm/gasp_sym_fail_c_poster.jpg" aria-label="대조군 정책이 물체 파지에 실패하는 실기 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[대조군 — 파지 실패]</figcaption></figure>
-          <figure class="fig"><video src="videos/multimodal/gasp_asym_success_c.mp4" poster="images/multimodal/gasp_asym_success_c_poster.jpg" aria-label="asymmetric 정책이 물체를 파지해 목표로 옮기는 실기 롤아웃"
+          <figure class="fig"><video src="videos/dualarm/gasp_asym_success_c.mp4" poster="images/dualarm/gasp_asym_success_c_poster.jpg" aria-label="asymmetric 정책이 물체를 파지해 목표로 옮기는 실기 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[asymmetric 적용 — 파지 후 목표 이동 성공]</figcaption></figure>
         </div>
