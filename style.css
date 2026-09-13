@@ -354,6 +354,7 @@ figure video, video.media { background: #000; }
 /* ---------- 덱(portfolio.html)에서 렌더한 다이어그램 이미지 ---------- */
 .diagram-img {
   width: 100%;
+  max-width: 100%;
   height: auto;
   display: block;
   margin: 4px 0 10px;

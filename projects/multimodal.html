@@ -19,7 +19,7 @@
       <span style="font-size:14px">Project: 시촉각 센싱기반 모방학습에 의한 자율조작파지기술개발</span></p>
   </div>
 
-  <img class="diagram-img" src="../images/dualarm/diagram_framework.png" alt="Shared control framework — perception, policy, safety check, buffers and the 200 Hz control loop">
+  <img class="diagram-img" src="../images/dualarm/diagram_framework.png" alt="Shared control framework — perception, policy, safety check, buffers and the 200 Hz control loop" width="1560" height="702">
   <p class="media-note">The shared control framework (Relocate policy inputs and right-arm execution shown): perception at 30&nbsp;Hz, policy at
      20&nbsp;Hz, and every action chunk cleared by the marker shield before the arm and hand
      consume it at 200&nbsp;Hz. Internal module names are generalized.</p>
@@ -180,7 +180,7 @@
     policy observations. The learned action is rescaled from the policy's normalized output back
     to joint ranges and solved through IK into commands accepted by the same control framework.</p>
 
-  <img class="diagram-img" src="../images/dualarm/diagram_gasp.png" alt="GASP training — Vision Pro demonstrations initialize the policy and train a density model whose score is added to the advantage before an NPG update">
+  <img class="diagram-img" src="../images/dualarm/diagram_gasp.png" alt="GASP training — Vision Pro demonstrations initialize the policy and train a density model whose score is added to the advantage before an NPG update" width="1560" height="570">
   <table class="res-table">
     <tr><th>Interface</th><th>Dimension</th></tr>
     <tr><td>Actor: end-effector pose (6), hand joints (16), and three relative-position vectors (9)</td><td>31</td></tr>
@@ -225,7 +225,7 @@
     for a 37-D input. The symmetric control uses the Actor observation for its Critic as well.
     The extra information supports value estimation during training; only the Actor is deployed.</p>
 
-  <img class="diagram-img" src="../images/dualarm/diagram_asymmetric.png" alt="Asymmetric actor-critic — the Actor uses the 31-D hardware observation, the Critic additionally sees 6-D privileged state, and only the Actor is deployed">
+  <img class="diagram-img" src="../images/dualarm/diagram_asymmetric.png" alt="Asymmetric actor-critic — the Actor uses the 31-D hardware observation, the Critic additionally sees 6-D privileged state, and only the Actor is deployed" width="1560" height="437">
   <div class="media-grid single sm">
     <figure><img src="../images/dualarm/foundation_pose.png" alt="FoundationPose object-pose estimate from the egocentric camera"><figcaption><b>Real observation.</b> FoundationPose pose overlay and registration score.</figcaption></figure>
   </div>
