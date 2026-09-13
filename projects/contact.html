@@ -18,7 +18,7 @@
       <span class="award">ICCAS 2024 first-author poster</span></p>
   </div>
 
-  <img class="media compact" src="../images/fingertip_cad.png"
+  <img class="media compact" src="../images/contact/fingertip_cad.png"
        alt="Sensorized fingertip 3D CAD">
   <p class="media-note">The sensorized fingertip the estimation method is built around.</p>
 
@@ -45,33 +45,38 @@
     with the known surface radius. Three curvature regions use their respective radii to
     calculate a contact location, which is then transformed back into the sensor frame.
     The formulation handles curved and planar regions.</p>
-  <div class="media-grid">
-<figure><img src="../images/eq_contact_k.png" alt="Coefficient K from force, moment and local curvature radius"><figcaption><b>Geometry coefficient.</b> Local curvature and the measured wrench.</figcaption></figure><figure><img src="../images/eq_contact_c.png" alt="Contact position calculated in the local curvature frame"><figcaption><b>Contact location.</b> The result is transformed into the sensor coordinate frame.</figcaption></figure>
+  <div class="eqs tall">
+    <figure><img src="../images/contact/eq_contact_k.png" alt="Coefficient K from force, moment and local curvature radius">
+      <figcaption><b>Geometry coefficient.</b> Built from the local curvature radius and the
+        measured wrench.</figcaption></figure>
+    <figure><img src="../images/contact/eq_contact_c.png" alt="Contact position calculated in the local curvature frame">
+      <figcaption><b>Contact location.</b> Computed in the curvature-center frame, then
+        transformed into the sensor frame.</figcaption></figure>
   </div>
   <p>The estimator assumes a single contact location and negligible cover deformation.
     Deformation is a source of error, particularly farther from the sensor.</p>
 
   <h3>Validation</h3>
   <p>A UR5e-positioned end tool supplies the reference contact location. Approximately 40
-    locations per region were tested across three curvature regions at 1&nbsp;mm spacing,
-    The reported evaluation uses non-deforming-axis data. The reported mean error is
+    locations per region were tested across three curvature regions at 1&nbsp;mm spacing, and
+    the reported evaluation uses the non-deforming-axis data. Mean error is
     <b>0.85&nbsp;mm</b>; the tool contact face has a radius of 1.5&nbsp;mm.</p>
   <p>Error increases as the contact point moves farther from the sensor. Improving the cover
     and fingertip deformation model remains future work.</p>
   <div class="media-grid uniform single">
     <figure>
-      <img src="../images/fingertip_estimation_results.png" alt="Contact location estimation results">
+      <img src="../images/contact/fingertip_estimation_results.png" alt="Contact location estimation results">
       <figcaption><b>Estimation results.</b> Estimated contact location against the applied
         reference tool position.</figcaption>
     </figure>
   </div>
   <div class="media-grid uniform tall">
     <figure>
-      <img src="../images/fingertip_validation_1.jpg" alt="Fingertip validation experiment, setup 1">
+      <img src="../images/contact/fingertip_validation_1.jpg" alt="Fingertip validation experiment, setup 1">
       <figcaption><b>Validation rig.</b> Known contact points applied to the fingertip.</figcaption>
     </figure>
     <figure>
-      <img src="../images/fingertip_validation_2.jpg" alt="Fingertip validation experiment, setup 2">
+      <img src="../images/contact/fingertip_validation_2.jpg" alt="Fingertip validation experiment, setup 2">
       <figcaption><b>Validation rig.</b> Repeated across locations on the fingertip
         surface.</figcaption>
     </figure>

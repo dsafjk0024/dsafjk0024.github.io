@@ -14,11 +14,11 @@
 
   <div class="detail-head">
     <h1>SO-101: ROS 2 Imitation Learning Pipeline (ACT &amp; Flow Matching)</h1>
-    <p class="detail-meta">Independent research · April – August 2026 · Sole developer (100%)</p>
+    <p class="detail-meta">Independent research · April – August 2026 · Sole developer</p>
   </div>
 
-  <video class="media" src="../videos/so101_success_montage.mp4"
-         poster="../images/so101_success_montage_poster.jpg"
+  <video class="media" src="../videos/so101/so101_success_montage.mp4"
+         poster="../images/so101/so101_success_montage_poster.jpg"
          autoplay muted loop playsinline preload="metadata" controls></video>
   <p class="media-note">Five successful rollouts of the deployed ACT policy at 2× speed, spanning
      the cube placements tested — from the two cubes adjacent to the widest separation.</p>
@@ -29,7 +29,6 @@
     <div class="stat"><span class="num">74 / 60%</span><span class="lbl">ACT vs flow matching, 50 trials each</span></div>
     <div class="stat"><span class="num">300</span><span class="lbl">teleoperated demonstrations</span></div>
     <div class="stat"><span class="num">30 Hz</span><span class="lbl">closed-loop control</span></div>
-    <div class="stat"><span class="num">100%</span><span class="lbl">solo development</span></div>
   </div>
 
   <h3>Overview</h3>
@@ -43,91 +42,7 @@
 
   <h3>Pipeline</h3>
 
-  <div class="diagram-scroll">
-  <svg class="diagram" viewBox="0 0 940 430" role="img"
-       aria-label="Hand-guided teleoperation drives the follower arm through a command topic. The same topics are recorded, converted into a LeRobot dataset and trained into a policy, which is then deployed onto that same command topic in place of the human.">
-    <defs>
-      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
-      </marker>
-    </defs>
-
-    <text class="lane" x="940" y="14" text-anchor="end">REAL TIME · ROS 2 JAZZY</text>
-    <text class="lane" x="940" y="248" text-anchor="end">OFFLINE</text>
-
-    <!-- teleoperation chain -->
-    <g class="node">
-      <rect x="0" y="30" width="120" height="46" rx="6"/><text x="60" y="58">human hand</text>
-      <rect x="160" y="30" width="140" height="46" rx="6"/><text x="230" y="52">leader arm</text>
-      <text class="sub" x="230" y="67">STS3215 × 6</text>
-      <rect x="340" y="30" width="140" height="46" rx="6"/><text x="410" y="52">teleop_node</text>
-      <text class="sub" x="410" y="67">50 Hz · stale guard</text>
-      <rect x="800" y="30" width="140" height="46" rx="6"/><text x="870" y="52">follower arm</text>
-      <text class="sub" x="870" y="67">ros2_control</text>
-    </g>
-    <g class="topic">
-      <rect x="520" y="34" width="240" height="38" rx="19"/>
-      <text x="640" y="58">/follower/…/commands</text>
-    </g>
-    <g class="edge">
-      <path d="M120,53 H155" marker-end="url(#ar)"/>
-      <path d="M300,53 H335" marker-end="url(#ar)"/>
-      <path d="M480,53 H515" marker-end="url(#ar)"/>
-      <path d="M760,53 H795" marker-end="url(#ar)"/>
-    </g>
-
-    <!-- sensing feeds the recorder -->
-    <g class="node">
-      <rect x="95" y="120" width="140" height="46" rx="6"/><text x="165" y="142">recorder</text>
-      <text class="sub" x="165" y="157">start / stop / discard</text>
-      <rect x="660" y="120" width="140" height="46" rx="6"/><text x="730" y="142">2 × camera</text>
-      <text class="sub" x="730" y="157">wrist + top, 480×640</text>
-    </g>
-    <g class="topic">
-      <rect x="390" y="124" width="210" height="38" rx="19"/>
-      <text x="495" y="148">4 schema-defined topics</text>
-    </g>
-    <g class="edge">
-      <path d="M870,76 V98 H495 V120" marker-end="url(#ar)"/>
-      <path d="M660,143 H605" marker-end="url(#ar)"/>
-      <path d="M390,143 H240" marker-end="url(#ar)"/>
-      <path d="M165,166 V256" marker-end="url(#ar)"/>
-    </g>
-
-    <!-- offline chain -->
-    <g class="node learned">
-    </g>
-    <g class="node">
-      <rect x="95" y="260" width="140" height="52" rx="6"/><text x="165" y="283">rosbag2</text>
-      <text class="sub" x="165" y="298">MCAP, raw CDR</text>
-      <rect x="285" y="260" width="160" height="52" rx="6"/><text x="365" y="283">converter</text>
-      <text class="sub" x="365" y="298">30 Hz as-of grid</text>
-      <rect x="495" y="260" width="160" height="52" rx="6"/><text x="575" y="283">LeRobot v3.0</text>
-      <text class="sub" x="575" y="298">300 episodes</text>
-      <rect x="705" y="260" width="180" height="52" rx="6"/><text x="795" y="283">ACT · flow matching</text>
-      <text class="sub" x="795" y="298">300k steps each</text>
-    </g>
-    <g class="edge">
-      <path d="M235,286 H280" marker-end="url(#ar)"/>
-      <path d="M445,286 H490" marker-end="url(#ar)"/>
-      <path d="M655,286 H700" marker-end="url(#ar)"/>
-    </g>
-
-    <!-- deployment closes the loop -->
-    <g class="node">
-      <rect x="600" y="360" width="230" height="52" rx="6"/><text x="715" y="383">sync inference node</text>
-      <text class="sub" x="715" y="398">30 Hz target · action chunks</text>
-    </g>
-    <g class="edge">
-      <path d="M795,312 V386 H835" marker-end="url(#ar)"/>
-      <text class="sub" x="880" y="341">checkpoint</text>
-    </g>
-    <g class="edge dashed">
-      <path d="M600,386 H45 V210 H640 V76" marker-end="url(#ar)"/>
-    </g>
-    <text class="note" x="110" y="202">the policy takes the human's place on the same topic</text>
-  </svg>
-  </div>
+  <img class="diagram-img" src="../images/so101/diagram_pipeline.png" alt="ROS 2 collection, training and inference pipeline — the policy publishes on the same command topic the human used">
 
   <p>
     One YAML file (<code>src/converter/config/so101.yaml</code>) fixes joint order, topic names,
@@ -184,7 +99,7 @@
   </p>
   <div class="media-grid single">
     <figure>
-      <video src="../videos/so101_act_vs_fbc.mp4" poster="../images/so101_act_vs_fbc_poster.jpg"
+      <video src="../videos/so101/so101_act_vs_fbc.mp4" poster="../images/so101/so101_act_vs_fbc_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Same placement, both policies</b> (2×). ACT left, flow matching right,
         run 28 of the same sequence.</figcaption>
@@ -226,27 +141,27 @@
     evaluation placements against the demonstration distribution, which is exactly what this
     session did not log, and is the first thing to fix in the next one.
   </p>
-  <div class="media-grid">
+  <div class="media-grid fit">
     <figure>
-      <video src="../videos/so101_indist_failures.mp4" poster="../images/so101_indist_failures_poster.jpg"
+      <video src="../videos/so101/so101_indist_failures.mp4" poster="../images/so101/so101_indist_failures_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>In-distribution failures</b> (2×). Two stacks slide off after release; one
         cube is never stacked.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/so101_ood_failures.mp4" poster="../images/so101_ood_failures_poster.jpg"
+      <video src="../videos/so101/so101_ood_failures.mp4" poster="../images/so101/so101_ood_failures_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Out-of-distribution failures</b> (2×). Cubes displaced beyond the
         demonstrated range.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/so101_retry.mp4" poster="../images/so101_retry_poster.jpg"
+      <video src="../videos/so101/so101_retry.mp4" poster="../images/so101/so101_retry_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Recovery after a miss</b> (2×). Counted as completed, not as a first
         attempt.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/so101_release_failure.mp4" poster="../images/so101_release_failure_poster.jpg"
+      <video src="../videos/so101/so101_release_failure.mp4" poster="../images/so101/so101_release_failure_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>An unusual failure</b> (1.5×). A clean grasp released mid-transport — the
         only instance in the session.</figcaption>

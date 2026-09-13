@@ -15,98 +15,19 @@
   <div class="detail-head">
     <h1>Multimodal Control, GASP Learning &amp; Real-Robot Deployment</h1>
     <p class="detail-meta">Project 01 · KETI · March 2024 – Present · Control framework, learning integration &amp; deployment
-      <span class="award">RoboWorld 2024 live demo</span></p>
+      <span class="award">RoboWorld 2024 live demo</span><br>
+      <span style="font-size:14px">Project: 시촉각 센싱기반 모방학습에 의한 자율조작파지기술개발</span></p>
   </div>
 
-  <div class="diagram-scroll">
-  <svg class="diagram" viewBox="0 0 940 470" role="img"
-       aria-label="Perception tracks the object pose at 30 Hz; a 20 Hz policy turns it into a command window that a marker shield must clear before it reaches the shared command buffers, which the arm and hand consume at 200 Hz while measured state feeds back into the observation.">
-    <defs>
-      <marker id="mmar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
-      </marker>
-    </defs>
-
-    <text class="lane" x="0" y="14">PERCEPTION · 30 Hz</text>
-    <text class="lane" x="0" y="134">POLICY · 20 Hz</text>
-    <text class="lane" x="0" y="314">SHARED BUFFERS · 200 Hz</text>
-    <text class="lane" x="940" y="314" text-anchor="end">DEVICES</text>
-
-    <!-- perception -->
-    <g class="node">
-      <rect x="0" y="26" width="180" height="52" rx="6"/><text x="90" y="48">RGB-D camera</text>
-      <text class="sub" x="90" y="64">wrist view, 30 Hz</text>
-      <rect x="230" y="26" width="180" height="52" rx="6"/><text x="320" y="48">object pose tracker</text>
-      <text class="sub" x="320" y="64">6-DoF pose initialization / tracking</text>
-      <rect x="460" y="26" width="200" height="52" rx="6"/><text x="560" y="48">shared memory</text>
-      <text class="sub" x="560" y="64">pose + RGB, freshness check</text>
-    </g>
-    <g class="edge">
-      <path d="M180,52 H225" marker-end="url(#mmar)"/>
-      <path d="M410,52 H455" marker-end="url(#mmar)"/>
-      <path d="M560,78 V108" marker-end="url(#mmar)"/>
-    </g>
-
-    <!-- policy chain -->
-    <g class="node learned">
-      <rect x="240" y="112" width="180" height="56" rx="6"/><text x="330" y="135">grasp policy</text>
-      <text class="sub" x="330" y="151">learned · 31-D → 22 targets</text>
-    </g>
-    <g class="node">
-      <rect x="460" y="112" width="200" height="56" rx="6"/><text x="560" y="135">observation</text>
-      <text class="sub" x="560" y="151">EE 6 + hand 16 + relative positions 9</text>
-      <rect x="240" y="200" width="180" height="56" rx="6"/><text x="330" y="223">adapter</text>
-      <text class="sub" x="330" y="239">denormalize · IK · vel/acc clip</text>
-      <rect x="460" y="200" width="200" height="56" rx="6"/><text x="560" y="223">command window</text>
-      <text class="sub" x="560" y="239">10 samples at 200 Hz</text>
-      <rect x="700" y="112" width="240" height="56" rx="6"/><text x="820" y="135">marker shield</text>
-      <text class="sub" x="820" y="151">markers ↔ torso / table proxies</text>
-      <rect x="700" y="200" width="190" height="56" rx="6"/><text x="795" y="223">latch on reject</text>
-      <text class="sub" x="795" y="239">decelerate and hold</text>
-    </g>
-    <g class="edge">
-      <path d="M460,140 H425" marker-end="url(#mmar)"/>
-      <path d="M330,168 V196" marker-end="url(#mmar)"/>
-      <path d="M420,228 H455" marker-end="url(#mmar)"/>
-      <path d="M660,228 V140 H695" marker-end="url(#mmar)"/>
-      <path d="M780,168 V196" marker-end="url(#mmar)"/>
-      <text class="sub" x="818" y="187">unsafe</text>
-    </g>
-
-    <!-- buffers -->
-    <g class="topic">
-      <rect x="0" y="330" width="200" height="40" rx="20"/><text x="100" y="355">StateBuffer</text>
-      <rect x="240" y="330" width="200" height="40" rx="20"/><text x="340" y="355">ArmCommandBuffer</text>
-      <rect x="240" y="392" width="200" height="40" rx="20"/><text x="340" y="417">HandCommandBuffer</text>
-    </g>
-    <g class="node">
-      <rect x="700" y="326" width="240" height="48" rx="6"/><text x="820" y="347">xArm7 · right arm</text>
-      <text class="sub" x="820" y="363">ServoJ, state thread 250 Hz</text>
-      <rect x="700" y="388" width="240" height="48" rx="6"/><text x="820" y="409">Allegro hand</text>
-      <text class="sub" x="820" y="425">CAN controller, 333 Hz</text>
-    </g>
-    <g class="edge">
-      <path d="M915,168 V296 H340 V326" marker-end="url(#mmar)"/>
-      <text class="sub" x="520" y="288">shield-approved samples only</text>
-      <path d="M340,370 V388" marker-end="url(#mmar)"/>
-      <path d="M440,350 H695" marker-end="url(#mmar)"/>
-      <path d="M440,412 H695" marker-end="url(#mmar)"/>
-    </g>
-    <g class="edge dashed">
-      <path d="M760,326 V318 H100 V326" marker-end="url(#mmar)"/>
-      <path d="M60,330 V240 H160 V172" marker-end="url(#mmar)"/>
-      <text class="note" x="66" y="232">measured state</text>
-    </g>
-  </svg>
-  </div>
+  <img class="diagram-img" src="../images/dualarm/diagram_framework.png" alt="Shared control framework — perception, policy, safety check, buffers and the 200 Hz control loop">
   <p class="media-note">The shared control framework (Relocate policy inputs and right-arm execution shown): perception at 30&nbsp;Hz, policy at
-     20&nbsp;Hz, and every command window cleared by the marker shield before the arm and hand
+     20&nbsp;Hz, and every action chunk cleared by the marker shield before the arm and hand
      consume it at 200&nbsp;Hz. Internal module names are generalized.</p>
 
   <div class="stat-row">
     <div class="stat"><span class="num">200 Hz</span><span class="lbl">control loop, decoupled from policy</span></div>
     <div class="stat"><span class="num">2 × 7</span><span class="lbl">DoF arms + 16-DoF hand</span></div>
-    <div class="stat"><span class="num">53%</span><span class="lbl">Relocate success · RoboWorld 2024</span></div>
+    <div class="stat"><span class="num">64</span><span class="lbl">marker points checked before every command</span></div>
   </div>
 
   <h3>Overview</h3>
@@ -217,15 +138,15 @@
   </ul>
 
   <h3>Imitation learning on the platform</h3>
-  <div class="media-grid">
+  <div class="media-grid lock" style="--ar:910/720">
     <figure>
-      <video src="../videos/dualarm_act_c.mp4" poster="../images/dualarm_act_c_poster.jpg"
+      <video src="../videos/dualarm/dualarm_act_c.mp4" poster="../images/dualarm/dualarm_act_c_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>ACT.</b> Pick-and-place rollout on the dual-arm platform, running through
         the same command path teleoperation uses.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/dualarm_flow_matching.mp4" poster="../images/dualarm_flow_matching_poster.jpg"
+      <video src="../videos/dualarm/dualarm_flow_matching_c.mp4" poster="../images/dualarm/dualarm_flow_matching_c_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Flow matching.</b> The same task under a flow-matching policy — swapped by
         checkpoint, with no change to the control stack.</figcaption>
@@ -246,18 +167,20 @@
     Margins are configured separately: 25&nbsp;mm in training; warning 50, stop 30 and recovery
     40&nbsp;mm on hardware. Rejected commands trigger deceleration and a latched stop. This
     checks the specified torso/table proxies, not every possible self-collision pair.</p>
-  <div class="media-grid">
-    <figure><video src="../videos/shield_mujoco.mp4" poster="../images/shield_mujoco_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+  <div class="media-grid fit sq">
+    <figure><video src="../videos/dualarm/shield_mujoco_c.mp4" poster="../images/dualarm/shield_mujoco_c_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>MuJoCo.</b> Torso-stop and table-stop checks, shown in sequence.</figcaption></figure>
-    <figure><video src="../videos/shield_real.mp4" poster="../images/shield_real_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+    <figure><video src="../videos/dualarm/shield_real_c.mp4" poster="../images/dualarm/shield_real_c_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Hardware.</b> Torso-stop and table-stop checks through the real command path.</figcaption></figure>
   </div>
   <h3>GASP learning — right arm and hand</h3>
   <p>Apple Vision Pro teleoperation supplies state–action demonstrations in MuJoCo. Behavior
     cloning initializes the policy, followed by GASP training with demonstration-augmented
     policy gradients and a density model that distinguishes demonstration observations from
-    policy observations. The learned action is converted through denormalization and IK into
-    commands accepted by the same control framework.</p>
+    policy observations. The learned action is rescaled from the policy's normalized output back
+    to joint ranges and solved through IK into commands accepted by the same control framework.</p>
+
+  <img class="diagram-img" src="../images/dualarm/diagram_gasp.png" alt="GASP training — Vision Pro demonstrations initialize the policy and train a density model whose score is added to the advantage before an NPG update">
   <table class="res-table">
     <tr><th>Interface</th><th>Dimension</th></tr>
     <tr><td>Actor: end-effector pose (6), hand joints (16), and three relative-position vectors (9)</td><td>31</td></tr>
@@ -287,9 +210,9 @@
     compared with 8,000 without the term. This is a training-return threshold result; adding
     a reward term changes the return scale, so it is not by itself a measurement of task-success
     improvement or real-robot sample efficiency.</p>
-  <div class="media-grid">
-    <figure><img src="../images/GWS_3d.png" alt="Force-space projection of the grasp wrench construction"><figcaption><b>Force-space view.</b> Contact forces and their hull; the full wrench calculation is 6-D.</figcaption></figure>
-    <figure><img src="../images/GWS_force.png" alt="Fx–Fy projection of the wrench set"><figcaption><b>Fx–Fy projection.</b> A visualization of the contact model, not a standalone force-closure test.</figcaption></figure>
+  <div class="media-row">
+    <figure><img src="../images/dualarm/GWS_3d.png" alt="Force-space projection of the grasp wrench construction"><figcaption><b>Force-space view.</b> Contact forces and their hull; the full wrench calculation is 6-D.</figcaption></figure>
+    <figure><img src="../images/dualarm/GWS_force.png" alt="Fx–Fy projection of the wrench set"><figcaption><b>Fx–Fy projection.</b> A visualization of the contact model, not a standalone force-closure test.</figcaption></figure>
   </div>
   <h3>Asymmetric critic and real observations</h3>
   <p>On hardware, one egocentric RealSense D435i and FoundationPose provide object pose estimates.
@@ -301,14 +224,16 @@
     the simulator’s true grasp-site–object and object–target relative positions (six values),
     for a 37-D input. The symmetric control uses the Actor observation for its Critic as well.
     The extra information supports value estimation during training; only the Actor is deployed.</p>
-  <div class="media-grid single">
-    <figure><img src="../images/foundation_pose.png" alt="FoundationPose object-pose estimate from the wrist-view camera"><figcaption><b>Real observation.</b> FoundationPose pose overlay and registration score.</figcaption></figure>
+
+  <img class="diagram-img" src="../images/dualarm/diagram_asymmetric.png" alt="Asymmetric actor-critic — the Actor uses the 31-D hardware observation, the Critic additionally sees 6-D privileged state, and only the Actor is deployed">
+  <div class="media-grid single sm">
+    <figure><img src="../images/dualarm/foundation_pose.png" alt="FoundationPose object-pose estimate from the egocentric camera"><figcaption><b>Real observation.</b> FoundationPose pose overlay and registration score.</figcaption></figure>
   </div>
   <h3>Real-robot deployment — symmetric and asymmetric examples</h3>
-  <div class="media-grid">
-    <figure><video src="../videos/gasp_sym_fail_c.mp4" poster="../images/gasp_sym_fail_c_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+  <div class="media-grid fit sq">
+    <figure><video src="../videos/dualarm/gasp_sym_fail_c.mp4" poster="../images/dualarm/gasp_sym_fail_c_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Symmetric control.</b> Example rollout with a failed grasp.</figcaption></figure>
-    <figure><video src="../videos/gasp_asym_success_c.mp4" poster="../images/gasp_asym_success_c_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
+    <figure><video src="../videos/dualarm/gasp_asym_success_c.mp4" poster="../images/dualarm/gasp_asym_success_c_poster.jpg" autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Asymmetric Actor.</b> Example rollout that grasps and moves the object to the target.</figcaption></figure>
   </div>
   <p>The asymmetric policy was deployed on the real right arm and hand. These videos were recorded
@@ -317,11 +242,13 @@
     been aggregated.</p>
 
   <h3>RoboWorld 2024</h3>
-  <div class="media-grid single">
+  <div class="media-grid single cap">
     <figure>
-      <img src="../images/roboworld_demo.jpg" alt="Relocate task demonstration at RoboWorld 2024">
-      <figcaption><b>Live demonstration.</b> The Relocate task on the platform at RoboWorld 2024
-        — 53% success, vision, tactile and force in one loop.</figcaption>
+      <video src="../videos/dualarm/roboworld_demo.mp4" poster="../images/dualarm/roboworld_demo_poster.jpg"
+             autoplay muted loop playsinline preload="metadata" controls></video>
+      <figcaption><b>Live demonstration.</b> The Relocate task at RoboWorld 2024 — the arm
+        approaches, grasps the bottle and lifts it, with vision, tactile and force in one loop.
+        53% success over the session.</figcaption>
     </figure>
   </div>
 

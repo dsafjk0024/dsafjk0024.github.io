@@ -18,14 +18,14 @@
       <span class="award">2025 &amp; KRoC 2026 first-author posters</span></p>
   </div>
 
-  <div class="media-grid">
+  <div class="media-grid fit sq">
     <figure>
-      <video src="../videos/rbfnn_before_c.mp4" poster="../images/rbfnn_before_c_poster.jpg"
+      <video src="../videos/rbfnn/rbfnn_before_c.mp4" poster="../images/rbfnn/rbfnn_before_c_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>Without compensation.</b> The object drops during the shown disturbance trial.</figcaption>
     </figure>
     <figure>
-      <video src="../videos/rbfnn_after_c.mp4" poster="../images/rbfnn_after_c_poster.jpg"
+      <video src="../videos/rbfnn/rbfnn_after_c.mp4" poster="../images/rbfnn/rbfnn_after_c_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
       <figcaption><b>With online RBFNN compensation.</b> The object remains grasped during the shown disturbance trial.</figcaption>
     </figure>
@@ -54,11 +54,23 @@
   <p>The RBFNN torque is added to the existing PD torque command. The gravity input makes
     wrist orientation explicit. Tracking tests and grasp-holding tests use the same control
     structure but represent separate evaluations.</p>
-  <div class="media-grid single">
-<figure><img src="../images/RBFNN_framework.png" alt="RBFNN residual torque compensation added to a PD controller"><figcaption><b>Control structure.</b> The learned compensation torque is summed with the PD output.</figcaption></figure>
+  <div class="media-grid single cap">
+<figure><img src="../images/rbfnn/RBFNN_framework.png" alt="RBFNN residual torque compensation added to a PD controller"><figcaption><b>Control structure.</b> The learned compensation torque is summed with the PD output.</figcaption></figure>
   </div>
-  <div class="media-grid">
-<figure><img src="../images/eq_rbfnn_input.png" alt="RBFNN inputs: position, velocity, tracking error, error derivative and normalized gravity"><figcaption><b>Input vector.</b> State, error and gravity direction.</figcaption></figure><figure><img src="../images/eq_rbfnn_torque.png" alt="Residual torque estimated from Gaussian basis functions and adaptive weights"><figcaption><b>Torque estimate.</b> Gaussian basis functions and adaptive weights.</figcaption></figure><figure><img src="../images/eq_rbfnn_s.png" alt="Integral sliding variable defined from tracking error"><figcaption><b>Adaptation signal.</b> Error, its derivative and its integral.</figcaption></figure><figure><img src="../images/eq_rbfnn_update.png" alt="Online RBFNN weight update at each control step"><figcaption><b>Online update.</b> The continuous adaptation law is discretized at the control interval.</figcaption></figure><figure><img src="../images/eq_rbfnn_tau.png" alt="Command torque equals PD torque plus RBFNN compensation"><figcaption><b>Command.</b> PD torque plus RBFNN compensation.</figcaption></figure>
+  <div class="eqs">
+    <figure><img src="../images/rbfnn/eq_rbfnn_input.png" alt="RBFNN inputs: position, velocity, tracking error, error derivative and normalized gravity">
+      <figcaption><b>Input vector.</b> Joint state, tracking error and its derivative, and the
+        gravity direction expressed relative to the hand.</figcaption></figure>
+    <figure><img src="../images/rbfnn/eq_rbfnn_torque.png" alt="Residual torque estimated from Gaussian basis functions and adaptive weights">
+      <figcaption><b>Torque estimate.</b> Gaussian basis functions with adaptive weights.</figcaption></figure>
+    <figure><img src="../images/rbfnn/eq_rbfnn_s.png" alt="Integral sliding variable defined from tracking error">
+      <figcaption><b>Adaptation signal.</b> An integral sliding surface built from the error, its
+        derivative and its integral.</figcaption></figure>
+    <figure><img src="../images/rbfnn/eq_rbfnn_update.png" alt="Online RBFNN weight update at each control step">
+      <figcaption><b>Online update.</b> A Lyapunov-based adaptation law, discretized at the
+        control interval.</figcaption></figure>
+    <figure><img src="../images/rbfnn/eq_rbfnn_tau.png" alt="Command torque equals PD torque plus RBFNN compensation">
+      <figcaption><b>Command.</b> The existing PD torque plus the RBFNN compensation.</figcaption></figure>
   </div>
 
   <h3>Tracking results</h3>
@@ -70,13 +82,13 @@
   </p>
   <div class="media-grid">
     <figure>
-      <img src="../images/RBFNN_joint.png" alt="Joint 7 trajectory tracking: reference vs RBFNN vs PD">
+      <img src="../images/rbfnn/RBFNN_joint.png" alt="Joint 7 trajectory tracking: reference vs RBFNN vs PD">
       <figcaption><b>Trajectory tracking.</b> The RBFNN controller (blue) follows the reference
         (dashed) almost on top of it, while the PD controller (orange) lags the reference and
         shows larger tracking deviations.</figcaption>
     </figure>
     <figure>
-      <img src="../images/RBFNN_error.png" alt="Joint 7 trajectory error: RBFNN vs PD">
+      <img src="../images/rbfnn/RBFNN_error.png" alt="Joint 7 trajectory error: RBFNN vs PD">
       <figcaption><b>Tracking error.</b> The same run as error: PD swings to roughly
         ±0.6&nbsp;rad, the RBFNN stays inside about ±0.15&nbsp;rad in the plotted trajectory.</figcaption>
     </figure>
@@ -91,7 +103,7 @@
     at KRoC 2026. Both are first-author posters; the two evaluations are reported separately.</p>
 
   <h3>Stack</h3>
-  <p class="tags">RBFNN · adaptive control · torque compensation · Allegro Hand · xArm7 · Python</p>
+  <p class="tags">RBFNN · adaptive control · residual torque compensation · integral sliding surface · Allegro Hand · xArm7 · Python</p>
 
 </div>
 </body>

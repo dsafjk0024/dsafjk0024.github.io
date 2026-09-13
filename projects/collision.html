@@ -17,17 +17,19 @@
     <p class="detail-meta">Enabling technology 03 · KETI · January – April 2025 · Distance-based control and sim-to-real validation</p>
   </div>
 
-  <div class="media-grid equal">
+  <div class="media-grid fit">
     <figure>
-      <video src="../videos/gjk_simulation.mp4" poster="../images/gjk_simulation_poster.jpg"
+      <video src="../videos/collision/gjk_simulation.mp4" poster="../images/collision/gjk_simulation_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>Simulation.</b> GJK distance between capsule approximations, driving
-        dynamic velocity damping in MuJoCo.</figcaption>
+      <figcaption><b>Simulation.</b> Screen capture of a MuJoCo run: the terminal logs the
+        per-cycle minimum distance and the damping factor it produces
+        (<code>dist_min</code>, <code>gamma</code>).</figcaption>
     </figure>
     <figure>
-      <video src="../videos/gjk_real_robot.mp4" poster="../images/gjk_real_robot_poster.jpg"
+      <video src="../videos/collision/gjk_real_robot.mp4" poster="../images/collision/gjk_real_robot_poster.jpg"
              autoplay muted loop playsinline preload="metadata" controls></video>
-      <figcaption><b>Real xArm6.</b> The same controller at 30&nbsp;Hz on hardware, using a depth camera without
+      <figcaption><b>Real xArm6.</b> The same controller at 30&nbsp;Hz on hardware — a hand
+        entering the workspace is the obstacle, sensed by the depth camera alone with no
         dedicated proximity sensors.</figcaption>
     </figure>
   </div>
@@ -35,21 +37,23 @@
   <div class="stat-row">
     <div class="stat"><span class="num">30 Hz</span><span class="lbl">closed loop on a real xArm6</span></div>
     <div class="stat"><span class="num">0</span><span class="lbl">dedicated proximity sensors</span></div>
-    <div class="stat"><span class="num">GJK</span><span class="lbl">minimum distance between capsules</span></div>
+    <div class="stat"><span class="num">GJK</span><span class="lbl">minimum distance, capsule ↔ convex hull</span></div>
   </div>
 
   <h3>Overview</h3>
   <p>A distance-based control layer slows the xArm6 as obstacles approach. A <b>RealSense D435i</b>
-    depth camera supplies obstacle point clouds. Robot links and obstacles are approximated
-    by <b>capsules</b>, and GJK computes their minimum distance. Within a configured threshold,
-    that distance scales the motion velocity without replanning the path.</p>
+    depth camera supplies obstacle point clouds. Robot links are approximated by <b>capsules</b>
+    and each obstacle point cloud by its <b>convex hull</b>; GJK returns the minimum distance
+    between the two convex shapes. Within a configured threshold, that distance scales the
+    motion velocity without replanning the path.</p>
   <p>The setup uses a depth camera, with no dedicated proximity sensors on the robot.
     It does not infer obstacle locations without sensing.</p>
 
   <h3>Design decisions</h3>
   <ul>
-    <li><b>Convex geometric approximation.</b> Capsule representations make robot–obstacle
-      distance queries explicit; GJK is applied to those representations.</li>
+    <li><b>Convex geometric approximation.</b> Capsules for the links and a convex hull per
+      obstacle point cloud keep both operands convex, which is what GJK requires; the query
+      returns a signed clearance the controller can act on directly.</li>
     <li><b>Distance-based damping.</b> Motion slows as clearance decreases inside the threshold,
       allowing the controller to react each cycle without a new path-planning solution.</li>
     <li><b>Simulation-to-real validation.</b> MuJoCo-based system identification supported
@@ -65,7 +69,7 @@
   </p>
 
   <h3>Stack</h3>
-  <p class="tags">GJK · point cloud · RealSense · dynamic velocity damping · MuJoCo · xArm6</p>
+  <p class="tags">GJK · capsule &amp; convex hull · point cloud · RealSense · dynamic velocity damping · MuJoCo · xArm6</p>
 
 </div>
 </body>

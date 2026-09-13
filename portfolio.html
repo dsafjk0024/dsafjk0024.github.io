@@ -528,9 +528,9 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>2026 — <b>양팔 플랫폼</b>으로 확장, 안전 장치와 강화학습 정책 배포까지 하나의 명령 경로로 통합</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><img src="images/roboworld_demo.jpg" alt="RoboWorld 2024 단일팔 라이브 시연 장면">
+          <figure class="fig"><img src="images/multimodal/roboworld_demo.jpg" alt="RoboWorld 2024 단일팔 라이브 시연 장면">
             <figcaption>[2024 단일팔 — RoboWorld 라이브, Relocate 성공률 53%]</figcaption></figure>
-          <figure class="fig"><video src="videos/dualarm_act_c.mp4" poster="images/dualarm_act_c_poster.jpg" aria-label="양팔 플랫폼에서 pick-and-place 롤아웃"
+          <figure class="fig"><video src="videos/multimodal/dualarm_act_c.mp4" poster="images/multimodal/dualarm_act_c_poster.jpg" aria-label="양팔 플랫폼에서 pick-and-place 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[2026 양팔 — pick-and-place 롤아웃]</figcaption></figure>
         </div>
@@ -665,10 +665,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>학습 환경과 실기 배포가 <b>동일한 거리 계산 모듈</b>을 공유 — 마진은 환경별 설정 (학습 25 mm · 실기 경고 50 / 정지 30 / 복구 40 mm)</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><video src="videos/shield_mujoco.mp4" poster="images/shield_mujoco_poster.jpg"
+          <figure class="fig"><video src="videos/multimodal/shield_mujoco.mp4" poster="images/multimodal/shield_mujoco_poster.jpg"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[MuJoCo 검증 — 몸통 정지 → 테이블 정지]</figcaption></figure>
-          <figure class="fig"><video src="videos/shield_real.mp4" poster="images/shield_real_poster.jpg"
+          <figure class="fig"><video src="videos/multimodal/shield_real.mp4" poster="images/multimodal/shield_real_poster.jpg"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[실기 검증 — 몸통 정지 → 테이블 정지]</figcaption></figure>
         </div>
@@ -782,9 +782,9 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
             </tbody>
           </table></div>
           <div class="gwsrow2">
-            <figure class="fig"><img src="images/GWS_3d.png" alt="3D 힘 공간에서의 접촉힘 분포와 hull">
+            <figure class="fig"><img src="images/multimodal/GWS_3d.png" alt="3D 힘 공간에서의 접촉힘 분포와 hull">
               <figcaption>[force 공간 — 접촉힘과 hull]</figcaption></figure>
-            <figure class="fig"><img src="images/GWS_force.png" alt="Fx-Fy 평면으로 투영한 wrench 집합과 convex hull">
+            <figure class="fig"><img src="images/multimodal/GWS_force.png" alt="Fx-Fy 평면으로 투영한 wrench 집합과 convex hull">
               <figcaption>[투영 — force Fx · Fy]</figcaption></figure>
           </div>
         </div>
@@ -858,7 +858,7 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
             <li>축별 <b>±15 mm 물체 위치 bias</b> 로 지속 편향 모사 — FoundationPose 실측 오차에 마진을 둔 값, 에피소드 단위 고정</li>
             <li>Actor obs 유지 · <b>Critic에만 privileged state 6-D 추가</b> — 오차 조건에서 가치 추정 안정화를 유도</li>
           </ul>
-          <figure class="fig plot"><img src="images/foundation_pose.png" alt="FoundationPose 로 추정한 물체 자세가 실기 영상에 overlay 된 화면">
+          <figure class="fig plot"><img src="images/multimodal/foundation_pose.png" alt="FoundationPose 로 추정한 물체 자세가 실기 영상에 overlay 된 화면">
             <figcaption>[FoundationPose 추정 — 물체 자세 overlay · registration score]</figcaption></figure>
         </div>
       </div>
@@ -878,10 +878,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li><b>asymmetric으로 학습한 Actor를 실기 배포</b> — 대조군(Critic obs = Actor obs)은 파지 실패, asymmetric 정책은 파지 후 목표까지 이동 성공</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><video src="videos/gasp_sym_fail_c.mp4" poster="images/gasp_sym_fail_c_poster.jpg" aria-label="대조군 정책이 물체 파지에 실패하는 실기 롤아웃"
+          <figure class="fig"><video src="videos/multimodal/gasp_sym_fail_c.mp4" poster="images/multimodal/gasp_sym_fail_c_poster.jpg" aria-label="대조군 정책이 물체 파지에 실패하는 실기 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[대조군 — 파지 실패]</figcaption></figure>
-          <figure class="fig"><video src="videos/gasp_asym_success_c.mp4" poster="images/gasp_asym_success_c_poster.jpg" aria-label="asymmetric 정책이 물체를 파지해 목표로 옮기는 실기 롤아웃"
+          <figure class="fig"><video src="videos/multimodal/gasp_asym_success_c.mp4" poster="images/multimodal/gasp_asym_success_c_poster.jpg" aria-label="asymmetric 정책이 물체를 파지해 목표로 옮기는 실기 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[asymmetric 적용 — 파지 후 목표 이동 성공]</figcaption></figure>
         </div>
@@ -911,12 +911,12 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>AutomationWorld 2026 라이브 시연 (2026. 03)</li>
         </ul>
         <div class="pg3">
-          <figure class="fig"><img src="images/peg_in_hole_layout.png" alt="Peg-in-Hole 실험 구성">
+          <figure class="fig"><img src="images/imitation/peg_in_hole_layout.png" alt="Peg-in-Hole 실험 구성">
             <figcaption>[Peg-in-Hole 실험 구성]</figcaption></figure>
-          <figure class="fig"><video src="videos/aw_demo.mp4" poster="images/aw_demo_poster.jpg" aria-label="AutomationWorld 2026 라이브 시연 장면"
+          <figure class="fig"><video src="videos/imitation/aw_demo.mp4" poster="images/imitation/aw_demo_poster.jpg" aria-label="AutomationWorld 2026 라이브 시연 장면"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[AutomationWorld 2026 라이브 시연]</figcaption></figure>
-          <figure class="fig"><video src="videos/peg_in_hole_tactile.mp4" poster="images/peg_tactile_poster.jpg"
+          <figure class="fig"><video src="videos/imitation/peg_in_hole_tactile.mp4" poster="images/imitation/peg_tactile_poster.jpg"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[학습 정책 삽입 롤아웃 — 여러 커넥터 · 배속]</figcaption></figure>
         </div>
@@ -939,7 +939,7 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>위치 정확도에 의존하던 삽입을 <b>접촉 기반 삽입</b>으로 전환</li>
         </ul>
         <div class="split tac">
-          <figure class="fig tacvid"><video src="videos/peg_in_hole_multimodal.mp4" poster="images/peg_multimodal_poster.jpg"
+          <figure class="fig tacvid"><video src="videos/imitation/peg_in_hole_multimodal.mp4" poster="images/imitation/peg_multimodal_poster.jpg"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[상단 측면 카메라 · 하단 XELA 접촉력 분포 — 손가락 팁 2개, 최대 |F<sub>z</sub>| 표기]</figcaption></figure>
           <ul class="items">
@@ -955,7 +955,7 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
         스토리: 위치 제어만으로 나간 AutomationWorld 시연에서 정렬 민감도가 한계로 드러났고,
         그 다음 단계로 촉각 센서를 넣어 접촉력 피드백으로 삽입하도록 바꿨다.
         정량 비교(촉각 유무 성공률 · 삽입 시간)는 아직 집계하지 않았다 — 물어보면 그렇게 답한다.
-        영상은 여러 시행을 이어붙인 배속본이며 원본은 videos/peg_in_hole_데모2.mp4.</aside>
+        영상은 여러 시행을 이어붙인 배속본이며 원본은 videos/imitation/peg_in_hole_데모2.mp4.</aside>
     </section>
 
     <!-- ======================= 13  ======================= -->
@@ -973,10 +973,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>시뮬레이션 전이 정책과 dynamics fine-tuning 정책의 실기 대조</li>
         </ul>
         <div class="figs f2">
-          <figure class="fig"><video src="videos/go2_deploy_baseline_m.mp4" poster="images/go2_deploy_baseline_m_poster.jpg" aria-label="다이내믹스 튜닝 없이 배포한 baseline 정책"
+          <figure class="fig"><video src="videos/go2/go2_deploy_baseline_m.mp4" poster="images/go2/go2_deploy_baseline_m_poster.jpg" aria-label="다이내믹스 튜닝 없이 배포한 baseline 정책"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[튜닝 전 — 시뮬레이션에서 그대로 전이]</figcaption></figure>
-          <figure class="fig"><video src="videos/go2_deploy_finetuned_s.mp4" poster="images/go2_deploy_finetuned_s_poster.jpg" aria-label="다이내믹스 튜닝 후 배포한 정책"
+          <figure class="fig"><video src="videos/go2/go2_deploy_finetuned_s.mp4" poster="images/go2/go2_deploy_finetuned_s_poster.jpg" aria-label="다이내믹스 튜닝 후 배포한 정책"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[dynamics fine-tuning 후 — 동일 world model]</figcaption></figure>
         </div>
@@ -1011,7 +1011,7 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <rect class="box" x="0" y="30" width="480" height="240" rx="12"/>
           <text class="t" x="24" y="62">1 · 전문가 정책 학습</text>
           <text class="s" x="24" y="88">PPO · Isaac Lab · 4096 병렬 환경</text>
-          <image href="images/go2_sim_evaluation_poster.jpg" clip-path="url(#g2imgA)"
+          <image href="images/go2/go2_sim_evaluation_poster.jpg" clip-path="url(#g2imgA)"
                  x="24" y="100" width="432" height="140" preserveAspectRatio="xMidYMid slice"/>
           <text class="cap" x="24" y="258">[시뮬레이션 학습 · 평가 환경]</text>
 
@@ -1081,7 +1081,7 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <rect class="box" x="600" y="430" width="420" height="240" rx="12"/>
           <text class="t" x="624" y="462">실물 Unitree Go2</text>
           <text class="s" x="624" y="488">관절 상태 · IMU · 3-DoF 속도 명령</text>
-          <image href="images/go2_deploy_finetuned_poster.jpg" clip-path="url(#g2imgE)"
+          <image href="images/go2/go2_deploy_finetuned_poster.jpg" clip-path="url(#g2imgE)"
                  x="624" y="500" width="372" height="130" preserveAspectRatio="xMidYMid slice"/>
           <text class="cap" x="624" y="656">[dynamics fine-tuning 후 실기 보행]</text>
 
@@ -1138,10 +1138,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>ACT · flow matching 정책 학습 및 실기 폐루프 평가</li>
         </ul>
         <div class="figs f2 mid">
-          <figure class="fig"><video src="videos/so101_success_montage.mp4" poster="images/so101_success_montage_poster.jpg" aria-label="학습된 정책이 큐브를 파지해 목표 위에 적재하는 성공 롤아웃"
+          <figure class="fig"><video src="videos/so101/so101_success_montage.mp4" poster="images/so101/so101_success_montage_poster.jpg" aria-label="학습된 정책이 큐브를 파지해 목표 위에 적재하는 성공 롤아웃"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[성공 롤아웃 — 파지 후 목표 위에 적재]</figcaption></figure>
-          <figure class="fig"><video src="videos/so101_indist_failures.mp4" poster="images/so101_indist_failures_poster.jpg" aria-label="적재 직후 스택이 미끄러져 무너지는 실패 장면"
+          <figure class="fig"><video src="videos/so101/so101_indist_failures.mp4" poster="images/so101/so101_indist_failures_poster.jpg" aria-label="적재 직후 스택이 미끄러져 무너지는 실패 장면"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[실패 — 물체를 놓은 직후 적재물 붕괴]</figcaption></figure>
         </div>
@@ -1257,10 +1257,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
         <p class="kicker">개별 연구 · 실기 평가</p>
         <h2>[동일 조건 실기 비교 — ACT vs flow matching]</h2>
         <div class="figs f2 mid">
-          <figure class="fig"><video src="videos/so101_act_vs_fbc.mp4" poster="images/so101_act_vs_fbc_poster.jpg" aria-label="같은 큐브 배치에서 ACT와 flow matching 정책의 롤아웃 비교"
+          <figure class="fig"><video src="videos/so101/so101_act_vs_fbc.mp4" poster="images/so101/so101_act_vs_fbc_poster.jpg" aria-label="같은 큐브 배치에서 ACT와 flow matching 정책의 롤아웃 비교"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[같은 배치 · 두 정책 롤아웃 — ACT | flow matching]</figcaption></figure>
-          <figure class="fig"><video src="videos/so101_ood_failures.mp4" poster="images/so101_ood_failures_poster.jpg" aria-label="분포 밖 배치에서 팔이 시연에 있던 위치로 향하는 실패 장면"
+          <figure class="fig"><video src="videos/so101/so101_ood_failures.mp4" poster="images/so101/so101_ood_failures_poster.jpg" aria-label="분포 밖 배치에서 팔이 시연에 있던 위치로 향하는 실패 장면"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[분포 밖 실패 — 시연 범위를 벗어난 배치]</figcaption></figure>
         </div>
@@ -1317,10 +1317,10 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li><b>2단계 — 파지 유지</b>: 물체를 파지한 상태에서 파지 자세를 유지하도록 학습 — 외란에도 놓치지 않게</li>
         </ul>
         <div class="figs f2 mid tall">
-          <figure class="fig"><video src="videos/rbfnn_before_c.mp4" poster="images/rbfnn_before_c_poster.jpg" aria-label="보상 없이 외란을 받아 물체를 놓치는 장면"
+          <figure class="fig"><video src="videos/rbfnn/rbfnn_before_c.mp4" poster="images/rbfnn/rbfnn_before_c_poster.jpg" aria-label="보상 없이 외란을 받아 물체를 놓치는 장면"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[보상 없음 — 외란에 물체 낙하]</figcaption></figure>
-          <figure class="fig"><video src="videos/rbfnn_after_c.mp4" poster="images/rbfnn_after_c_poster.jpg" aria-label="RBFNN 보상으로 같은 외란에서 파지를 유지하는 장면"
+          <figure class="fig"><video src="videos/rbfnn/rbfnn_after_c.mp4" poster="images/rbfnn/rbfnn_after_c_poster.jpg" aria-label="RBFNN 보상으로 같은 외란에서 파지를 유지하는 장면"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[RBFNN 보상 — 같은 외란에서 파지 유지]</figcaption></figure>
         </div>
@@ -1334,19 +1334,19 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
         <p class="kicker">요소기술 01 · 제어 구조</p>
         <h2>[내장 PD 위에 얹은 RBFNN 보상 계층]</h2>
         <div class="split fw">
-          <figure class="fig fwfig"><img src="images/RBFNN_framework.png" alt="RBFNN 보상 계층과 PD 제어기가 합산되어 토크 명령을 만드는 구조도">
+          <figure class="fig fwfig"><img src="images/rbfnn/RBFNN_framework.png" alt="RBFNN 보상 계층과 PD 제어기가 합산되어 토크 명령을 만드는 구조도">
             <figcaption>[RBFNN 이 추정한 보상 토크가 PD 출력에 더해져 τ<sub>cmd</sub> 로 나간다]</figcaption></figure>
           <div>
             <div class="eqimgs">
-              <div class="eqi"><img src="images/eq_rbfnn_input.png" alt="RBFNN 입력 벡터 X = [q, q̇, e, ė, ĝ]">
+              <div class="eqi"><img src="images/rbfnn/eq_rbfnn_input.png" alt="RBFNN 입력 벡터 X = [q, q̇, e, ė, ĝ]">
                 <i>관절 위치 · 속도, 추종 오차와 오차의 시간 미분, <b>정규화 중력 벡터 ĝ</b>(손목 자세)</i></div>
-              <div class="eqi"><img src="images/eq_rbfnn_torque.png" alt="RBFNN 보상 토크 = 가중치 전치 곱하기 가우시안 기저">
+              <div class="eqi"><img src="images/rbfnn/eq_rbfnn_torque.png" alt="RBFNN 보상 토크 = 가중치 전치 곱하기 가우시안 기저">
                 <i>가우시안 기저 φ — 센터 · 폭은 입력 공간을 균일하게 덮도록 설정</i></div>
-              <div class="eqi"><img src="images/eq_rbfnn_s.png" alt="적분 슬라이딩 표면 s">
+              <div class="eqi"><img src="images/rbfnn/eq_rbfnn_s.png" alt="적분 슬라이딩 표면 s">
                 <i>적분 슬라이딩 표면</i></div>
-              <div class="eqi"><img src="images/eq_rbfnn_update.png" alt="RBFNN 가중치 온라인 갱신식">
+              <div class="eqi"><img src="images/rbfnn/eq_rbfnn_update.png" alt="RBFNN 가중치 온라인 갱신식">
                 <i>Lyapunov 기반 적응 법칙 — 제어 주기 Δt마다 온라인 갱신</i></div>
-              <div class="eqi"><img src="images/eq_rbfnn_tau.png" alt="최종 명령 토크 = PD 출력 + RBFNN 보상 토크">
+              <div class="eqi"><img src="images/rbfnn/eq_rbfnn_tau.png" alt="최종 명령 토크 = PD 출력 + RBFNN 보상 토크">
                 <i>내장 PD 출력에 보상 토크를 더해 인가</i></div>
             </div>
             <p class="note">손목 자세를 중력 방향으로 입력에 넣어 자세 변화에 강건하게 만들고,
@@ -1366,9 +1366,9 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
         <p class="kicker">요소기술 01 · 결과</p>
         <h2>[추종 오차 ±0.6 rad (PD) → ±0.15 rad (RBFNN + PD)]</h2>
         <div class="figs f2 wideplot">
-          <figure class="fig"><img src="images/RBFNN_joint.png" alt="RBFNN 보상 유무에 따른 궤적 추적 비교">
+          <figure class="fig"><img src="images/rbfnn/RBFNN_joint.png" alt="RBFNN 보상 유무에 따른 궤적 추적 비교">
             <figcaption>[궤적 추종 — RBFNN + PD 는 기준에 겹치고 PD 는 오버슈트]</figcaption></figure>
-          <figure class="fig"><img src="images/RBFNN_error.png" alt="RBFNN 보상 유무에 따른 추적 오차 비교">
+          <figure class="fig"><img src="images/rbfnn/RBFNN_error.png" alt="RBFNN 보상 유무에 따른 추적 오차 비교">
             <figcaption>[추종 오차 — PD 약 ±0.6 rad, RBFNN + PD 약 ±0.15 rad]</figcaption></figure>
         </div>
         <ul class="items">
@@ -1402,11 +1402,11 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>한계: 센서에서 접촉점이 <b>멀수록 오차 증가</b> — 손끝 변형 영향, 설계 개선이 다음 과제</li>
         </ul>
         <div class="ct3">
-          <figure class="fig plot"><img src="images/fingertip_cad.png" alt="F/T 센서를 중심으로 설계한 손끝 CAD">
+          <figure class="fig plot"><img src="images/contact/fingertip_cad.png" alt="F/T 센서를 중심으로 설계한 손끝 CAD">
             <figcaption>[손끝 CAD — F/T 센서 · Cap part · Cover · JIG]</figcaption></figure>
-          <figure class="fig"><img src="images/fingertip_validation_2.jpg" alt="설계한 손끝 실물에 접촉을 인가하는 장면">
+          <figure class="fig"><img src="images/contact/fingertip_validation_2.jpg" alt="설계한 손끝 실물에 접촉을 인가하는 장면">
             <figcaption>[실물 손끝 — 알려진 접촉점 인가]</figcaption></figure>
-          <figure class="fig plot"><img src="images/fingertip_estimation_results.png" alt="추정 접촉 위치와 end-tool 기준값 비교 그래프">
+          <figure class="fig plot"><img src="images/contact/fingertip_estimation_results.png" alt="추정 접촉 위치와 end-tool 기준값 비교 그래프">
             <figcaption>[추정 vs 실측 — 평균 오차 0.85 mm]</figcaption></figure>
         </div>
       </div>
@@ -1422,9 +1422,9 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
         <p class="kicker">요소기술 02 · 추정 원리</p>
         <h2>[힘 · 토크 기반 접촉점 산출식]</h2>
         <div class="eqrow">
-          <div class="eqi"><img src="images/eq_contact_k.png" alt="곡률 반경을 반영하는 계수 K 의 정의">
+          <div class="eqi"><img src="images/contact/eq_contact_k.png" alt="곡률 반경을 반영하는 계수 K 의 정의">
             <i>손끝 곡률 반경 r<sub>0</sub> 를 반영하는 계수 K</i></div>
-          <div class="eqi"><img src="images/eq_contact_c.png" alt="측정 힘과 토크로부터 3차원 접촉점 c를 구하는 식">
+          <div class="eqi"><img src="images/contact/eq_contact_c.png" alt="측정 힘과 토크로부터 3차원 접촉점 c를 구하는 식">
             <i>측정 힘 f · 토크 m′로부터 3-D 접촉점 c를 직접 계산</i></div>
         </div>
         <ul class="items">
@@ -1456,11 +1456,11 @@ body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1
           <li>실물 xArm6에서 30 Hz 폐루프 검증 — <b>전용 근접 센서 없이</b> 깊이 카메라만으로</li>
         </ul>
         <div class="figs f2">
-          <figure class="fig"><video src="videos/gjk_simulation.mp4" poster="images/gjk_simulation_poster.jpg" aria-label="시뮬레이션에서 포인트클라우드 기반 속도 감쇠"
+          <figure class="fig"><video src="videos/collision/gjk_simulation.mp4" poster="images/collision/gjk_simulation_poster.jpg" aria-label="시뮬레이션에서 포인트클라우드 기반 속도 감쇠"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[시뮬레이션 — 이동 중 박스가 갑자기 생성되면 즉시 인지,
               임계 거리 안에서 속도 감쇠]</figcaption></figure>
-          <figure class="fig"><video src="videos/gjk_real_robot.mp4" poster="images/gjk_real_robot_poster.jpg" aria-label="실물 xArm6에서 근접 센서 없이 동작하는 동일 제어기"
+          <figure class="fig"><video src="videos/collision/gjk_real_robot.mp4" poster="images/collision/gjk_real_robot_poster.jpg" aria-label="실물 xArm6에서 근접 센서 없이 동작하는 동일 제어기"
                    autoplay muted loop playsinline preload="metadata"></video>
             <figcaption>[실물 xArm6 — 동일 제어기, 전용 근접 센서 없이]</figcaption></figure>
         </div>

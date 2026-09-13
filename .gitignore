@@ -9,11 +9,11 @@ ppt_maker/
 .DS_Store
 
 # raw phone footage from evaluation sessions (edited clips are committed, originals are not)
-videos/so101 ACT/
+videos/so101/raw_ACT/
 
 # raw phone footage — edited clips are committed, originals are not
-videos/so101*/
-videos/175000_success.mp4
+videos/so101/raw_*/
+videos/so101/175000_success.mp4
 
 # personal documents: never publish from this repo
 Jusung_Kim_Portfolio.pdf
@@ -22,3 +22,10 @@ images/서명.png
 
 # local working notes, not part of the published site
 HANDOFF.md
+
+# 입사 지원 서류 — 연락처 · 주소 · 연봉이 들어 있다. 이 리포는 공개되므로 절대 커밋하지 않는다.
+apply/
+
+# 회사별 지원 자료 — 사이트 콘텐츠가 아니다
+hanwha_robotics/
+한화로보틱스/
