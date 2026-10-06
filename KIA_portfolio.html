@@ -1,0 +1,1522 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jusung Kim — KIA 로봇 학습 데이터 Portfolio 2026</title>
+
+<!-- 한글 본문 Noto Sans KR, 라틴 Inter, 코드 JetBrains Mono.
+     Inter 를 앞에 둬야 라틴이 Inter 로 잡히고 한글만 Noto 로 폴스루된다.
+     오프라인/사내망이면 이 3줄을 지우고 --font-sans 를 시스템 폰트로 바꾼다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;700&display=swap">
+
+<style>
+/* ============================================================ 1. 테마 토큰
+   여기만 바꾸면 덱 전체 룩이 바뀐다. 다른 팔레트는 references/themes.md 참고. */
+/* 섹션 테마 — 프로젝트(블루) · 개별 연구(그린) · 요소기술(브론즈) · 성과(그레이) */
+[data-sec="task"]{ --accent:#1E6FA8; --accent-2:#17547E; --accent-soft:rgba(30,111,168,.10) }
+[data-sec="solo"]{ --accent:#0E7A57; --accent-2:#0B5C42; --accent-soft:rgba(14,122,87,.10) }
+[data-sec="tech"]{ --accent:#9A5B12; --accent-2:#74440D; --accent-soft:rgba(154,91,18,.10) }
+[data-sec="pub"] { --accent:#4A4F57; --accent-2:#343840; --accent-soft:rgba(74,79,87,.10) }
+.tbl td.tg{ font-family:var(--font-mono); font-size:.92em; font-weight:600; white-space:nowrap }
+table.ovw td:nth-child(3){ white-space:nowrap }
+table.ovw td:nth-child(2){ width:34% }
+.tbl td.tg.task{ color:#1E6FA8 } .tbl td.tg.solo{ color:#0E7A57 } .tbl td.tg.tech{ color:#9A5B12 }
+.subt{ font-size:.9em; font-weight:700; color:var(--accent-2); margin-top:-.35em }
+a{ color:var(--accent-2); text-decoration:none; border-bottom:1px solid var(--accent-2);
+   padding-bottom:1px }
+a:hover{ color:var(--accent); border-color:var(--accent) }
+
+:root{
+  --w:1920; --h:1080;                    /* stage 저작 해상도 (16:9) */
+  --scale:1;                             /* JS 가 매기는 유일한 자유도 */
+  --measure-stage:1200px;                /* stage 모드 콘텐츠 컬럼 */
+  --measure-web:680px;                   /* fullbleed 모드 콘텐츠 컬럼 */
+  --dur:520ms; --ease:cubic-bezier(.22,.85,.36,1);
+
+  --bg:#FFFFFF;  --panel:#F2F5F3;  --panel-2:#F7F9F8;  --line:#DCE3DF;
+  --fg:#101613;  --mute:#31403A;   --dim:#6E7A74;
+  --accent:#0E7A57; --accent-2:#127D5C; --accent-soft:rgba(14,122,87,.08);
+
+  --font-sans:'Inter','Noto Sans KR',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+*{ box-sizing:border-box }
+html,body{ height:100%; margin:0; padding:0 }
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:var(--font-sans); font-weight:400;
+  overflow:hidden;                       /* 스크롤 없음 — 이동은 전부 JS */
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+
+/* ==================================================== 2. viewport + stage
+   두 레이아웃을 한 엔진으로: <body data-layout="stage"> 또는 "fullbleed". */
+.viewport{
+  position:fixed; inset:0; overflow:hidden;   /* scale() 은 레이아웃 크기를 안 줄인다 */
+  display:grid; place-items:center;           /* 넘치는 stage 가 좌우 대칭으로 넘침 */
+  touch-action:pinch-zoom;                    /* 확대는 살리고 pan/double-tap 은 죽임 */
+  padding:env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.viewport::before{                            /* 앰비언트 글로우 (지워도 무해) */
+  content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(120% 82% at 12% -8%,   rgba(14,122,87,.055), transparent 62%),
+    radial-gradient(100% 76% at 104% 108%, rgba(14,122,87,.07),  transparent 66%);
+}
+
+/* stage: 1920×1080 고정 조판. 배율 하나로 폰트·gap·보더·좌표가 전부 비례. */
+[data-layout="stage"] .stage{
+  position:relative; overflow:hidden;
+  width:calc(var(--w) * 1px); height:calc(var(--h) * 1px);
+  transform:scale(var(--scale));              /* origin=center → 반픽셀 오프셋 회피 */
+  font-size:27.18px;                          /* 기존 7번 슬라이드의 실측 기준 크기 */
+  background:var(--bg);
+}
+/* fullbleed: 레터박스 없이 화면을 꽉 채움. */
+[data-layout="fullbleed"] .stage{ position:absolute; inset:0 }
+
+/* ============================================= 3. 슬라이드 스택 (3-상태)
+   .is-past 와 .is-future 를 .is-current 양쪽의 서로 다른 정지 위치로 정의하면
+   클래스 한 번 교체로 나가는 장과 들어오는 장이 동시에 움직인다. */
+.slide{
+  position:absolute; inset:0; z-index:1;
+  display:grid; place-items:center;
+  opacity:0;
+  transition:transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+[data-layout="stage"] .slide{ padding:96px 128px }
+[data-layout="fullbleed"] .slide{ padding:clamp(56px,7vh,96px) clamp(22px,5vw,56px) }
+
+.slide.is-current{ opacity:1; transform:none; z-index:2 }
+.slide.is-past, .slide.is-future{ opacity:0 }              /* 기본 = fade */
+
+/* 절제된 이동이 고급스럽다. 100% 씩 날리면 싸구려로 보인다. */
+[data-transition="rise"].is-past   { transform:translateY(-3.5%) scale(.988) }
+[data-transition="rise"].is-future { transform:translateY(3.5%)  scale(.988) }
+[data-transition="slide"].is-past  { transform:translateX(-6%) }
+[data-transition="slide"].is-future{ transform:translateX(6%) }
+[data-transition="zoom"].is-past   { transform:scale(1.05) }
+[data-transition="zoom"].is-future { transform:scale(.95) }
+
+/* ==================================================== 4. 콘텐츠 컬럼
+   같은 마크업이 두 레이아웃에서 다 읽히게 하는 지점. */
+.measure{ display:grid; gap:.9em }
+[data-layout="stage"] .measure{ width:min(var(--measure-stage),100%) }
+[data-layout="fullbleed"] .measure{
+  width:min(var(--measure-web),100%);
+  /* 중간식에 rem 항을 섞어야 브라우저 확대가 동작한다 (W3C F94) */
+  font-size:clamp(15px,.62rem + .55vw,20px);
+}
+[data-layout="stage"] .measure.wide{ width:min(1560px,100%) }
+[data-layout="fullbleed"] .measure.wide{ width:min(calc(var(--measure-web) + 160px),100%) }
+
+/* ==================================================== 5. 타이포 */
+h1,h2,h3,h4{ margin:0; font-weight:700; letter-spacing:-.022em; line-height:1.12 }
+h1{ font-size:2.6em } h2{ font-size:1.72em } h3{ font-size:.82em }
+p { margin:0; font-size:.92em; line-height:1.68; color:var(--mute) }
+p.lead{ font-size:1.02em; color:var(--fg) }
+ul,ol{ margin:0; padding-left:1.15em; font-size:.9em; line-height:1.7; color:var(--mute) }
+li{ margin:.3em 0 } li::marker{ color:var(--accent-2) }
+strong,b{ color:var(--fg); font-weight:700 }
+em{ color:var(--accent); font-style:normal; font-weight:600 }
+
+.kicker{ font-family:var(--font-mono); font-size:.68em; font-weight:600;
+         letter-spacing:.22em; text-transform:uppercase; color:var(--accent) }
+.rule{ height:1px; margin:.2em 0;
+       background:linear-gradient(90deg,var(--accent-2),transparent) }
+.note{ font-size:.78em; color:var(--dim); line-height:1.6 }
+
+:not(pre) > code{                        /* 전역 code{display:block} 은 쓰면 안 된다 */
+  font-family:var(--font-mono); font-size:.86em; color:var(--fg);
+  background:var(--panel); border:1px solid var(--line); border-radius:5px;
+  padding:.1em .38em;
+}
+
+/* ==================================================== 6. 컴포넌트 */
+.cards{ display:grid; gap:.6em }
+.cards.c2{ grid-template-columns:1fr 1fr }
+.cards.c3{ grid-template-columns:repeat(3,1fr) }
+.card{ background:var(--panel-2); border:1px solid var(--line); border-radius:11px;
+       padding:.82em .92em; min-width:0 }
+.card h3{ margin-bottom:.4em; color:var(--accent);
+          font-family:var(--font-mono); font-weight:600 }
+.card p{ font-size:.78em; line-height:1.55 }
+
+.tbl{ overflow-x:auto; background:var(--panel-2);
+      border:1px solid var(--line); border-radius:11px }
+table{ width:100%; border-collapse:collapse; font-size:.76em }
+th,td{ padding:.62em .8em; text-align:left; vertical-align:top; line-height:1.5 }
+th{ font-family:var(--font-mono); font-weight:600; font-size:.9em;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--dim);
+    border-bottom:1px solid var(--line) }
+td{ color:var(--mute); border-bottom:1px solid var(--line) }
+tr:last-child td{ border-bottom:0 }
+td strong{ color:var(--accent) }
+
+.stack{ display:grid; gap:.45em }
+.row{ display:grid; grid-template-columns:auto 1fr; gap:.7em; align-items:baseline;
+      padding:.5em .8em; background:var(--panel-2); border:1px solid var(--line);
+      border-left:2px solid var(--accent-2); border-radius:0 9px 9px 0 }
+.row b{ font-family:var(--font-mono); font-size:.76em; color:var(--accent);
+        white-space:nowrap }
+.row span{ font-size:.8em; color:var(--mute); line-height:1.55 }
+
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:1.4em; align-items:center }
+
+/* .items — 레퍼런스식 항목 나열. 라벨 없이 "~개발/설계/구축" 명사형 한 줄. */
+.items{ list-style:none; padding-left:0; display:grid; gap:.5em; font-size:.92em }
+.items li{ margin:0; padding-left:1.35em; position:relative;
+           color:var(--mute); line-height:1.62 }
+.items li::before{ content:'\25AA'; position:absolute; left:.15em; color:var(--accent) }
+.items li b{ color:var(--fg); font-weight:700 }
+.items .sub-items{ list-style:none; padding-left:0; margin:.3em 0 0;
+                   display:grid; gap:.22em }
+.items .sub-items li{ padding-left:1em; font-size:.94em; color:var(--dim) }
+.items .sub-items li::before{ content:'\2013'; color:var(--dim) }
+
+/* ==================================================== 7b. 다이어그램
+   1560 폭 stage 에 맞춘 인라인 SVG. 색은 전부 토큰에서 가져온다. */
+.split{ display:grid; grid-template-columns:1.45fr 1fr; gap:1.2em; align-items:start }
+.split .figs{ gap:.6em }
+.shieldrow{ display:grid; grid-template-columns:1.15fr 1fr 1fr; gap:.7em; align-items:start }
+
+/* 자리표시 레이아웃 — 실제 이미지·영상으로 교체할 칸 */
+.phrow{ display:grid; gap:.7em }
+.phrow.c2{ grid-template-columns:1fr 1fr }
+.phrow.c3{ grid-template-columns:repeat(3,1fr) }
+.ph{ display:grid; place-items:center; text-align:center; padding:.8em;
+     background:var(--panel-2); border:2px dashed var(--line); border-radius:12px }
+.ph .lbl{ font-family:var(--font-mono); font-size:.7em; letter-spacing:.04em;
+          color:var(--dim); line-height:1.6 }
+.ph .hint{ margin-top:.5em; font-size:.64em; color:var(--dim); opacity:.75; line-height:1.5 }
+.ph.h1{ min-height:13.5em } .ph.h2{ min-height:8.6em } .ph.h3{ min-height:4.2em }
+.split.gws{ grid-template-columns:.85fr 1.35fr; align-items:center; gap:1.6em }
+.split.wide{ grid-template-columns:1.7fr 1fr; align-items:center; gap:1.2em }
+.ph.h4{ min-height:6.8em }
+.figs.wideplot .fig img{ aspect-ratio:auto; height:auto; max-height:none; object-fit:contain;
+                          background:#fff; padding:.4em; border:1px solid var(--line) }
+.split.fw{ grid-template-columns:1.35fr 1fr; align-items:center; gap:1.4em }
+.fig.fwfig img{ aspect-ratio:auto; height:auto; max-height:none; object-fit:contain;
+                background:none; border:0; padding:0 }
+.eqimgs{ display:grid; gap:.7em }
+.eqimgs .eqi{ display:grid; gap:.25em; justify-items:start }
+.eqimgs .eqi img{ max-width:100%; height:2.6em; width:auto; display:block;
+                  background:#F2F2F2; border:1px solid var(--line); border-radius:8px }
+.eqimgs .eqi i{ font-style:normal; font-size:.72em; color:var(--dim); line-height:1.5 }
+.eqimgs.lg .eqi img{ max-height:4.4em }
+.eqimgs.xl .eqi img{ max-height:5.4em }
+.eqrow{ display:grid; grid-template-columns:4.09fr 6.25fr; gap:1.3em; align-items:start }
+.eqrow .eqi{ display:grid; gap:.3em }
+.eqrow .eqi img{ width:100%; height:auto; max-height:none; display:block;
+                 background:#F2F2F2; border:1px solid var(--line); border-radius:8px; padding:.25em .4em }
+.eqrow .eqi i{ font-style:normal; font-size:.72em; color:var(--dim); line-height:1.5 }
+.ct3{ display:grid; grid-template-columns:1.15fr .78fr 1.3fr; gap:.9em; align-items:start }
+.pg3{ display:grid; grid-template-columns:repeat(3,1fr); gap:.9em; align-items:start }
+.pg3 .fig img, .pg3 .fig video{ width:100%; height:9.4em; object-fit:cover; max-height:none; aspect-ratio:auto }
+.split.tac{ grid-template-columns:.62fr 1fr; align-items:center; gap:1.6em }
+.fig.tacvid video{ width:100%; height:auto; aspect-ratio:auto; max-height:none; object-fit:contain }
+.ct3 .fig img{ width:100%; height:9.2em; object-fit:contain; max-height:none; background:#fff }
+.eqlist{ display:grid; gap:.5em }
+.eqlist .eq{ font-family:var(--font-mono); font-size:.8em; line-height:1.5; color:var(--fg);
+             background:var(--panel-2); border:1px solid var(--line);
+             border-left:2px solid var(--accent-2); border-radius:0 8px 8px 0; padding:.5em .7em }
+.eqlist .eq i{ display:block; margin-top:.25em; font-style:normal;
+               font-family:var(--font-sans); font-size:.82em; color:var(--dim) }
+.gwsrow{ display:grid; grid-template-columns:.82fr 1fr 1fr; gap:1em; align-items:center }
+.split.rw{ grid-template-columns:1.15fr 1fr; gap:1.4em; align-items:center }
+.gwsrow2{ display:grid; grid-template-columns:.85fr 1fr; gap:.9em; align-items:center }
+.gwsrow2 .fig img{ width:100%; height:auto; aspect-ratio:auto; max-height:9.5em;
+                   object-fit:contain; background:none; border:0; border-radius:0; padding:0 }
+.gwsrow2 figcaption{ text-align:center }
+.gwsrow .fig img{ width:100%; height:auto; aspect-ratio:auto; max-height:13.5em;
+                  object-fit:contain; background:none; border:0; border-radius:0; padding:0 }
+.gwsrow figcaption{ text-align:center }
+.shieldrow .fig img{ width:100%; height:11.5em; object-fit:cover; max-height:none }
+.fig video{ display:block; width:100%; aspect-ratio:16/9; object-fit:cover; max-height:13em;
+            background:var(--panel-2); border:1px solid var(--line); border-radius:10px }
+.figs.sm .fig video{ max-height:8.5em }
+.natrow{ display:flex; gap:1.4em; align-items:flex-start; justify-content:flex-start }
+.natrow .fig{ flex:0 0 auto }
+.natrow .fig img, .natrow .fig video{ height:11.5em; width:auto; max-width:none; max-height:none;
+                                      aspect-ratio:auto; object-fit:contain }
+.natrow figcaption{ text-align:center }
+.rbpair{ display:flex; gap:1.6em; align-items:flex-start; justify-content:flex-start }
+.rbpair .fig{ flex:0 0 auto }
+.rbpair .fig video{ height:13.5em; width:auto; max-width:none; max-height:none;
+                    aspect-ratio:auto; object-fit:contain }
+.rbpair figcaption{ text-align:center }
+.ct3 .fig video{ width:100%; height:9.2em; object-fit:contain; max-height:none; background:#fff }
+.vidpair{ display:flex; gap:4.2em; align-items:flex-start; justify-content:flex-start }
+.vidpair .fig{ flex:0 0 auto; min-width:0 }
+.vidpair .fig video{ height:17em; width:auto; max-width:none; aspect-ratio:auto;
+                     object-fit:contain }
+.vidpair figcaption{ text-align:center }
+.figs.mid .fig video{ height:9.5em; object-fit:contain; background:var(--panel-2) }
+.figs.mid.tall .fig img, .figs.mid.tall .fig video{ width:100%; height:13.5em; max-height:none;
+                        aspect-ratio:auto; object-fit:contain; background:var(--panel-2) }
+.figs.mid .fig img{ width:100%; height:9.5em; object-fit:contain; max-height:none;
+                     background:var(--panel-2) }
+.diagram{ width:100%; height:auto; display:block }
+.diagram .box{ fill:var(--panel-2); stroke:var(--line); stroke-width:1 }
+.diagram .box.learned{ fill:var(--accent-soft); stroke:var(--accent-2) }
+.diagram .frame{ fill:none; stroke:var(--line) }
+.diagram text{ font-family:var(--font-sans); fill:var(--fg) }
+.diagram .t{ font-size:24px; font-weight:700 }
+.diagram .s{ font-size:18px; fill:var(--mute) }
+.diagram .cap{ font-size:16px; fill:var(--dim) }
+.diagram .lane{ font-family:var(--font-mono); font-size:13px; font-weight:600;
+                letter-spacing:.14em; fill:var(--dim) }
+.diagram .edge{ fill:none; stroke:var(--dim); stroke-width:1.6 }
+.diagram .edge.dash{ stroke-dasharray:6 5; stroke:var(--accent-2) }
+.diagram .elabel{ font-family:var(--font-mono); font-size:17px; fill:var(--accent) }
+.diagram .grp{ fill:none; stroke-width:2; stroke-dasharray:11 9 }
+.diagram .grp.sim{ stroke:#4A7FD4 }
+.diagram .grp.real{ stroke:var(--accent-2) }
+.diagram .lane.sim{ fill:#4A7FD4 }
+.diagram .lane.real{ fill:var(--accent-2) }
+.diagram .t2{ font-size:18px; font-weight:700 }
+.diagram .t2.ac{ fill:var(--accent) }
+.diagram .s2{ font-size:16px; fill:var(--mute) }
+.diagram .s2.mid{ font-weight:600 }
+.diagram .s2.ac{ fill:var(--accent) }
+.diagram .s2.dim{ fill:var(--dim) }
+.diagram .chip{ fill:var(--panel); stroke:var(--line) }
+.diagram .pill{ fill:var(--accent-soft); stroke:var(--accent-2) }
+.diagram .chip.act{ fill:var(--accent-soft); stroke:var(--accent-2) }
+.diagram .traj{ fill:none; stroke-width:2 }
+.diagram .traj.hi{ stroke:var(--accent) }
+.diagram .traj.hi.bold{ stroke-width:3.5 }
+.diagram .traj.mid{ stroke:var(--mute); opacity:.75 }
+.diagram .traj.low{ stroke:var(--dim); opacity:.45 }
+.diagram .dot{ fill:var(--accent) }
+.diagram .edge.thin{ stroke-width:1.2 }
+.cards.c4{ grid-template-columns:repeat(4,1fr) }
+.card p .sub, .sub{ font-size:.85em; color:var(--dim) }
+
+/* 그림 — PDF 에서는 영상이 재생되지 않으므로 실행 영상에서 뽑은 정지 프레임을 쓴다 */
+.figs{ display:grid; gap:.55em }
+.figs.f2{ grid-template-columns:1fr 1fr }
+.figs.f3{ grid-template-columns:repeat(3,1fr) }
+.fig{ display:grid; gap:.3em; margin:0; min-width:0 }
+.fig img{
+  display:block; width:100%; aspect-ratio:16/9;
+  object-fit:contain;                  /* 근거 사진을 잘라내지 않는다 */
+  max-height:13em;                     /* em 기준 → 자동 축소가 이미지에도 적용된다 */
+  background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+}
+/* 16:9 가 아닌 원본은 강제 박스를 씌우지 않는다 — 세로·정사각 사진이
+   16:9 박스에 들어가면 대부분이 잘리거나 좌우 여백만 남는다 */
+.fig.free img{
+  aspect-ratio:auto; width:auto; height:auto;
+  max-width:100%; max-height:11em; margin-inline:auto;
+}
+.figs.sm .fig.free img{ max-height:9em }
+.fig.leftfig img{ margin-inline:0 }
+.figs.f1{ grid-template-columns:minmax(0,1fr) }
+.fig figcaption{ font-size:.58em; line-height:1.45; color:var(--dim) }
+.fig figcaption strong{ color:var(--mute) }
+/* 그래프·도면은 잘라내지 않고 흰 바탕 위에 담는다 */
+.fig.plot img{ object-fit:contain; background:#fff; padding:.5em; aspect-ratio:16/9;
+               border:1px solid var(--line) }
+.figs.sm .fig img{ max-height:8.5em }        /* 텍스트가 많은 장용 */
+
+/* ============================== 7. 코드 블록 + 라인 하이라이트
+   줄당 span.line 하나. 들여쓰기하지 말고 각 줄이 실제 개행으로 끝나야
+   복붙 공백이 안 깨진다. 코드 안의 < 는 &lt; 로 escape.
+   정적:  <code data-hi="3-5">
+   단계별: <code data-hi-steps="0|1-2|4-6">   (스텝 커서를 소비한다) */
+pre{ margin:0; padding:.85em 0; overflow-x:auto; font-size:.78em;
+     background:var(--panel-2); border:1px solid var(--line); border-radius:11px }
+pre > code{ display:block; white-space:pre; font-size:1em;
+            font-family:var(--font-mono); line-height:1.78; color:var(--mute) }
+code .line{ display:block; padding:0 1.1em; border-left:2px solid transparent;
+            transition:opacity 300ms var(--ease), background-color 300ms var(--ease) }
+pre.has-hi code .line{ opacity:.32 }
+pre.has-hi code .line.hi{ opacity:1; color:var(--fg);
+                          background:var(--accent-soft); border-left-color:var(--accent) }
+code .c{ color:var(--dim) }              /* 주석 */
+code .k{ color:var(--accent) }           /* 키워드 */
+
+/* ====================================== 8. 등장 애니메이션 (둘 중 골라 쓴다)
+   .stagger — 진입 시 자동 순차 등장. 키를 소비하지 않는다(키 1 = 페이지 1 유지).
+   .frag    — 발표자가 키로 하나씩 공개. 논지를 나르는 빌드에 쓴다. */
+.stagger > *{
+  opacity:0; transform:translateY(9px);
+  transition:opacity 520ms var(--ease), transform 520ms var(--ease);
+  transition-delay:calc(var(--i,0) * 62ms + 110ms);
+}
+.is-current .stagger > *{ opacity:1; transform:none }
+.slide:not(.is-current) .stagger > *{ transition-delay:0ms }   /* 퇴장은 즉시 */
+.stagger>:nth-child(1){--i:0} .stagger>:nth-child(2){--i:1} .stagger>:nth-child(3){--i:2}
+.stagger>:nth-child(4){--i:3} .stagger>:nth-child(5){--i:4} .stagger>:nth-child(6){--i:5}
+.stagger>:nth-child(7){--i:6} .stagger>:nth-child(n+8){--i:7}  /* 딜레이 상한 */
+
+/* 미공개 빌드는 흐름에 남긴다. display:none 은 공개마다 리플로우를 일으킨다. */
+.frag{ opacity:0; transform:translateY(.35em);
+       transition:opacity 380ms var(--ease), transform 380ms var(--ease) }
+.frag.shown{ opacity:1; transform:none }
+
+/* ==================================================== 9. 크롬
+   stage 에 transform 이 걸리면 fixed 자손의 기준이 stage 가 되므로
+   크롬은 반드시 .viewport 밖(body 직계)에 둔다. */
+.bar{ position:fixed; left:0; right:0; bottom:0; height:3px; z-index:30;
+      background:linear-gradient(90deg,var(--accent-2),var(--accent));
+      transform-origin:left center; transform:scaleX(0);
+      transition:transform 420ms var(--ease) }
+.counter{ position:fixed; z-index:30; pointer-events:none;
+          right:clamp(18px,3.2vw,34px); bottom:clamp(16px,2.6vh,26px);
+          font-family:var(--font-mono); font-size:11.5px; font-weight:600;
+          letter-spacing:.14em; color:var(--dim); font-variant-numeric:tabular-nums }
+.counter i{ color:var(--accent); font-style:normal }
+.brand{ position:fixed; z-index:30; pointer-events:none;
+        left:clamp(18px,3.2vw,34px); bottom:clamp(16px,2.6vh,26px);
+        font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em;
+        text-transform:uppercase; color:var(--dim) }
+
+/* aria-live 리전은 초기 HTML 에 반드시 존재해야 한다. 리전과 텍스트를 같은
+   프레임에 넣으면 스크린리더가 대부분 아무것도 읽지 않는다. */
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden;
+          clip-path:inset(50%); white-space:nowrap }
+
+/* 화자 노트 — hidden 은 UA display:none 이라 @media print 로 되살릴 수 있다 */
+.notes[hidden]{ display:none }
+
+.help{ position:fixed; inset:auto 22px 46px auto; z-index:40; display:none;
+       max-width:340px; padding:15px 17px; border-radius:13px;
+       background:rgba(255,255,255,.96); border:1px solid var(--line);
+       font-size:12.5px; line-height:2; color:var(--mute); backdrop-filter:blur(10px) }
+.help.open{ display:block }
+.help b{ color:var(--accent); font-family:var(--font-mono); font-weight:600 }
+
+/* ==================================================== 10. 발표자 화면 (?presenter) */
+.pv{ display:none }
+body.presenter .viewport, body.presenter .help, body.presenter .brand,
+body.presenter .counter, body.presenter .bar{ display:none }
+body.presenter .pv{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+                    gap:20px; padding:20px; height:100dvh }
+.pv section{ display:flex; flex-direction:column; gap:20px; min-width:0 }
+.pv .box{ background:var(--panel-2); border:1px solid var(--line);
+          border-radius:13px; padding:16px 18px; min-width:0 }
+.pv h4{ margin:0 0 .7em; font-family:var(--font-mono); font-size:10.5px;
+        font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--dim) }
+#pvNotes{ flex:1; overflow:auto; font-size:16px; line-height:1.7; color:var(--fg) }
+#pvClock{ font-family:var(--font-mono); font-weight:600; font-size:38px; line-height:1;
+          color:var(--accent); font-variant-numeric:tabular-nums }
+#pvWall,#pvPos{ margin-top:6px; font-family:var(--font-mono); font-size:12px;
+                color:var(--dim); font-variant-numeric:tabular-nums }
+#pvPreview{ flex:1; overflow:hidden; padding:18px; background:var(--bg);
+            border:1px solid var(--line); border-radius:11px }
+#pvPreview .measure{ width:100%; font-size:13px; gap:.8em }
+#pvPreview .stagger > *, #pvPreview .frag{ opacity:1; transform:none; transition:none }
+
+/* ================ 11. 모션 최소화 — transition 을 없애지 않고 1ms 로.
+   settle() 이 실제 애니메이션을 읽으므로 JS 분기가 필요 없다. */
+@media (prefers-reduced-motion: reduce){
+  .slide{ transition:opacity 1ms }
+  .slide.is-past, .slide.is-future{ transform:none }
+  .stagger > *, .frag{ transition-duration:1ms; transition-delay:0ms }
+  .bar{ transition:none }
+}
+
+/* ================ 12. 인쇄 / PDF — transform 을 풀고 정적 흐름으로.
+   스케일된 콘텐츠는 페이지네이션되지 않아 잘린 한 장이 나온다. */
+@media print{
+  @page{ size:1920px 1080px; margin:0 }
+  /* 덱 자신의 팔레트를 그대로 인쇄한다. 여기서 color 를 덮으면
+     색상 지정이 없는 요소(h1 등)가 배경과 같은 색이 되어 사라진다. */
+  body{ overflow:visible }
+  .viewport{ position:static; display:block; overflow:visible; padding:0 }
+  .viewport::before{ display:none }
+  [data-layout="stage"] .stage,
+  [data-layout="fullbleed"] .stage{ position:static; transform:none; overflow:visible;
+                                    width:auto; height:auto }
+  .slide{ position:static; width:1920px; height:1080px;
+          opacity:1 !important; transform:none !important;
+          break-after:page; page-break-after:always }
+  /* 마지막 장 뒤의 강제 개페이지는 빈 페이지를 하나 만든다 */
+  .slide:last-of-type{ break-after:auto; page-break-after:auto }
+  .stagger > *, .frag{ opacity:1 !important; transform:none !important }
+  pre.has-hi code .line{ opacity:1 !important }
+  .fig, .figs, .cards, .stack, .tbl{ break-inside:avoid }
+  .fig img{ print-color-adjust:exact }
+  .notes[hidden]{ display:none }   /* 제출용 PDF — 노트 제외 */
+  .bar,.counter,.brand,.help,.pv,.sr-only{ display:none !important }
+  *{ print-color-adjust:exact; -webkit-print-color-adjust:exact }
+}
+
+/* Sentence lists retain the original card and note typography. */
+.sentence-list{list-style:none;margin:0;padding:0;display:grid;gap:.3em;font-size:.92em;line-height:1.68;color:var(--mute)}
+.sentence-list li{position:relative;margin:0;padding-left:1em}
+.sentence-list li::before{content:'•';position:absolute;left:0;color:var(--accent)}
+.card .sentence-list{font-size:.78em;line-height:1.55}
+.sentence-list.sentence-note{font-size:.78em;line-height:1.6;color:var(--dim);gap:.16em}
+.sentence-list.sentence-note li::before{content:'–';color:var(--dim)}
+
+/* Slide 09: central evidence, three bottom summaries. */
+.tactile-evidence{margin:0;display:grid;gap:8px;justify-items:center;min-width:0}
+.tactile-evidence video{aspect-ratio:auto;width:auto;height:420px;max-width:100%;max-height:none;object-fit:contain;background:white;border:0;border-radius:0}
+.tactile-evidence figcaption{font-size:16px;color:var(--dim);text-align:center}
+.a-stage{display:flex;justify-content:center;background:var(--panel-2);border-radius:12px;padding:12px}
+.a-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;border-top:1px solid var(--line);padding-top:16px}
+.a-summary span{font-size:17px;color:var(--accent);font-weight:700;letter-spacing:.03em}
+.a-summary p{font-size:20px;line-height:1.5;margin-top:8px}
+
+/* SO-101 Sim-to-Real: measured results and pending media. */
+.s2r-align{display:grid;grid-template-columns:1fr 1.15fr;gap:40px;align-items:center}
+.s2r-error{display:block;width:100%;height:300px;object-fit:contain}
+.s2r-plots{display:grid;grid-template-columns:1fr 1fr;gap:35px}
+.s2r-plots figure{margin:0;min-width:0}
+.s2r-plots h3{font-size:23px;line-height:1.4;margin-bottom:16px}
+.s2r-plots img{display:block;width:100%;height:355px;object-fit:contain}
+.s2r-plots svg{display:block;width:100%;height:auto}
+.s2r-result{display:grid;grid-template-columns:1.1fr 1fr;gap:35px;align-items:center}
+.s2r-video-slots{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.s2r-media-slot{min-height:250px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;background:var(--panel-2);border:2px dashed var(--line);border-radius:12px;text-align:center;padding:24px}
+.s2r-media-slot b{font-size:25px;color:var(--accent)}
+.s2r-media-slot span{font-size:20px;color:var(--dim)}
+.s2r-media-slot.compact{min-height:100px;padding:16px;gap:8px}
+.s2r-media-slot.compact b{font-size:22px}
+
+/* Compact portfolio structure: keep diagrams and media intact. */
+.cover-links{position:absolute;left:128px;right:128px;bottom:58px;display:flex;gap:40px;font-size:24px;z-index:3}
+.pipeline-merged h2,.simreal-ablation h2,.relocate-merged h2{font-size:42px;margin-bottom:22px}
+.pipeline-overview{display:grid;grid-template-columns:28% 1fr;gap:30px;align-items:center}
+.pipeline-summary .so-intro{display:flex;flex-direction:column;gap:16px}
+.pipeline-summary .so-brief{font-size:20px}.pipeline-summary .so-brief .lead{font-size:25px;line-height:1.5}
+.pipeline-summary .so-brief>div{margin-bottom:14px}.pipeline-summary .sentence-list{font-size:18px;line-height:1.5}
+.pipeline-summary .fig{margin:0;width:100%}.pipeline-summary .fig video{height:185px;object-fit:contain}
+.pipeline-summary figcaption{font-size:16px}.pipeline-diagram svg{width:100%;height:auto;max-height:610px}
+.pipeline-merged .so-contract{margin-top:18px;gap:16px}.pipeline-merged .so-contract .card{padding:12px 16px}
+.pipeline-merged .so-contract h3{font-size:20px;margin-bottom:5px}.pipeline-merged .so-contract p{font-size:17px;line-height:1.5}
+.simreal-ablation .so-comparison-video{padding:12px;gap:24px}.simreal-ablation .so-video-media video{width:100%;height:230px;object-fit:contain}
+.simreal-ablation .so-eyebrow{font-size:19px;margin-bottom:8px}.ablation-heading{font-size:24px;margin:16px 0 8px}
+.ablation-legend{display:flex;gap:32px;justify-content:center;font-size:18px;margin-bottom:8px}
+.ablation-legend span:before{content:"";display:inline-block;background:var(--series);width:14px;height:14px;margin-right:8px;border-radius:2px}
+.simreal-ablation .s2r-plots{margin-top:0;gap:28px}.simreal-ablation .s2r-plots h3{font-size:19px;margin:0 0 6px}
+.simreal-ablation .s2r-plots svg{width:100%;max-height:300px}
+.relocate-merged-grid{display:grid;grid-template-columns:44% 1fr;gap:30px;align-items:center}
+.relocate-videos .p3-results{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0}
+.relocate-videos video{width:100%;height:365px;object-fit:contain;background:#F2F5F3}
+.relocate-videos figcaption{font-size:18px;line-height:1.5}.relocate-learning svg{width:100%;height:auto;max-height:460px}
+.relocate-merged .p3-brief{margin-top:24px;gap:16px}.relocate-merged .p3-brief .card{padding:14px 16px}
+.relocate-merged .p3-brief h3{font-size:19px;margin-bottom:8px}.relocate-merged .p3-brief .sentence-list{font-size:17px;line-height:1.5}
+
+
+/* Caption spacing and full-size layout refinements. */
+.simreal-ablation .s2r-plots h3{font-size:17px;line-height:1.5;min-height:50px}
+.relocate-videos figcaption{white-space:nowrap;font-size:20px}
+.relocate-merged h2{font-size:38px}
+
+/* Approved slide 3 layout A. */
+.pipeline-final-a{gap:12px}.pipeline-final-a h2{font-size:38px;margin-bottom:25px}.pipeline-final-a .fig{margin:0}.pipeline-final-a video{width:100%;object-fit:contain;background:#F2F5F3}.pipeline-final-a figcaption{font-size:17px}.pipeline-final-a .card{padding:16px 18px!important}.pipeline-final-a .card h3{font-size:20px!important}.pipeline-final-a .card p{font-size:18px!important;line-height:1.5!important}.pipeline-final-a .so-contract{gap:16px!important}.pipeline-final-a svg{width:100%;object-fit:contain}.option-a-main{display:grid;grid-template-columns:29% 1fr;gap:30px;align-items:start}.option-a-main video{height:380px}.option-a-main .pipeline-diagram svg{height:380px}.option-a-bottom{display:grid;grid-template-columns:29% 1fr;gap:30px;margin-top:24px}.option-a-bottom .so-contract{display:grid;grid-template-columns:1fr 1fr!important;margin:0!important}.option-a-bottom .so-brief{font-size:17px}.option-a-bottom .lead{font-size:21px}.option-a-bottom .sentence-list{font-size:17px}
+.pipeline-final-a h2{font-size:36px;line-height:1.3;margin-bottom:12px}.pipeline-final-a .option-a-bottom .so-brief{display:grid;gap:14px}.pipeline-final-a .option-a-bottom .so-brief .lead{margin:0;font-size:21px;line-height:1.45}.pipeline-final-a .option-a-bottom .sentence-list{font-size:17px;line-height:1.5}.pipeline-final-a .so-eyebrow{font-size:17px;margin-bottom:6px}.pipeline-final-a .option-a-bottom .card p{font-size:18px!important;line-height:1.5!important}
+
+/* Slide 3: larger typography and diagram within approved A layout. */
+[data-layout="stage"] .slide[data-slide3-size="enlarged"]{padding:48px 112px}
+.pipeline-final-a .option-a-main,.pipeline-final-a .option-a-bottom{grid-template-columns:31% 1fr;gap:28px}
+.pipeline-final-a .option-a-main video,.pipeline-final-a .option-a-main .pipeline-diagram svg{height:430px;max-height:430px}
+.pipeline-final-a .option-a-bottom{margin-top:16px}
+.pipeline-final-a .option-a-bottom .so-brief{gap:12px}
+.pipeline-final-a .option-a-bottom .so-brief .lead{font-size:26px;line-height:1.4}
+.pipeline-final-a .option-a-bottom .sentence-list{font-size:23px;line-height:1.4;gap:7px}
+.pipeline-final-a .so-eyebrow{font-size:22px!important;margin-bottom:7px}
+.pipeline-final-a .option-a-bottom .card{padding:18px 20px!important}
+.pipeline-final-a .option-a-bottom .card h3{font-size:25px!important;margin-bottom:10px}
+.pipeline-final-a .option-a-bottom .card p{font-size:22px!important;line-height:1.5!important}
+.pipeline-final-a figcaption{font-size:20px}
+
+/* Slide 3: wider summary column and separated card bullets. */
+.pipeline-final-a .option-a-main,.pipeline-final-a .option-a-bottom{grid-template-columns:38% 1fr;gap:36px}
+.pipeline-final-a .option-a-bottom .sentence-list{line-height:1.4}
+.pipeline-final-a .option-a-bottom .card .contract-bullets{font-size:22px;line-height:1.45;gap:14px;color:var(--mute)}
+.pipeline-final-a .option-a-bottom .card .contract-bullets li{margin:0;padding-left:1em}
+.pipeline-final-a .option-a-bottom .card h3{margin-bottom:16px}
+.pipeline-final-a .option-a-bottom .card{padding:20px 22px!important}
+.pipeline-final-a .option-a-bottom .so-contract{gap:20px!important}
+
+/* Slide 3: wide cards and diagram, compact video. */
+[data-layout="stage"] .slide[data-slide3-size="enlarged"]{padding:28px 64px}
+[data-layout="stage"] .pipeline-final-a.measure.wide{width:100%;max-width:1792px}
+.pipeline-final-a{gap:10px}
+.pipeline-final-a h2{margin-bottom:8px}
+.pipeline-final-a .option-a-main{grid-template-columns:26% 1fr;gap:28px}
+.pipeline-final-a .option-a-bottom{grid-template-columns:28% 1fr;gap:28px;margin-top:10px}
+.pipeline-final-a .option-a-main video{height:330px;max-height:330px}
+.pipeline-final-a .option-a-main .pipeline-diagram svg{display:block;width:100%;height:auto;max-height:none;margin:0;aspect-ratio:1616 / 738}
+.pipeline-final-a .option-a-bottom .card{padding:18px 20px!important}
+.pipeline-final-a .option-a-bottom .card .contract-bullets li{white-space:nowrap}
+.pipeline-final-a .option-a-bottom .so-contract{gap:18px!important}
+.pipeline-final-a .option-a-bottom .card h3{margin-bottom:14px}
+</style>
+<style>
+/* SO-101 compact project overview, 2026-10-05. */
+.so-intro{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center}
+.so-brief{display:grid;gap:25px}.so-eyebrow{font-size:.7em!important;font-weight:700;color:var(--accent)!important;letter-spacing:.06em;margin-bottom:5px}
+.so-intro .fig video{width:100%;height:354px;object-fit:contain;background:#F2F5F3}
+.so-metrics{display:flex;gap:42px}.so-metrics>div{display:grid;gap:2px}.so-metrics b{font-size:1.75em;color:var(--accent);line-height:1.15}.so-metrics span{font-size:.74em;color:var(--mute)}
+.so-contract{grid-template-columns:repeat(4,1fr)!important}.so-contract .card{padding:22px 24px}.so-contract h3{font-size:.82em;margin-bottom:10px}.so-contract p{font-size:.76em;line-height:1.7}
+.so-decision{display:grid;gap:18px;padding:0 12px}.so-decision p{font-size:.84em;line-height:1.6}.so-decision .sentence-list{font-size:.8em}.so-next{border-left:3px solid var(--accent);padding-left:20px}.so-decision .note{font-size:.64em}
+.so-s2r-overview{display:grid;grid-template-columns:1.1fr .9fr;gap:65px;align-items:start;margin-top:25px}.so-s2r-output{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:35px 40px;display:grid;gap:28px}.so-s2r-output .so-metrics{gap:70px}.so-s2r-output .so-metrics b{font-size:2.5em}.so-result{border-top:1px solid var(--line);padding-top:25px}.so-result>b{font-size:1.3em;color:var(--accent)}.so-result p{font-size:.88em;margin-top:10px}.so-s2r-output .note{font-size:.72em}
+.so-integrated{gap:.7em}.so-integrated .note{font-size:.66em}.so-integrated svg{width:100%;height:auto}
+</style>
+<style>.so-evaluation .figs.mid .fig video{height:220px}.so-evaluation .so-decision{gap:12px}.so-evaluation .so-decision p{line-height:1.45}.so-evaluation .so-decision li{margin:.15em 0}</style>
+<style>
+.so-evaluation .so-observation{font-size:.74em;white-space:nowrap}.so-evaluation .so-observation b{color:var(--accent)}.so-evaluation .so-eval-detail{font-size:.61em;white-space:nowrap;color:var(--dim)}
+.so-comparison-video{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--panel-2);display:grid;gap:14px}.so-comparison-video.filled{grid-template-columns:1fr 1fr;gap:22px}
+.so-video-media video{width:100%;display:block;border-radius:9px;background:#000}
+.so-video-cap{margin:8px 0 0;font-size:.62em;color:var(--dim);line-height:1.5}
+.so-video-row{display:grid;grid-template-columns:80px repeat(3,1fr);gap:16px;align-items:stretch}.so-video-label{display:grid;place-items:center;font-family:var(--font-mono);font-weight:700;color:var(--accent);font-size:.8em}.so-video-cell{height:200px;border:1.5px dashed #CDD8D2;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#fff}.so-video-cell b{font-size:.84em;color:var(--mute)}.so-video-cell span{font-size:.65em;color:var(--dim)}.so-result-story{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}.so-result-story>div{padding:18px 24px;border-left:3px solid var(--line)}.so-result-story p{font-size:.83em}.so-result-story .so-pending-result{border-left-color:var(--accent)}
+</style>
+<style>
+.p3-overview .p3-results .fig video{width:100%;height:340px;object-fit:contain;max-height:none;background:var(--panel-2)}
+.p3-brief{grid-template-columns:repeat(4,1fr)!important}.p3-brief .card{padding:22px 24px}.p3-brief h3{font-size:.8em;margin-bottom:12px}.p3-brief .sentence-list{font-size:.72em;line-height:1.65}.p3-brief li{margin:.15em 0}
+</style>
+<style>
+/* Readable titles above dashed phase boundaries. */
+.diagram.region-titles .lane,.diagram.region-titles .lane-title{font-family:var(--font-sans);font-size:26px;font-weight:700;letter-spacing:-.3px;fill:#17547E}
+.diagram.region-titles .lane.real{fill:#0B5C42}.diagram.d16 .lane.real{fill:#74440D}.diagram.d16 .grp.real{stroke:#9A5B12}
+.diagram.region-titles{display:block;width:100%;height:auto;max-height:740px}
+.p3-brief .sentence-list{font-size:.71em}
+</style>
+<style>
+/* Preserve original diagram scale; make room through slide margins and smaller phase headings. */
+[data-layout="stage"] .slide[data-diagram-layout="full-size"]{padding:64px 128px}
+.diagram.region-titles.d13{max-height:none;width:100%;height:auto}
+.diagram.region-titles.d13 .lane{font-size:21px}
+</style>
+<style>
+/* Keep original horizontal scale; outer connector routes use visible SVG overflow. */
+.diagram.region-titles{max-height:none;width:100%;height:auto;overflow:visible}
+.diagram.region-titles .lane,.diagram.region-titles .lane-title{font-size:21px}
+</style>
+<style>
+.rbfnn-expanded .rbfnn-media{align-items:center}
+.rbfnn-expanded .rbfnn-media .rbfnn-figure img{height:500px;width:100%;object-fit:contain;max-height:none}
+</style>
+<style>
+.s2-project-overview .tbl table{table-layout:fixed}.s2-project-overview .tbl td{padding:22px 26px;vertical-align:middle;font-size:1.06em;line-height:1.6}
+.s2-project-overview .tbl th{font-size:1.0em}
+.s2-project-overview .s2-project-name{display:block;font-size:1.1em;margin-bottom:5px}.s2-project-overview .s2-formal-title{display:block;font-size:.84em;line-height:1.5;color:var(--mute)}.s2-project-overview .s2-project-kind{display:block;font-size:.76em;color:var(--dim);margin-top:7px}
+.s2-project-overview .sentence-list{font-size:1em;line-height:1.65}.s2-project-overview .sentence-list li{margin:.25em 0}
+</style>
+<style>
+.s2-job-contents .tbl table{table-layout:fixed}.s2-job-contents .tbl td{padding:18px 20px;vertical-align:middle;font-size:.74em;line-height:1.6}
+.s2-job-contents .s2-project-name{display:block;font-size:1.1em;margin-bottom:5px}.s2-job-contents .s2-formal-title{display:block;font-size:.86em;line-height:1.5;color:var(--mute)}.s2-job-contents .s2-project-kind{display:block;font-size:.78em;margin-top:6px;color:var(--dim)}
+.s2-job-contents .sentence-list{font-size:1em;line-height:1.65}.s2-job-contents .sentence-list li{margin:.2em 0}.s2-job-links{display:grid;gap:8px}.s2-job-links span{display:block;border-left:3px solid var(--accent);padding-left:12px;font-size:.88em;line-height:1.5;color:var(--accent-2)}
+</style>
+<style>
+.s2-keyword-contents .tbl table{table-layout:fixed}.s2-keyword-contents .tbl td{padding:24px;vertical-align:middle;font-size:.79em;line-height:1.65}
+.s2-keyword-contents .s2-project-name,.s2-keyword-contents .s2-project-focus{display:block;font-size:1.05em;line-height:1.5}.s2-keyword-contents .s2-project-name{margin-bottom:3px}.s2-keyword-contents .s2-project-focus{color:var(--accent-2)}.s2-keyword-contents .s2-project-kind{display:block;font-size:.76em;color:var(--dim);margin-top:8px}
+.s2-keyword-contents .sentence-list{font-size:1em;line-height:1.65}.s2-keyword-contents .sentence-list li{margin:.25em 0}
+</style>
+<style id="slide3-vertical-fit">
+/* Slide 3 vertical fit: wide cards preserved, top/bottom space restored. */
+[data-layout="stage"] .slide[data-slide3-size="enlarged"]{padding:72px 64px}
+.pipeline-final-a .option-a-main .pipeline-diagram svg{height:420px;max-height:420px;aspect-ratio:auto}
+.pipeline-final-a .option-a-main video{height:290px;max-height:290px}
+.pipeline-final-a .option-a-bottom{margin-top:8px}
+</style>
+<style id="slide3-balanced-size">[data-layout="stage"] .slide[data-slide3-size="enlarged"]{padding:60px 64px}.pipeline-final-a .option-a-main .pipeline-diagram svg{height:450px;max-height:450px;aspect-ratio:auto}</style>
+<style id="slide3-goal-position">.pipeline-final-a .option-a-bottom .so-brief>div:first-child{position:relative;top:-96px}</style>
+<style id="slide3-flow-B-final">
+[data-layout="stage"] .slide.slide3-flow-final{padding:60px 64px}
+[data-layout="stage"] .slide3-flow-final .measure.wide{width:100%;max-width:1792px}
+.slide3-flow-final .measure{gap:16px}.slide3-flow-final h2{font-size:36px;line-height:1.3;margin-bottom:8px}
+.slide3-flow-final .kicker{margin:0}.slide3-flow-final .fig{margin:0}
+.slide3-flow-final video{width:100%;object-fit:contain;background:#F2F5F3}
+.slide3-flow-final figcaption{font-size:19px;line-height:1.5}
+.slide3-flow-final .pipeline-diagram svg{display:block;width:100%;height:auto;max-height:none;margin:0}
+.flow-steps{display:grid;gap:20px;position:relative}
+.slide3-flow-final .flow-step{position:relative;padding:20px 22px;background:#F7F9F8;border:1.5px solid #CDD8D2;border-radius:14px}
+.slide3-flow-final .flow-step h3{display:flex;align-items:center;gap:12px;font-size:24px;line-height:1.4;margin:0 0 14px}
+.step-number{display:inline-grid;place-items:center;flex:0 0 32px;width:32px;height:32px;font-size:20px;border-radius:50%;background:#0E7A57;color:white}
+.slide3-flow-final .contract-bullets{font-size:22px;line-height:1.45;gap:12px;color:var(--mute)}
+.slide3-flow-final .contract-bullets li{white-space:normal;margin:0}
+
+
+.slide3-flow-final.layout-B .flow-steps{grid-template-columns:repeat(4,1fr);gap:24px}.layout-B .flow-step{padding:18px 18px}.layout-B .flow-step h3{font-size:22px;gap:8px}.layout-B .contract-bullets{font-size:20px;gap:10px}.layout-B .flow-step:not(:last-child)::after{content:"→";position:absolute;right:-23px;top:45%;font-size:24px;color:#0E7A57}.flow-b-media{display:grid;grid-template-columns:24% 1fr;gap:28px;align-items:center}.flow-b-media video{height:275px}.flow-b-media svg{height:475px!important}
+[data-layout="stage"] .slide.slide3-flow-final{padding:60px 64px}
+.slide3-flow-final .measure{gap:0}
+.slide3-flow-final .kicker{margin-bottom:14px}
+.slide3-flow-final h2{margin-bottom:26px}
+.slide3-flow-final .flow-b-media{margin-top:60px;grid-template-columns:minmax(0,24%) minmax(0,1fr)}
+.slide3-flow-final .flow-b-media svg{height:520px!important}
+.slide3-flow-final .flow-b-media video{height:275px;max-height:275px;width:100%;object-fit:contain;aspect-ratio:auto}
+</style>
+<style id="slide3-box-spacing">
+/* Slide 3: redistribute first two boxes, separate headings and bullets. */
+.slide3-flow-final.layout-B .flow-steps{grid-template-columns:1.3fr .7fr 1fr 1fr}
+.slide3-flow-final.layout-B .flow-step h3{gap:18px}
+.slide3-flow-final.layout-B .contract-bullets{gap:18px}
+.slide3-flow-final.layout-B .flow-step:first-child .contract-bullets li{white-space:nowrap}
+</style>
+<style id="slide3-box-balance">.slide3-flow-final.layout-B .flow-steps{grid-template-columns:1.15fr .85fr 1fr 1fr}</style>
+<style id="slide3-box-padding">.slide3-flow-final.layout-B .flow-step{padding-left:18px;padding-right:18px;min-width:0;box-sizing:border-box}.slide3-flow-final.layout-B .flow-step:first-child .contract-bullets li{white-space:normal}.slide3-flow-final.layout-B .flow-step .contract-bullets{width:100%;box-sizing:border-box}.slide3-flow-final.layout-B .flow-step h3{padding:0;margin-left:0;margin-right:0}</style>
+<style id="slide3-final-scale">
+/* Slide 3: expand diagram down/right while preserving 60px section gap. */
+.slide3-flow-final h2{position:relative;top:-8px}
+.slide3-flow-final .flow-b-media{align-items:start;margin-top:60px}
+.slide3-flow-final .flow-b-media .pipeline-diagram{margin-right:-24px}
+.slide3-flow-final .flow-b-media svg{height:560px!important;max-height:none;overflow:visible}
+.slide3-flow-final .flow-b-media .flow-video{align-self:center}
+</style>
+<style id="slide3-diagram-align">.slide3-flow-final .flow-b-media .pipeline-diagram{margin-right:0;min-width:0}.slide3-flow-final .flow-b-media svg{width:100%;height:auto!important;max-height:none;aspect-ratio:1610 / 738;display:block}</style>
+<style id="slide3-diagram-center-final">.slide3-flow-final .flow-b-media{display:block;margin-top:60px}.slide3-flow-final .flow-b-media .pipeline-diagram{width:100%;margin:0}.slide3-flow-final .flow-b-media svg{width:100%;height:620px!important;max-height:none;aspect-ratio:auto;display:block}</style>
+<style id="slide3-header-gap">.slide3-flow-final .kicker{position:relative;top:-28px;margin-bottom:14px}</style>
+<style id="slide3-last-labels">.slide3-flow-final .kicker{top:-16px}</style>
+<style id="slide3-center-scale">.slide3-flow-final .flow-b-media{margin-top:60px}.slide3-flow-final .flow-b-media svg{height:650px!important;max-height:none;aspect-ratio:auto}</style>
+<style id="slide3-box-bold">.slide3-flow-final .flow-step .contract-bullets{font-weight:700}</style>
+<style id="slide3-title-bold">.slide3-flow-final .flow-step h3{font-weight:700}</style>
+<style id="slide4-evaluation-final">
+[data-layout="stage"] .slide.slide4-evaluation-final{padding:60px 64px;align-items:start;justify-items:center}
+[data-layout="stage"] .slide4-evaluation-final .measure.wide{width:100%;max-width:1792px;align-content:start;gap:0}
+.slide4-evaluation-final .kicker{font-size:24px;margin:0 0 22px}
+.slide4-evaluation-final h2{font-size:36px;line-height:1.3;margin:0 0 40px;font-weight:700}
+.slide4-evaluation-final .fig{margin:0;gap:14px}.slide4-evaluation-final video{display:block;width:100%;max-height:none;aspect-ratio:auto;object-fit:contain;background:#F2F5F3;border-radius:10px}
+.slide4-evaluation-final figcaption{font-size:21px;line-height:1.4;font-weight:700}
+.slide4-evaluation-final .evaluation-table{margin:0;border-radius:12px;overflow:hidden}
+.slide4-evaluation-final table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:24px;line-height:1.4}
+.slide4-evaluation-final th{font-size:25px;font-weight:700;padding:16px 18px;color:#0E7A57;background:#F0F5F2;text-align:left}
+.slide4-evaluation-final td{padding:16px 18px;font-weight:700;border-bottom:1px solid #DCE3DF;vertical-align:middle}
+.slide4-evaluation-final tbody tr:last-child td{border-bottom:0}
+.slide4-evaluation-final .main-score b{display:block;font-size:39px;color:#0E7A57;line-height:1.2}
+.slide4-evaluation-final .main-score span{display:block;font-size:20px;margin-top:5px;color:#6E7A74}
+.result-conclusion{display:grid;gap:18px}.result-conclusion p{display:grid;grid-template-columns:140px 1fr;gap:20px;margin:0;font-size:23px;line-height:1.5;font-weight:700}
+.result-conclusion b{color:#0E7A57}
+.eval-label{font-size:22px;font-weight:700;color:#0E7A57;margin:0 0 16px}
+
+.eval-b-main{display:grid;grid-template-columns:54% 1fr;gap:48px;align-items:start}.eval-b-videos{display:grid;gap:28px}.eval-b-videos video{height:230px}.layout-B td{padding:20px 18px}.layout-B .result-conclusion{margin-top:36px;padding-top:24px;border-top:1px solid #DCE3DF}</style><style id="slide4-type-match">.slide4-evaluation-final .kicker{font-size:.68em}.slide4-evaluation-final table,.slide4-evaluation-final .main-score b,.slide4-evaluation-final .main-score span{font-size:20px}.slide4-evaluation-final th,.slide4-evaluation-final .eval-label{font-size:22px}.slide4-evaluation-final figcaption,.slide4-evaluation-final .result-conclusion p{font-size:20px}.slide4-evaluation-final td{padding:14px 18px}.slide4-evaluation-final .main-score b{line-height:1.4}</style>
+<style id="portfolio-header-grid-and-slide4-results">
+/* One header grid for portfolio content slides, based on slide 3 anchors. */
+[data-layout="stage"] .slide.portfolio-header-aligned{padding:60px 64px;align-items:start;justify-items:center}
+[data-layout="stage"] .portfolio-header-aligned>.measure{width:100%;max-width:1792px;padding-top:117px;align-content:start}
+[data-layout="stage"] .portfolio-header-aligned>.measure>.kicker{position:absolute!important;top:44px!important;left:64px;right:64px;margin:0!important;font-size:18.4824px!important;line-height:1.68;transform:none}
+[data-layout="stage"] .portfolio-header-aligned>.measure>h2{position:absolute!important;top:97px!important;left:64px;right:64px;margin:0!important;font-size:36px!important;line-height:1.3;transform:none}
+.slide4-evaluation-final .score-cell b{display:block;font-size:20px;line-height:1.4}
+.slide4-evaluation-final .score-cell span,.slide4-evaluation-final .main-score span{display:block;font-size:20px;color:#6E7A74;font-weight:400;line-height:1.4;margin-top:5px}
+.slide4-evaluation-final .eval-b-results .result-conclusion{margin-top:26px;padding-top:22px;border-top:1px solid #DCE3DF}
+</style>
+<style id="slide4-alignment">
+/* Slide 4: align video and table top edges, lower/spread conclusions. */
+.slide4-evaluation-final .eval-label{line-height:1.4}
+.slide4-evaluation-final .eval-b-videos{padding-top:46.8px}
+.slide4-evaluation-final .eval-b-results .result-conclusion{margin-top:42px;padding-top:30px;gap:30px}
+</style>
+<style id="slide6-graph-layout">
+/* Slide 6: larger plots, one bottom caption per plot, legend beneath both. */
+.simreal-ablation .s2r-plots{gap:36px;margin:12px 0 0;align-items:start}
+.simreal-ablation .s2r-plots figure{margin:0;min-width:0}
+.simreal-ablation .s2r-plots svg{width:100%;height:380px;max-height:none;display:block}
+.simreal-ablation .ablation-axis-caption{font-size:20px;font-weight:700;line-height:1.5;text-align:center;margin-top:8px;color:var(--fg)}
+.simreal-ablation .ablation-legend{margin:18px 0 0;font-size:20px;gap:36px;justify-content:center}
+</style>
+<style id="slide6-axis-labels">.simreal-ablation .s2r-plots .ablation-fixed-condition{font-size:20px;font-weight:700;line-height:1.5;text-align:center;min-height:0;margin:0 0 10px}.simreal-ablation .s2r-plots svg{height:380px;max-height:none}</style>
+<style id="project2-rose-overview">
+/* Project 2: distinct muted rose tone, project-3-style hierarchy. */
+.slide[data-project-tone="rose"]{--accent:#A34E65;--accent-2:#A34E65;--accent-soft:rgba(163,78,101,.08)}
+.slide[data-project-tone="rose"]>.measure>.kicker{color:#A34E65}
+.peg-project-overview .measure{gap:0}
+.peg-project-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.peg-project-card{position:relative;border:1.5px solid #D7ACB8;border-radius:14px;background:#FBF3F5;padding:20px 22px}
+.peg-project-card h3{display:flex;gap:18px;align-items:center;font-size:22px;font-weight:700;margin-bottom:18px;line-height:1.4}
+.peg-project-card h3 span{display:inline-grid;place-items:center;flex:0 0 32px;height:32px;border-radius:50%;background:#A34E65;color:#fff;font-size:20px}
+.peg-project-card .sentence-list{font-size:20px;font-weight:700;line-height:1.5;gap:18px}
+.peg-project-card .sentence-list li{margin:0}
+.peg-project-card:not(:last-child)::after{content:"→";position:absolute;right:-23px;top:45%;font-size:24px;color:#A34E65}
+.peg-project-media{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:60px}
+.peg-project-media .fig{margin:0;gap:16px}
+.peg-project-media .fig img,.peg-project-media .fig video{display:block;width:100%;height:360px;max-height:none;aspect-ratio:auto;object-fit:contain;background:#F7F7F7;border-radius:12px}
+.peg-project-media figcaption{font-size:20px;font-weight:700;line-height:1.5;color:#31403A}
+</style>
+<style id="slide7-title-media">.peg-project-overview .peg-project-media{margin-top:112px}</style>
+<style id="slide8-tactile-style">
+/* Slide 8: visual evidence first; concise bold observations on the right. */
+.tactile-project-page .measure{gap:0}
+.tactile-main{display:grid;grid-template-columns:minmax(0,68%) minmax(0,1fr);gap:36px;align-items:start;margin-top:24px}
+.tactile-project-page .tactile-evidence{margin:0;gap:20px}
+.tactile-project-page .tactile-evidence video{width:100%;height:640px;max-height:none;aspect-ratio:auto;object-fit:contain;background:#F7F7F7;border-radius:12px}
+.tactile-project-page .tactile-evidence figcaption{font-size:20px;font-weight:700;line-height:1.5}
+.tactile-summary{display:grid;gap:28px;align-content:start}
+.tactile-card{padding:24px;border:1.5px solid #D7ACB8;border-radius:14px;background:#FBF3F5}
+.tactile-card h3{display:flex;gap:18px;align-items:center;font-size:22px;font-weight:700;line-height:1.4;margin-bottom:18px}
+.tactile-card h3 span{display:inline-grid;place-items:center;flex:0 0 32px;height:32px;border-radius:50%;background:#A34E65;color:white;font-size:20px}
+.tactile-card .sentence-list{font-size:20px;font-weight:700;line-height:1.5;gap:18px}
+.tactile-card .sentence-list li{margin:0}
+</style>
+<style id="slide9-violet-draft">
+/* Project 3 draft: muted violet, four concise work stages above evidence. */
+.slide[data-project-tone="violet"]{--accent:#6F5AA6;--accent-2:#6F5AA6;--accent-soft:rgba(111,90,166,.08)}
+.relocate-project-draft .measure{gap:0}
+.relocate-project-steps{display:grid;grid-template-columns:1fr 1fr 1.1fr 1.05fr;gap:24px}
+.relocate-project-card{position:relative;padding:20px;border:1.5px solid #C4B8DE;border-radius:14px;background:#F6F3FB}
+.relocate-project-card h3{display:flex;gap:18px;align-items:center;font-size:22px;font-weight:700;line-height:1.4;margin-bottom:18px}
+.relocate-project-card h3 span{display:inline-grid;place-items:center;flex:0 0 32px;height:32px;background:#6F5AA6;border-radius:50%;color:white;font-size:20px}
+.relocate-project-card .sentence-list{font-size:20px;line-height:1.5;font-weight:700;gap:18px}
+.relocate-project-card .sentence-list li{margin:0}
+.relocate-project-card:not(:last-child)::after{content:"→";position:absolute;right:-23px;top:45%;font-size:24px;color:#6F5AA6}
+.relocate-project-draft .relocate-merged-grid{display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);gap:36px;align-items:center;margin-top:48px}
+.relocate-project-draft .p3-results{margin:0;gap:20px}
+.relocate-project-draft .relocate-videos video{height:420px;max-height:none;width:100%;object-fit:contain;background:#F7F7F7;border-radius:12px}
+.relocate-project-draft .relocate-videos figcaption{font-size:20px;font-weight:700;line-height:1.5;white-space:nowrap}
+.relocate-project-draft .relocate-learning svg{width:100%;height:470px;max-height:none;display:block}
+</style>
+<style id="slide9-single-video">.relocate-project-draft .relocate-merged-grid{grid-template-columns:minmax(0,28%) minmax(0,1fr);gap:36px}.relocate-project-draft .relocate-videos video{height:540px;max-height:none}.relocate-project-draft .relocate-learning svg{height:600px;max-height:none}.relocate-project-draft .relocate-videos figcaption{font-size:19px;white-space:normal}</style>
+<style id="slide9-theme-balance">.s9-lower-theme .formula{fill:#247F86!important}.s9-lower-theme .trajectory{stroke:#247F86}.relocate-project-steps{grid-template-columns:.86fr .86fr 1.19fr 1.24fr}.relocate-project-card:nth-child(3) .sentence-list li,.relocate-project-card:nth-child(4) .sentence-list li{white-space:nowrap}</style>
+<style id="slide9-readability">.relocate-project-draft .relocate-merged-grid{grid-template-columns:minmax(0,22%) minmax(0,1fr);gap:36px}.relocate-project-draft .relocate-videos video{height:470px;max-height:none}.relocate-project-draft .relocate-learning svg{height:650px;max-height:none}.relocate-project-draft .relocate-learning svg text{font-weight:700}</style>
+<style id="slide9-box-rebalance">.relocate-project-steps{grid-template-columns:.96fr .96fr 1.09fr 1.14fr}</style>
+<style id="slide10-control-draft">
+/* Slide 10 draft: match project 3 violet perception / teal control lanes. */
+.relocate-control-draft .measure{gap:0}
+.relocate-control-draft .diagram.region-titles.d13{width:90%;max-width:1600px;height:auto;max-height:none;margin:24px auto 0;display:block}
+.relocate-control-draft .diagram .grp.sim{stroke:#6F5AA6;fill:none}
+.relocate-control-draft .diagram .lane.sim{fill:#6F5AA6!important;font-weight:700}
+.relocate-control-draft .diagram .box{stroke:#C4B8DE}
+.relocate-control-draft .diagram .box.learned{stroke:#6F5AA6;fill:#F1EDF8}
+.relocate-control-draft .diagram .control-path-teal .grp.real{stroke:#247F86;fill:none}
+.relocate-control-draft .diagram .control-path-teal .lane.real{fill:#247F86!important;font-weight:700}
+.relocate-control-draft .diagram .control-path-teal .box{stroke:#247F86;fill:#F2F8F8}
+.relocate-control-draft .diagram .control-path-teal .elabel{fill:#247F86}
+.relocate-control-draft .diagram text{font-weight:700}
+</style>
+<style id="slide9-learning-dimensions">.relocate-project-draft .relocate-project-steps{grid-template-columns:.82fr 1.16fr 1.55fr 1.08fr;gap:20px}.relocate-project-draft .relocate-project-card .sentence-list li{white-space:normal;font-size:19px;line-height:1.4}.relocate-project-draft .relocate-project-card .sentence-list{gap:12px}.relocate-project-draft .relocate-project-card h3{font-size:21px}.relocate-project-draft .relocate-project-card:nth-child(3) .sentence-list li{font-size:18px;white-space:nowrap}</style>
+<style id="slide9-flow-order">.relocate-project-draft .relocate-project-steps{grid-template-columns:1.55fr .82fr 1.16fr 1.08fr}.relocate-project-draft .relocate-project-card:nth-child(3) .sentence-list li{font-size:19px;white-space:normal}.relocate-project-draft .relocate-project-card:nth-child(1) .sentence-list li{font-size:18px;white-space:nowrap}</style>
+<style id="slide9-width-balance">.relocate-project-draft .relocate-project-steps{grid-template-columns:1.36fr .96fr 1.16fr 1.13fr}.relocate-project-draft .relocate-project-card:nth-child(1) .sentence-list li{white-space:normal}.relocate-project-draft .relocate-project-card:nth-child(2) .sentence-list li{white-space:nowrap}</style>
+<style id="slide9-width-final">.relocate-project-draft .relocate-project-steps{grid-template-columns:1.46fr .96fr 1.16fr 1.03fr}</style>
+<style id="slide10-spacing-rebased">[data-layout="stage"] .relocate-control-draft>.measure{padding-top:100px!important;gap:0!important;align-content:start!important}.relocate-control-draft .diagram.region-titles.d13{width:90%!important;max-width:1540px!important;height:auto!important;max-height:none!important;margin:0 auto!important;display:block}.relocate-control-draft .control-path-teal .edge{stroke:#247F86!important}.relocate-control-draft .control-path-teal .edge.dash{stroke:#247F86!important}</style>
+<style id="slide11-12-go2-draft">
+.go2-style-draft{--accent:#A66B28;--accent-2:#497C72}.go2-style-draft .kicker{color:#A66B28!important}.go2-style-draft .subt{font-size:21px;font-weight:700;margin:0;color:#59615D}.go2-summary-cards{display:grid;grid-template-columns:1.2fr 1.1fr 1fr;gap:24px;margin-top:10px}.go2-summary-card{border:1px solid #DCCBB5;border-radius:14px;background:#FBF7F1;padding:22px 24px}.go2-summary-card h3{display:flex;align-items:center;gap:18px;font-size:22px;font-weight:700;margin:0 0 18px}.go2-summary-card h3 span{color:#A66B28}.go2-summary-card p{font-size:20px;line-height:1.55;font-weight:700;margin:0}.go2-style-draft .figs.f2{gap:36px;margin-top:48px}.go2-style-draft .figs.f2 video{height:430px;width:100%;object-fit:contain;background:#F6F7F6;border-radius:12px}.go2-style-draft figcaption{font-size:20px;font-weight:700;margin-top:16px}.go2-style-draft .diagram.region-titles.d16{width:90%!important;max-width:1510px!important;height:auto!important;max-height:none!important;margin:26px auto 0!important;display:block}.go2-style-draft .diagram text{font-weight:700}.go2-style-draft .diagram .grp.sim{stroke:#A66B28}.go2-style-draft .diagram .lane.sim{fill:#A66B28!important}.go2-style-draft .diagram .grp.real{stroke:#497C72}.go2-style-draft .diagram .lane.real{fill:#497C72!important}.go2-style-draft .diagram .box{stroke:#CDBB9F}.go2-style-draft .diagram .box.learned{stroke:#A66B28;fill:#FBF7F1}.go2-style-draft .diagram .ac{fill:#A66B28}.go2-style-draft .diagram .traj.hi{stroke:#A66B28}.go2-style-draft .diagram .edge.dash{color:#497C72;stroke:#497C72}.go2-style-draft .diagram .lane{font-size:25px!important}
+</style>
+<style id="slide11-card-balance">.go2-summary-cards{grid-template-columns:1fr 1.1fr 1.2fr}.go2-summary-card .sentence-list{margin:0;padding-left:22px;display:grid;gap:16px;font-size:20px;line-height:1.55;font-weight:700}</style>
+<style id="slide11-merged-layout">.go2-summary-card{padding:16px 22px}.go2-summary-card h3{margin-bottom:12px}.go2-summary-card p{font-size:19px;line-height:1.4}.go2-merged-layout{display:grid;grid-template-columns:29% 71%;gap:24px;align-items:center;margin-top:36px}.go2-merged-layout .fig{margin:0;min-width:0}.go2-merged-layout video{width:100%;height:auto;object-fit:contain;border-radius:12px}.go2-merged-layout figcaption{font-size:18px;line-height:1.4}.go2-style-draft .go2-merged-diagram .diagram.region-titles.d16{width:100%!important;max-width:none!important;margin:0!important;max-height:610px!important}.go2-merged-layout{grid-template-columns:minmax(0,29fr) minmax(0,71fr)}.go2-merged-diagram{min-width:0}</style>
+<style id="slide11-video-crop">.go2-merged-layout{grid-template-columns:minmax(0,23fr) minmax(0,77fr)}.go2-style-draft .go2-merged-diagram .diagram.region-titles.d16{max-height:680px!important}</style>
+<style id="go2-split-theme">.go2-style-draft .diagram .go2-real-theme .box{stroke:#497C72;fill:#F2F7F5}.go2-style-draft .diagram .go2-real-theme .box.learned{stroke:#497C72;fill:#EAF3F0}.go2-style-draft .diagram .go2-real-theme .t,.go2-style-draft .diagram .go2-real-theme .ac,.go2-style-draft .diagram .go2-real-theme .elabel{fill:#497C72!important}.go2-style-draft .diagram .go2-real-theme .chip{stroke:#497C72}.go2-style-draft .diagram .go2-real-theme .chip.act{fill:#DCEEE8;stroke:#497C72}.go2-style-draft .diagram .go2-real-theme .traj.hi{stroke:#497C72}.go2-style-draft .diagram .go2-real-theme .edge{color:#497C72;stroke:#497C72}.go2-style-draft .diagram .go2-real-theme .dot{fill:#497C72}</style>
+<style id="slide11-diagram-up">.go2-merged-layout .go2-merged-diagram{transform:translateY(-16px)}</style>
+<style id="slide11-swap-freeze">.go2-merged-layout{grid-template-columns:minmax(0,77fr) minmax(0,23fr)}.go2-merged-layout .go2-merged-diagram{grid-column:1;grid-row:1}.go2-merged-layout>.fig{grid-column:2;grid-row:1}.go2-style-draft .diagram .go2-real-theme .chip.go2-frozen{fill:#E8EDF0;stroke:#9BA8B2}.go2-style-draft .diagram .go2-real-theme .dim{fill:#758693!important}</style>
+<style id="appendix-center-draft">.appendix-style-draft .kicker{color:#536A79!important}.appendix-cards{display:grid;gap:24px}.appendix-cards.two{grid-template-columns:1fr 1fr;margin-top:28px}.appendix-cards.three{grid-template-columns:.85fr 1fr 1.2fr;margin-bottom:40px}.appendix-card{padding:22px 24px;border:1px solid #CAD4DB;border-radius:14px;background:#F4F7F9}.appendix-card h3{margin:0 0 18px;font-size:22px;font-weight:700;color:#536A79}.appendix-card ul{display:grid;gap:16px;margin:0;padding-left:22px;font-size:20px;font-weight:700;line-height:1.5}.appendix-style-draft .tech2,.appendix-style-draft .figs.f2{gap:36px}.appendix-style-draft .tech2 .fig img,.appendix-style-draft .tech2 .fig video,.appendix-style-draft .figs.f2 video{height:410px!important;width:100%;object-fit:contain;background:#FFF}.appendix-style-draft figcaption{font-size:20px;font-weight:700;margin-top:16px}.appendix-style-draft .rbfnn-media{margin-top:28px}.portfolio-centered-end .measure{max-width:1600px;width:100%;gap:28px}.portfolio-centered-end .kicker,.portfolio-centered-end h2{text-align:center;margin:0}.portfolio-centered-end h2{font-size:36px}.portfolio-centered-end .kicker{font-size:19px}.portfolio-centered-end .stack .row{font-size:21px;padding:18px 0}.portfolio-centered-end .tbl table{font-size:21px}.portfolio-centered-end .tbl th,.portfolio-centered-end .tbl td{padding:18px 20px}.portfolio-centered-end .rule{margin:0 auto}</style>
+<style id="paper-followup-table">.portfolio-centered-end .tbl table{font-size:19px}.portfolio-centered-end .tbl th,.portfolio-centered-end .tbl td{padding:15px 18px}</style>
+<style id="project1-green-theme">.slide[data-project-tone="green"]{--accent:#0E7A57;--accent-2:#0E7A57;--accent-soft:rgba(14,122,87,.08)}.slide[data-project-tone="green"]>.measure>.kicker{color:#0E7A57!important}.slide[data-project-tone="green"] .flow-step{border-color:#A7CDBF!important;background:#F1F8F4!important}.slide[data-project-tone="green"] .flow-step h3{color:#0E7A57!important}.slide[data-project-tone="green"] .flow-step .step-number{background:#0E7A57!important;color:white!important}.slide[data-project-tone="green"] .eval-label,.slide[data-project-tone="green"] .result-conclusion b,.slide[data-project-tone="green"] .result-conclusion strong,.slide[data-project-tone="green"] .so-eyebrow{color:#0E7A57!important}.slide[data-project-tone="green"] .evaluation-table th{background:#EEF7F2;color:#0E7A57}.slide[data-project-tone="green"] .evaluation-table{border-color:#A7CDBF}.slide[data-project-tone="green"] .so-comparison-video{border-color:#A7CDBF}.slide[data-project-tone="green"] .ablation-fixed-condition{color:#0E7A57}</style>
+<style id="contents-final">.slide3-flow-final .diagram .return-flow{stroke:#0E7A57!important}.s2-keyword-contents .tbl td{padding:18px 22px}.s2-keyword-contents .sentence-list{font-size:20px;line-height:1.45;gap:10px}.toc-supplement{display:flex;justify-content:space-between;gap:24px;font-size:18px;line-height:1.5;margin-top:12px;color:#59645E}.toc-supplement b{margin-right:16px}.s2-keyword-contents [data-toc-project="01"] .s2-project-name{color:#0E7A57}.s2-keyword-contents [data-toc-project="02"] .s2-project-name{color:#A34E65}.s2-keyword-contents [data-toc-project="03"] .s2-project-name{color:#6F5AA6}.s2-keyword-contents [data-toc-project="04"] .s2-project-name{color:#A66B28}</style>
+<style id="contents-job-alignment">.s2-keyword-contents .s2-project-name{font-size:25px!important;line-height:1.45;font-weight:700}.s2-keyword-contents .s2-project-kind{display:block;margin-top:14px;font-size:18px}.s2-keyword-contents .tbl td{padding:22px}.s2-keyword-contents .sentence-list{font-size:20px;gap:12px}</style>
+<style id="contents-all-rows">.s2-keyword-contents .tbl td{padding:13px 20px!important}.s2-keyword-contents .s2-project-name{font-size:24px!important;line-height:1.35}.s2-keyword-contents .s2-project-kind{margin-top:8px!important;font-size:17px}.s2-keyword-contents .sentence-list{font-size:19px;line-height:1.4;gap:7px}.s2-keyword-contents [data-toc-project="appendix"] .s2-project-name,.s2-keyword-contents [data-toc-project="closing"] .s2-project-name{color:#536A79}</style>
+<style id="contents-wording">.toc-end-pages{font-size:18px;line-height:1.5;color:#59645E;margin:14px 0 0;padding-left:20px}.toc-end-pages span{margin-left:36px}.s2-keyword-contents .tbl td{padding:16px 20px!important}</style>
+<style id="kia-bookends">.slide.kia-bookend{--fg:#F5F7F8;--mute:#CCD5DB;--dim:#A9BAC5;--accent:#F5F7F8;--accent-2:#B3C5D0;--line:rgba(255,255,255,.18);background:#09141D;color:#F5F7F8;isolation:isolate}.kia-bookend::before{content:"";position:absolute;inset:48px;border:1px solid rgba(255,255,255,.14);z-index:-1;pointer-events:none}.kia-bookend::after{content:"";position:absolute;width:620px;height:620px;right:-310px;top:-310px;border:100px solid rgba(255,255,255,.025);border-radius:50%;z-index:-1;pointer-events:none}.kia-bookend .measure{gap:30px}.kia-bookend h1{color:#FFF;letter-spacing:-.035em;font-size:84px}.kia-bookend .kicker{color:#A9BAC5}.kia-bookend .lead{color:#F5F7F8}.kia-bookend .note,.kia-bookend .sub{color:#A9BAC5}.kia-bookend a{color:#E5EDF2;text-decoration-color:#617886}.kia-bookend b{color:#F5F7F8}.kia-bookend .rule{background:linear-gradient(90deg,#A9BAC5,rgba(169,186,197,.12));height:2px}.kia-bookend .stack .row{border-color:rgba(255,255,255,.16)}.kia-bookend .stack{background:transparent}</style>
+<style id="kia-light-bookends">.slide.kia-bookend{--fg:#09141D;--mute:#42525E;--dim:#687882;--accent:#09141D;--accent-2:#09141D;--line:#DDE3E7;background:#FFFFFF;color:#09141D}.kia-bookend::before{inset:auto -160px -360px auto;width:740px;height:740px;border:2px solid rgba(9,20,29,.11);border-radius:0;transform:rotate(35deg);background:linear-gradient(135deg,rgba(9,20,29,.025),transparent 65%)}.kia-bookend::after{width:360px;height:360px;right:-180px;top:-180px;border:60px solid rgba(9,20,29,.055);border-radius:0;transform:rotate(35deg)}.kia-bookend h1{color:#09141D}.kia-bookend .kicker{color:#687882}.kia-bookend .lead{color:#09141D;font-weight:600}.kia-bookend .note,.kia-bookend .sub{color:#687882}.kia-bookend a{color:#263C4B;text-decoration-color:#A3B0B9}.kia-bookend b{color:#09141D}.kia-bookend .rule{background:linear-gradient(90deg,#09141D,rgba(9,20,29,.08));height:2px}.kia-bookend .stack .row{border-color:#DDE3E7}</style>
+<style id="kia-solid-pattern">.kia-bookend::before{border-color:#09141D;background:none}.kia-bookend::after{border-color:#09141D}</style>
+<style id="kia-video-links">.kia-video-link{display:block;text-align:center;font-size:17px;font-weight:700;line-height:1.4;margin-top:8px;color:#315565;text-decoration:underline;text-underline-offset:3px}.fig:has(>.kia-video-link){gap:6px}.so-video-media{position:relative}.so-video-media .kia-video-link{position:relative;margin-top:8px}.so-comparison-video.filled{padding-bottom:32px!important;overflow:visible!important}</style>
+</head>
+
+<!-- data-layout="stage"     → 1920×1080 고정 조판. 투사·PDF 용. 창이 16:9 가 아니면 레터박스.
+     data-layout="fullbleed" → 레터박스 없이 화면 꽉. 웹 공유·링크 용. -->
+<body data-layout="stage">
+
+<div class="viewport" id="viewport">
+  <div class="stage" id="stage" aria-roledescription="슬라이드 덱" aria-label="Jusung Kim 포트폴리오">
+
+    <!-- ======================= 1  ======================= -->
+    <section class="slide kia-bookend" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        
+        <h1>Jusung&nbsp;Kim</h1>
+        <div class="rule"></div>
+        <p class="lead">Manipulator DB 및 파이프라인 구축 직무</p>
+        <p class="note">Research Intern · 지능로보틱스연구센터, 한국전자기술연구원(KETI)<br>
+          <b>Email</b> <a href="mailto:dsafjk0024@naver.com">dsafjk0024@naver.com</a> &nbsp;·&nbsp;
+          <b>Homepage</b> <a href="https://dsafjk0024.github.io" target="_blank" rel="noopener">dsafjk0024.github.io</a> &nbsp;·&nbsp;
+          <b>GitHub</b> <a href="https://github.com/dsafjk0024" target="_blank" rel="noopener">github.com/dsafjk0024</a></p>
+      </div>
+      <aside class="notes" hidden>표지. 한 줄로 무엇을 하는 사람인지만.</aside>
+    </section>
+
+<section class="slide portfolio-header-aligned" data-sec="solo" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger s2-project-overview s2-keyword-contents"><h2>목차</h2><div class="rule"></div><div class="tbl"><table><colgroup><col style="width:47%"><col style="width:53%"></colgroup><thead><tr><th>프로젝트 · 구성</th><th>주요 수행 내용</th></tr></thead><tbody><tr data-toc-project="01"><td><strong class="s2-project-name">01 · 텔레오퍼레이션 기반 시연 데이터 파이프라인 구축</strong><span class="s2-project-kind">개별 연구 · 3–6페이지</span></td><td><ul class="sentence-list"><li>실제 로봇 · 시뮬레이터 기반 텔레오퍼레이션 데이터 수집</li><li>학습용 데이터 포맷 설계 · 변환</li><li>Sim-to-Real · co-training · 실제 로봇 성능 평가</li></ul></td></tr><tr data-toc-project="02"><td><strong class="s2-project-name">02 · Peg-In-Hole 시연 수집 · 모방학습</strong><span class="s2-project-kind">공동 과제 · 7–8페이지</span></td><td><ul class="sentence-list"><li>로봇 상태 · 영상 · 촉각 멀티모달 시연 데이터 획득</li><li>모방학습 모델 학습 · 촉각 기반 Residual policy 연계</li></ul></td></tr><tr data-toc-project="03"><td><strong class="s2-project-name">03 · Relocate 시연 수집 · 강화학습</strong><span class="s2-project-kind">공동 과제 · 9–10페이지</span></td><td><ul class="sentence-list"><li>시뮬레이터 기반 시연 데이터 수집 · 학습 인터페이스 설계</li><li>Asymmetric 강화학습 · 통합 제어 프레임워크 구축</li></ul></td></tr><tr data-toc-project="04"><td><strong class="s2-project-name">04 · World Model 기반 Sim-to-Real</strong><span class="s2-project-kind">공동 과제 · 11페이지</span></td><td><ul class="sentence-list"><li>시뮬레이션 기반 병렬 rollout 데이터 생성 · World Model 학습</li><li>Sim-to-Real · MPPI 제어 기반 World Model dynamics 적응</li></ul></td></tr><tr data-toc-project="appendix"><td><strong class="s2-project-name">부록 · 로봇 제어 및 안전 요소기술</strong><span class="s2-project-kind">12–13페이지</span></td><td><ul class="sentence-list"><li>Residual torque 보상 · 거리 기반 충돌 회피</li><li>Simulation marker 기반 safety shield</li></ul></td></tr></tbody></table></div><p class="toc-end-pages">기술 스택 · 14페이지<span>연구성과 · 15페이지</span></p></div><aside class="notes" hidden>프로젝트1~4 순서와 본문 묶음 유지. 목차 제목은 실제 수행 내용과 공고 키워드로 요약. 원래 식별명: 01 SO-101, 02 Peg-in-Hole, 03 Relocate, 04 Unitree Go2 / SimDist. 제목을 공고의 네 업무와 일대일로 분리하지 않는다. SO-101의 behavior cloning/ResiP는 공동 기반 활용. 공동 과제 담당 범위와 SimDist 공개 구현 재현 구분. world model은 VLA·IL 학습 실적으로 주장하지 않는다. VLA 직접 학습·대규모 데이터 인프라·버전 관리 구축을 주장하지 않는다.</aside></section>
+
+<section class="slide portfolio-header-aligned slide3-flow-final layout-B" data-project-tone="green" data-sec="solo" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger"><p class="kicker">개별 연구 · SO-101 로봇을 활용한 모방학습</p><h2>텔레오퍼레이션 기반 실제 로봇 시연 데이터 수집 · 학습 · deployment 파이프라인 구축</h2><div class="flow-steps"><div class="card flow-step"><h3><span class="step-number">1</span>관측 · 행동 규격</h3><ul class="sentence-list contract-bullets"><li>proprioception · 영상 · action을 YAML로 정의</li><li>수집 · 학습 · deployment 공통 규격 적용</li></ul></div><div class="card flow-step"><h3><span class="step-number">2</span>데이터 품질 검증</h3><ul class="sentence-list contract-bullets"><li>관측 · 행동 규격 불일치 검출</li><li>변환 · 학습 · deployment 전 검증</li></ul></div><div class="card flow-step"><h3><span class="step-number">3</span>LeRobot 데이터 변환</h3><ul class="sentence-list contract-bullets"><li>rosbag2 / MCAP 로깅 · 30 Hz 시간 정렬</li><li>LeRobot v3.0 학습 데이터셋 생성</li></ul></div><div class="card flow-step"><h3><span class="step-number">4</span>모방학습 모델 비교</h3><ul class="sentence-list contract-bullets"><li>ACT vs Flow Matching</li><li>동일 데이터셋 · deployment 인터페이스로 비교</li></ul></div></div><div class="flow-b-media"><div class="pipeline-diagram"><svg class="diagram s4-illustrated region-titles d4" viewBox="-214 -24 1988 738" preserveAspectRatio="xMidYMin meet" role="img" aria-label="리더 팔 텔레오퍼레이션과 policy 추론의 공통 명령 경로, MCAP 기록 및 LeRobot 학습 파이프라인"><defs><marker id="s4-illustrated-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#6E7A74"/></marker><clipPath id="s6t"><rect x="183" y="103" width="289" height="110" rx="6"/></clipPath><clipPath id="s6a0"><rect x="554" y="103" width="108" height="110" rx="6"/></clipPath><clipPath id="s6a1"><rect x="668" y="103" width="108" height="110" rx="6"/></clipPath><clipPath id="s6a2"><rect x="782" y="103" width="108" height="110" rx="6"/></clipPath><clipPath id="s6a3"><rect x="896" y="103" width="108" height="110" rx="6"/></clipPath><clipPath id="s6d0"><rect x="1088" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="s6d1"><rect x="1164" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="s6d2"><rect x="1240" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="s6d3"><rect x="1316" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="s6d4"><rect x="1392" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="s6d5"><rect x="1468" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="s6tp"><rect x="20" y="404" width="142" height="133" rx="6"/></clipPath><clipPath id="s6st"><rect x="1380" y="412" width="159" height="119" rx="6"/></clipPath><marker id="slide3-green-return" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0E7A57"/></marker></defs><style>
+.stage-panel{fill:none;stroke-width:2;stroke-dasharray:10 8}.module{fill:#F7F9F8;stroke-width:1.5}
+.heading{font-size:23px;font-weight:700;fill:#101613}.label{font-size:21px;fill:#101613}
+.number{font-size:21px;fill:white!important;font-weight:700}.lane-title{font:600 15px Inter,sans-serif;letter-spacing:1.5px;fill:#1E6FA8}
+.caption{font-size:18px;fill:#31403A}.tiny{font-size:16px;fill:#6E7A74}
+.math{font-size:22px;font-weight:600;fill:#101613}.topic{font-size:25px;font-weight:600;fill:#0E7A57!important}
+.flow{fill:none;stroke:#6E7A74;stroke-width:2;stroke-linejoin:round}.return-flow{stroke-dasharray:6 5;stroke:#0E7A57}
+</style><rect class="stage-panel" x="0" y="10" width="1560" height="277" rx="16" stroke="#1E6FA8"/><text class="lane-title" x="15" y="-10" text-anchor="start">실시간 제어 · 텔레오퍼레이션과 policy 실행</text><text class="heading" x="30" y="49" text-anchor="start">리더 팔</text><rect x="45" y="157" width="51" height="12" rx="4" fill="#1E6FA8" fill-opacity=".18" stroke="#1E6FA8"/><polyline points="58,154 73,110 125,82 161,115 190,109" fill="none" stroke="#1E6FA8" stroke-width="12" stroke-linejoin="round"/><circle cx="58" cy="154" r="8" fill="white" stroke="#1E6FA8" stroke-width="3"/><circle cx="73" cy="110" r="8" fill="white" stroke="#1E6FA8" stroke-width="3"/><circle cx="125" cy="82" r="8" fill="white" stroke="#1E6FA8" stroke-width="3"/><circle cx="161" cy="115" r="8" fill="white" stroke="#1E6FA8" stroke-width="3"/><circle cx="190" cy="109" r="8" fill="white" stroke="#1E6FA8" stroke-width="3"/><path d="M195 109l17 -12M195 109l17 12M212 97v8M212 121v-8" fill="none" stroke="#1E6FA8" stroke-width="4"/><text class="caption" x="32" y="221" text-anchor="start">관절 위치 6개</text><text class="tiny" x="32" y="247" text-anchor="start">그리퍼 포함</text><rect x="280" y="84" width="230" height="119" rx="12" class="module" stroke="#1E6FA8"/><text class="heading" x="298" y="116" text-anchor="start">텔레오퍼레이션</text><text class="caption" x="298" y="165" text-anchor="start">50 Hz · 입력 갱신 확인</text><rect x="568" y="99" width="455" height="66" rx="33" fill="#0E7A57" fill-opacity=".07" stroke="#0E7A57" stroke-width="1.6"/><text class="topic" x="795" y="139" text-anchor="middle">/follower/…/commands</text><text class="heading" x="1210" y="49" text-anchor="start">팔로워 팔</text><rect x="1227" y="157" width="51" height="12" rx="4" fill="#0E7A57" fill-opacity=".18" stroke="#0E7A57"/><polyline points="1240,154 1255,110 1307,82 1343,115 1372,109" fill="none" stroke="#0E7A57" stroke-width="12" stroke-linejoin="round"/><circle cx="1240" cy="154" r="8" fill="white" stroke="#0E7A57" stroke-width="3"/><circle cx="1255" cy="110" r="8" fill="white" stroke="#0E7A57" stroke-width="3"/><circle cx="1307" cy="82" r="8" fill="white" stroke="#0E7A57" stroke-width="3"/><circle cx="1343" cy="115" r="8" fill="white" stroke="#0E7A57" stroke-width="3"/><circle cx="1372" cy="109" r="8" fill="white" stroke="#0E7A57" stroke-width="3"/><path d="M1377 109l17 -12M1377 109l17 12M1394 97v8M1394 121v-8" fill="none" stroke="#0E7A57" stroke-width="4"/><text class="caption" x="1211" y="221" text-anchor="start">ros2_control</text><path d="M225 132H269" class="flow" marker-end="url(#s4-illustrated-arrow)"/><path d="M510 132H556" class="flow" marker-end="url(#s4-illustrated-arrow)"/><path d="M1023 132H1196" class="flow" marker-end="url(#s4-illustrated-arrow)"/><rect x="618" y="212" width="355" height="57" rx="12" class="module" stroke="#0E7A57"/><text class="heading" x="795.5" y="244" text-anchor="middle">inference · observation / chunk</text><path d="M795 212V176" class="flow return-flow" marker-end="url(#slide3-green-return)" style="stroke:#0E7A57!important"/><g transform="translate(0 24)"><rect class="stage-panel" x="0" y="365" width="1560" height="309" rx="16" stroke="#0E7A57"/><text class="lane-title" x="15" y="338" text-anchor="start" style="fill:#0B5C42">학습 데이터 처리 · 기록 · 시간 정렬 · policy 학습</text><rect x="20" y="394" width="230" height="231" rx="12" class="module" stroke="#1E6FA8"/><text class="heading" x="38" y="426" text-anchor="start">관절 상태 · 영상</text><g aria-label="카메라 2대"><path d="M47 469H66L73 458H105L112 469H131V526H47Z" fill="#1E6FA8" fill-opacity=".08" stroke="#1E6FA8" stroke-width="2.5" stroke-linejoin="round"/><circle cx="89" cy="498" r="18" fill="white" stroke="#1E6FA8" stroke-width="3"/><circle cx="89" cy="498" r="10" fill="#1E6FA8" fill-opacity=".16" stroke="#1E6FA8" stroke-width="1.5"/><rect x="114" y="477" width="10" height="7" rx="2" fill="#1E6FA8"/><text x="151" y="509" style="font-size:30px;font-weight:600;fill:#1E6FA8">× 2</text></g><text class="caption" x="39" y="551" text-anchor="start">480×640 · 손목 / 상단</text><path d="M39 585H65L76 574L88 596L104 579L119 588H227" fill="none" stroke="#1E6FA8" stroke-width="2"/><path d="M317 452V538C317 557 424 557 424 538V452" fill="#1E6FA8" fill-opacity=".12" stroke="#1E6FA8" stroke-width="2"/><path d="M317 478.76C317 496.76 424 496.76 424 478.76" fill="none" stroke="#1E6FA8" stroke-width="2"/><path d="M317 508.92C317 526.9200000000001 424 526.9200000000001 424 508.92" fill="none" stroke="#1E6FA8" stroke-width="2"/><path d="M317 538C317 556 424 556 424 538" fill="none" stroke="#1E6FA8" stroke-width="2"/><ellipse cx="370.5" cy="452" rx="53.5" ry="15" fill="#1E6FA8" fill-opacity=".18" stroke="#1E6FA8" stroke-width="2"/><text class="math" x="370.5" y="583" text-anchor="middle">MCAP</text><text class="caption" x="370.5" y="608" text-anchor="middle">rosbag2 · 원시 기록</text><rect x="493" y="413" width="300" height="197" rx="12" class="module" stroke="#0E7A57"/><text class="heading" x="511" y="445" text-anchor="start">30 Hz 시간 정렬</text><path d="M514 479H770" stroke="#1E6FA8" stroke-opacity=".3"/><circle cx="528" cy="479" r="5" fill="#1E6FA8"/><circle cx="567" cy="479" r="5" fill="#1E6FA8"/><circle cx="606" cy="479" r="5" fill="#1E6FA8"/><circle cx="645" cy="479" r="5" fill="#1E6FA8"/><circle cx="684" cy="479" r="5" fill="#1E6FA8"/><circle cx="723" cy="479" r="5" fill="#1E6FA8"/><path d="M514 513H770" stroke="#9A5B12" stroke-opacity=".3"/><circle cx="544" cy="513" r="5" fill="#9A5B12"/><circle cx="583" cy="513" r="5" fill="#9A5B12"/><circle cx="622" cy="513" r="5" fill="#9A5B12"/><circle cx="661" cy="513" r="5" fill="#9A5B12"/><circle cx="700" cy="513" r="5" fill="#9A5B12"/><circle cx="739" cy="513" r="5" fill="#9A5B12"/><path d="M545 469V532" stroke="#CDD8D2" stroke-dasharray="3 4"/><path d="M594 469V532" stroke="#CDD8D2" stroke-dasharray="3 4"/><path d="M643 469V532" stroke="#CDD8D2" stroke-dasharray="3 4"/><path d="M692 469V532" stroke="#CDD8D2" stroke-dasharray="3 4"/><path d="M741 469V532" stroke="#CDD8D2" stroke-dasharray="3 4"/><text class="caption" x="510" y="582" text-anchor="start">공통 프레임으로 변환</text><path d="M862 452V538C862 557 971 557 971 538V452" fill="#9A5B12" fill-opacity=".12" stroke="#9A5B12" stroke-width="2"/><path d="M862 478.76C862 496.76 971 496.76 971 478.76" fill="none" stroke="#9A5B12" stroke-width="2"/><path d="M862 508.92C862 526.9200000000001 971 526.9200000000001 971 508.92" fill="none" stroke="#9A5B12" stroke-width="2"/><path d="M862 538C862 556 971 556 971 538" fill="none" stroke="#9A5B12" stroke-width="2"/><ellipse cx="916.5" cy="452" rx="54.5" ry="15" fill="#9A5B12" fill-opacity=".18" stroke="#9A5B12" stroke-width="2"/><text class="math" x="916.5" y="583" text-anchor="middle">LeRobot v3.0</text><text class="caption" x="916.5" y="608" text-anchor="middle">시연 300 episodes</text><rect x="1070" y="395" width="463" height="252" rx="12" class="module" stroke="#0E7A57"/><text class="heading" x="1088" y="427" text-anchor="start">ACT · flow matching 학습</text><rect x="1191" y="451" width="210" height="89" rx="10" fill="#0E7A57" fill-opacity=".055" stroke="#0E7A57" stroke-width="1.5"/><path d="M1213 472L1296.0 467" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1213 472L1296.0 495.5" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1213 472L1296.0 524" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1213 519L1296.0 467" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1213 519L1296.0 495.5" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1213 519L1296.0 524" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1296.0 467L1379 472" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1296.0 467L1379 519" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1296.0 495.5L1379 472" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1296.0 495.5L1379 519" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1296.0 524L1379 472" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><path d="M1296.0 524L1379 519" stroke="#0E7A57" stroke-opacity=".4" stroke-width="1.3"/><circle cx="1213" cy="472" r="5" fill="#0E7A57"/><circle cx="1213" cy="519" r="5" fill="#0E7A57"/><circle cx="1296.0" cy="467" r="5" fill="#0E7A57"/><circle cx="1296.0" cy="495.5" r="5" fill="#0E7A57"/><circle cx="1296.0" cy="524" r="5" fill="#0E7A57"/><circle cx="1379" cy="472" r="5" fill="#0E7A57"/><circle cx="1379" cy="519" r="5" fill="#0E7A57"/><text class="math" x="1296.0" y="567" text-anchor="middle">학습 checkpoint</text><text class="caption" x="1090" y="619" text-anchor="start">동일 데이터 · policy별 300k step</text><path d="M250 503H305" class="flow" marker-end="url(#s4-illustrated-arrow)"/><path d="M424 503H481" class="flow" marker-end="url(#s4-illustrated-arrow)"/><path d="M793 503H850" class="flow" marker-end="url(#s4-illustrated-arrow)"/><path d="M971 503H1058" class="flow" marker-end="url(#s4-illustrated-arrow)"/></g><path d="M591 165V315H-42V533H10" class="flow return-flow" marker-end="url(#slide3-green-return)" style="stroke:#0E7A57!important"/><text class="tiny" x="-58" y="450" text-anchor="end" style="fill:#0E7A57">같은 토픽을 기록</text><path d="M1300 419V319H993V241H983" class="flow return-flow" marker-end="url(#slide3-green-return)" style="stroke:#0E7A57!important"/><text class="tiny" x="1114" y="345" text-anchor="start" style="fill:#0E7A57">checkpoint → inference</text></svg></div></div></div><aside class="notes" hidden>ROS 2 Jazzy · ros2_control · Feetech STS3215 · rosbag2/MCAP · LeRobot v3.0 · PyTorch. 300 시연, policy별 300k 스텝.
+        종료 사유: 실제 로봇에서 시연을 모아 policy를 deploy·평가하는 단계는 목표를 달성해 8월에 종료.
+        후속 2026년 9–10월에는 공동 behavior cloning/ResiP 기반으로 시뮬레이션 600 ep와 실제 로봇 40 episodes co-training·deploy. Diffusion Policy 실제 로봇 11/23 성공 기록. 기존 실제 로봇 300개와 별도 데이터셋.수치가 아니라 시스템 설계가 이 장의 논지.
+        세부 질문 오면 max_age_s, 에피소드 폐기 기준, LeRobot이 시간을 frame_index/fps 로 합성하는 문제를 설명.
+        학습 스텝 수는 프로젝트 페이지 기준(policy별 동일 스텝). 삭제한 본문 부연설명:  관측 · 행동 YAML 규격을 기록–변환–학습–추론에서 공유. 팔 · 시간축 · 네트워크는 개념도. </aside></section>
+
+<section class="slide portfolio-header-aligned slide4-evaluation-final layout-B" data-project-tone="green" data-sec="solo" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger"><p class="kicker">개별 연구 · 실제 로봇 평가</p><h2>모방학습 모델 성능 비교 실패 사례 분석</h2><div class="eval-b-main"><div class="eval-b-results"><p class="eval-label">동일 데이터셋 · 실제 로봇 평가</p><div class="tbl evaluation-table"><table><colgroup><col style="width:44%"><col style="width:28%"><col style="width:28%"></colgroup><thead><tr><th>평가 조건</th><th>ACT</th><th>Flow Matching</th></tr></thead><tbody><tr class="main-score"><td>시연 범위 내 · 50회</td><td><b>74%</b><span>37 / 50</span></td><td><b>60%</b><span>30 / 50</span></td></tr><tr><td>가까운 배치 · 25회</td><td class="score-cell"><b>96%</b><span>24 / 25</span></td><td class="score-cell"><b>76%</b><span>19 / 25</span></td></tr><tr><td>먼 배치 · 25회</td><td class="score-cell"><b>52%</b><span>13 / 25</span></td><td class="score-cell"><b>44%</b><span>11 / 25</span></td></tr><tr><td>Out of distribution · 10회</td><td class="score-cell"><b>20%</b><span>2 / 10</span></td><td class="score-cell"><b>30%</b><span>3 / 10</span></td></tr><tr><td>제어주기 30Hz</td><td>29.8 Hz</td><td>26.8 Hz</td></tr></tbody></table></div><div class="result-conclusion"><p><b>결과</b><span>먼 배치 · 시연 범위 밖에서 두 policy 모두 성공률 감소</span></p><p><b>데이터 확장</b><span>시뮬레이션 데이터 생성 · co-training으로 배치 커버리지 확장</span></p></div></div><div class="eval-b-videos"><figure class="fig"><video src="videos/KIA/so101_act_vs_fbc.mp4" poster="images/so101/so101_act_vs_fbc_poster.jpg" aria-label="같은 큐브 배치에서 ACT와 flow matching policy의 rollout 비교"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/so101_act_vs_fbc.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>Cube stacking task · ACT vs Flow Matching</figcaption></figure><figure class="fig"><video src="videos/KIA/so101_ood_placement_failures.mp4" poster="images/so101/so101_ood_placement_failures_poster.jpg" aria-label="시연 범위 밖 run 52와 적층 후 미끄러지는 run 04의 실패 사례 비교"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/so101_ood_placement_failures.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>Failure cases · OOD / Placement</figcaption></figure></div></div></div><aside class="notes" hidden>74% vs 60%을 "이겼다"로 말하지 않는다.
+        통계 근거(프로젝트 페이지): 범위 내 50 + 범위 밖 10 = 60회 전체를 대응표본으로 비교했고,
+        한쪽만 성공한 22회가 14:8. 동전 던지기와 구분 안 되는 수준(McNemar p = 0.29).
+        위치별 실패 쏠림은 Fisher p = 0.001. 물어보면 그때 꺼낸다.
+        flow matching의 ODE 샘플러가 replan당 ~100 ms라 27 Hz.
+        "왜 끝냈나" 질문 오면: 실제 로봇 시연 수집의 커버리지 한계가 실패 분포로 드러났고,
+        후속 단계의 시뮬레이션 데이터 생성 · co-training · 실제 로봇 deploy 성과는 이어지는 슬라이드에서 제시.
+    실패 비교 영상: 왼쪽 OOD run52(0–8.233초), 오른쪽 적층 실패 run04(0–9.133초). 짧은 왼쪽은 마지막 프레임 유지. 원본 속도 유지. 사례의 알고리즘 소속은 확정하지 않음.</aside></section>
+
+<section class="slide portfolio-header-aligned" data-project-tone="green" data-sec="solo" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger so-integrated"><p class="kicker">개별 연구 · Sim-to-Real</p><h2>시뮬레이션 정합 · 데이터 생성 · co-training · deployment</h2><svg xmlns="http://www.w3.org/2000/svg" class="diagram so-prep" viewBox="-8 0 1576 691" role="img" aria-label="9점 보정, 카메라 정합, Rendering domain randomization을 준비한 뒤 BC와 ResiP로 합성 궤적을 만들고 실제 로봇 시연과 co-training하여 deploy"><defs><marker id="slide5-so-prep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#6E7A74"/></marker><clipPath id="slide5-s6d0"><rect x="1088" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="slide5-s6d1"><rect x="1164" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="slide5-s6d2"><rect x="1240" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="slide5-s6d3"><rect x="1316" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="slide5-s6d4"><rect x="1392" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="slide5-s6d5"><rect x="1468" y="103" width="72" height="110" rx="6"/></clipPath><clipPath id="slide5-s6st"><rect x="1380" y="412" width="159" height="119" rx="6"/></clipPath></defs><style>.so-prep text{font-family:Inter,"Noto Sans KR",sans-serif}.so-prep .panel{fill:none;stroke-width:2;stroke-dasharray:9 7}.so-prep .hd{font-size:23px;font-weight:700;fill:#101613}.so-prep .tx{font-size:18px;fill:#31403A}.so-prep .bold{font-size:20px;font-weight:600;fill:#101613}.so-prep .num{font-size:19px;font-weight:700;fill:white!important}.so-prep .slot{fill:#F7F9F8;stroke:#CDD8D2;stroke-width:1.5;stroke-dasharray:5 4}.so-prep .slot-t{font-size:18px;fill:#50665C}.so-prep .small{font-size:16px;fill:#6E7A74}.so-prep .band{font-size:22px;font-weight:700;fill:#1E6FA8}.so-prep .arr{fill:none;stroke:#6E7A74;stroke-width:2;stroke-linejoin:round}.so-prep .plus{font-size:29px;fill:#0E7A57}</style><text x="0" y="24" class="band" text-anchor="start">데이터 수집 전 · 현실 기준으로 시뮬레이션 정합</text><rect x="0" y="44" width="492" height="229" rx="16" class="panel" stroke="#1E6FA8"/><circle cx="25" cy="72" r="16" fill="#1E6FA8"/><text x="25" y="78" class="num" text-anchor="middle">1</text><text x="53" y="79" class="hd" text-anchor="start" style="fill:#1E6FA8">9점 접촉 추종기반 kinematic calibration</text><g transform="translate(0 12)"><path d="M28 118L126 100L156 178L58 196Z" fill="#EDF4F8" stroke="#BCD0DE"/><circle cx="43" cy="126" r="5" fill="#1E6FA8"/><circle cx="78" cy="120" r="5" fill="#1E6FA8"/><circle cx="113" cy="114" r="5" fill="#1E6FA8"/><circle cx="53" cy="152" r="5" fill="#1E6FA8"/><circle cx="88" cy="146" r="5" fill="#1E6FA8"/><circle cx="123" cy="140" r="5" fill="#1E6FA8"/><circle cx="63" cy="178" r="5" fill="#1E6FA8"/><circle cx="98" cy="172" r="5" fill="#1E6FA8"/><circle cx="133" cy="166" r="5" fill="#1E6FA8"/><path d="M67 87L78 105L102 117L108 132" stroke="#1E6FA8" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M101 132L115 132" stroke="#1E6FA8" stroke-width="3"/></g><svg x="183" y="96" width="289" height="136" viewBox="390 260 970 820" preserveAspectRatio="xMidYMid meet" overflow="hidden" style="width:289px;height:136px"><image href="images/so101_sim2real/s2r_touch9_contact_frame.jpg" x="0" y="0" width="1920" height="1080"/></svg><rect x="183" y="96" width="289" height="136" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><text x="25" y="257" class="tx" text-anchor="start" style="font-weight:700">그립점 평균 오차 18.2 → 5.5 mm</text><rect x="534" y="44" width="492" height="229" rx="16" class="panel" stroke="#1E6FA8"/><circle cx="559" cy="72" r="16" fill="#1E6FA8"/><text x="559" y="78" class="num" text-anchor="middle">2</text><text x="587" y="79" class="hd" text-anchor="start" style="fill:#1E6FA8">카메라 · 실행 정합</text><rect x="552" y="98" width="224" height="127" rx="9" fill="#74576C" fill-opacity=".035" stroke="#74576C" stroke-opacity=".4"/><text x="564" y="119" font-size="17" font-weight="700" fill="#74576C">Real</text><image href="images/so101_sim2real/s2r_align_real.png" x="561" y="128" width="99" height="88" preserveAspectRatio="xMidYMid slice"/><image href="images/so101_sim2real/s2r_align_real_wrist.png" x="668" y="128" width="99" height="88" preserveAspectRatio="xMidYMid slice"/><rect x="782" y="98" width="224" height="127" rx="9" fill="#1E6FA8" fill-opacity=".035" stroke="#1E6FA8" stroke-opacity=".4"/><text x="794" y="119" font-size="17" font-weight="700" fill="#1E6FA8">Sim</text><image href="images/so101_sim2real/s2r_align_sim.png" x="791" y="128" width="99" height="88" preserveAspectRatio="xMidYMid slice"/><image href="images/so101_sim2real/s2r_align_sim_wrist.png" x="898" y="128" width="99" height="88" preserveAspectRatio="xMidYMid slice"/><text x="558" y="257" class="tx" text-anchor="start" style="font-weight:700">ChArUco · 색 / 노출 · 관절 추종</text><rect x="1068" y="44" width="492" height="229" rx="16" class="panel" stroke="#1E6FA8"/><circle cx="1093" cy="72" r="16" fill="#1E6FA8"/><text x="1093" y="78" class="num" text-anchor="middle">3</text><text x="1121" y="79" class="hd" text-anchor="start" style="fill:#1E6FA8">domain randomization</text><image href="images/so101_sim2real/s2r_dr_nominal.png" x="1088" y="103" width="72" height="110" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6d0)"/><rect x="1088" y="103" width="72" height="110" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><image href="images/so101_sim2real/s2r_dr_front_b.png" x="1164" y="103" width="72" height="110" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6d1)"/><rect x="1164" y="103" width="72" height="110" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><image href="images/so101_sim2real/s2r_dr_jitter.png" x="1240" y="103" width="72" height="110" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6d2)"/><rect x="1240" y="103" width="72" height="110" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><image href="images/so101_sim2real/s2r_dr_wrist_nominal.png" x="1316" y="103" width="72" height="110" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6d3)"/><rect x="1316" y="103" width="72" height="110" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><image href="images/so101_sim2real/s2r_dr_wrist_b.png" x="1392" y="103" width="72" height="110" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6d4)"/><rect x="1392" y="103" width="72" height="110" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><image href="images/so101_sim2real/s2r_dr_wrist_c.png" x="1468" y="103" width="72" height="110" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6d5)"/><rect x="1468" y="103" width="72" height="110" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><text x="1092" y="257" class="tx" text-anchor="start" style="font-weight:700">wrist jitter 1 cm / 3° · 기준 + 랜덤화</text><path d="M498 158H524" class="arr" marker-end="url(#slide5-so-prep-arrow)"/><path d="M1032 158H1058" class="arr" marker-end="url(#slide5-so-prep-arrow)"/><g transform="translate(0 36)"><text x="0" y="326" style="fill:#0E7A57" class="band" text-anchor="start">데이터 생성 · co-training · 실제 로봇 deployment</text><rect x="0" y="348" width="330" height="294" rx="16" class="panel" stroke="#0E7A57"/><circle cx="25" cy="376" r="16" fill="#0E7A57"/><text x="25" y="382" class="num" text-anchor="middle">4</text><text x="53" y="383" class="hd" text-anchor="start" style="fill:#0E7A57">behavior cloning</text><svg x="20" y="398" width="164" height="165" viewBox="840 140 480 640" preserveAspectRatio="xMidYMid meet" overflow="hidden" style="width:164px;height:165px"><image href="images/so101_sim2real/s2r_teleop_gripper_frame.jpg" x="0" y="0" width="1920" height="1080"/></svg><rect x="20" y="398" width="164" height="165" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><rect x="201" y="433" width="108" height="76" rx="9" fill="#1E6FA8" fill-opacity=".06" stroke="#1E6FA8"/><path d="M221 453L255.0 448" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M221 453L255.0 471.0" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M221 453L255.0 494" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M221 489L255.0 448" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M221 489L255.0 471.0" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M221 489L255.0 494" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M255.0 448L289 453" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M255.0 448L289 489" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M255.0 471.0L289 453" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M255.0 471.0L289 489" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M255.0 494L289 453" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M255.0 494L289 489" stroke="#1E6FA8" stroke-opacity=".35"/><circle cx="221" cy="453" r="4" fill="#1E6FA8"/><circle cx="221" cy="489" r="4" fill="#1E6FA8"/><circle cx="255.0" cy="448" r="4" fill="#1E6FA8"/><circle cx="255.0" cy="471.0" r="4" fill="#1E6FA8"/><circle cx="255.0" cy="494" r="4" fill="#1E6FA8"/><circle cx="289" cy="453" r="4" fill="#1E6FA8"/><circle cx="289" cy="489" r="4" fill="#1E6FA8"/><text x="255.0" y="536" class="bold" text-anchor="middle" style="font-weight:700">π<tspan font-size="14" dy="6">base</tspan></text><path d="M188 469H198" class="arr" marker-end="url(#slide5-so-prep-arrow)"/><text x="22" y="605" class="tx" text-anchor="start" style="font-weight:700">로봇 proprioception기반 사전학습</text><rect x="370" y="348" width="330" height="294" rx="16" class="panel" stroke="#0E7A57"/><circle cx="395" cy="376" r="16" fill="#0E7A57"/><text x="395" y="382" class="num" text-anchor="middle">5</text><a href="https://arxiv.org/pdf/2407.16677" target="_blank" rel="noopener noreferrer" aria-label="ResiP 원문 논문 PDF 열기"><title>From Imitation to Refinement — Residual RL for Precise Assembly</title><text x="423" y="383" class="hd" text-anchor="start" style="text-decoration:underline;fill:#0E7A57">ResiP · 원문 알고리즘</text></a><rect x="390" y="410" width="115" height="65" rx="9" fill="#1E6FA8" fill-opacity=".06" stroke="#1E6FA8"/><path d="M410 430L447.5 425" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M410 430L447.5 442.5" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M410 430L447.5 460" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M410 455L447.5 425" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M410 455L447.5 442.5" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M410 455L447.5 460" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M447.5 425L485 430" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M447.5 425L485 455" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M447.5 442.5L485 430" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M447.5 442.5L485 455" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M447.5 460L485 430" stroke="#1E6FA8" stroke-opacity=".35"/><path d="M447.5 460L485 455" stroke="#1E6FA8" stroke-opacity=".35"/><circle cx="410" cy="430" r="4" fill="#1E6FA8"/><circle cx="410" cy="455" r="4" fill="#1E6FA8"/><circle cx="447.5" cy="425" r="4" fill="#1E6FA8"/><circle cx="447.5" cy="442.5" r="4" fill="#1E6FA8"/><circle cx="447.5" cy="460" r="4" fill="#1E6FA8"/><circle cx="485" cy="430" r="4" fill="#1E6FA8"/><circle cx="485" cy="455" r="4" fill="#1E6FA8"/><text x="447.5" y="502" class="bold" text-anchor="middle" style="font-weight:700">π<tspan font-size="14" dy="6">base</tspan></text><rect x="556" y="410" width="123" height="65" rx="9" fill="#0E7A57" fill-opacity=".06" stroke="#0E7A57"/><path d="M576 430L617.5 425" stroke="#0E7A57" stroke-opacity=".35"/><path d="M576 430L617.5 442.5" stroke="#0E7A57" stroke-opacity=".35"/><path d="M576 430L617.5 460" stroke="#0E7A57" stroke-opacity=".35"/><path d="M576 455L617.5 425" stroke="#0E7A57" stroke-opacity=".35"/><path d="M576 455L617.5 442.5" stroke="#0E7A57" stroke-opacity=".35"/><path d="M576 455L617.5 460" stroke="#0E7A57" stroke-opacity=".35"/><path d="M617.5 425L659 430" stroke="#0E7A57" stroke-opacity=".35"/><path d="M617.5 425L659 455" stroke="#0E7A57" stroke-opacity=".35"/><path d="M617.5 442.5L659 430" stroke="#0E7A57" stroke-opacity=".35"/><path d="M617.5 442.5L659 455" stroke="#0E7A57" stroke-opacity=".35"/><path d="M617.5 460L659 430" stroke="#0E7A57" stroke-opacity=".35"/><path d="M617.5 460L659 455" stroke="#0E7A57" stroke-opacity=".35"/><circle cx="576" cy="430" r="4" fill="#0E7A57"/><circle cx="576" cy="455" r="4" fill="#0E7A57"/><circle cx="617.5" cy="425" r="4" fill="#0E7A57"/><circle cx="617.5" cy="442.5" r="4" fill="#0E7A57"/><circle cx="617.5" cy="460" r="4" fill="#0E7A57"/><circle cx="659" cy="430" r="4" fill="#0E7A57"/><circle cx="659" cy="455" r="4" fill="#0E7A57"/><text x="617.5" y="502" class="bold" text-anchor="middle" style="font-weight:700">π<tspan font-size="14" dy="6">res</tspan></text><text x="531" y="451" class="plus" text-anchor="middle">+</text><path d="M398 551C428 513 454 571 482 541S548 571 575 535S640 551 668 523" stroke="#9A5B12" stroke-width="3" fill="none"/><circle cx="398" cy="551" r="5" fill="#9A5B12"/><circle cx="668" cy="523" r="5" fill="#9A5B12"/><text x="392" y="583" class="tx" text-anchor="start" style="font-weight:700">base + Residual → teacher 생성</text><text x="392" y="613" class="tx" text-anchor="start" style="font-weight:700">π<tspan font-size="13" dy="5">res</tspan><tspan dy="-5"> : PPO 강화학습</tspan></text><rect x="740" y="348" width="420" height="294" rx="16" class="panel" stroke="#0E7A57"/><circle cx="765" cy="376" r="16" fill="#0E7A57"/><text x="765" y="382" class="num" text-anchor="middle">6</text><text x="793" y="383" class="hd" text-anchor="start" style="fill:#0E7A57">학습 데이터 확보</text><g transform="translate(13 0)"><path d="M778 427V484C778 500 871 500 871 484V427" fill="#9A5B12" fill-opacity=".1" stroke="#9A5B12" stroke-width="2"/><ellipse cx="824.5" cy="427" rx="46.5" ry="12" fill="#9A5B12" fill-opacity=".2" stroke="#9A5B12" stroke-width="2"/><path d="M778 455.5C778 470.5 871 470.5 871 455.5" fill="none" stroke="#9A5B12" stroke-width="2"/><path d="M778 484C778 499 871 499 871 484" fill="none" stroke="#9A5B12" stroke-width="2"/><text x="824.5" y="521" class="bold" text-anchor="middle" style="font-weight:700">시뮬레이션 시연</text><text x="824.5" y="544" class="small" text-anchor="middle">600 episodes</text></g><path d="M1017 427V484C1017 500 1110 500 1110 484V427" fill="#A55368" fill-opacity=".1" stroke="#A55368" stroke-width="2"/><ellipse cx="1063.5" cy="427" rx="46.5" ry="12" fill="#A55368" fill-opacity=".2" stroke="#A55368" stroke-width="2"/><path d="M1017 455.5C1017 470.5 1110 470.5 1110 455.5" fill="none" stroke="#A55368" stroke-width="2"/><path d="M1017 484C1017 499 1110 499 1110 484" fill="none" stroke="#A55368" stroke-width="2"/><text x="1063.5" y="521" class="bold" text-anchor="middle" style="font-weight:700">실제 로봇 시연</text><text x="1063.5" y="544" class="small" text-anchor="middle">40 episodes</text><text x="950" y="463" class="plus" text-anchor="middle">+</text><text x="763" y="602" class="tx" text-anchor="start" style="font-weight:700">domain randomization · 속도 완화</text><rect x="1200" y="348" width="360" height="294" rx="16" class="panel" stroke="#0E7A57"/><circle cx="1225" cy="376" r="16" fill="#0E7A57"/><text x="1225" y="382" class="num" text-anchor="middle">7</text><text x="1253" y="383" class="hd" text-anchor="start" style="fill:#0E7A57">co-training · deployment</text><rect x="1220" y="428" width="117" height="73" rx="9" fill="#0E7A57" fill-opacity=".06" stroke="#0E7A57"/><path d="M1240 448L1278.5 443" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1240 448L1278.5 464.5" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1240 448L1278.5 486" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1240 481L1278.5 443" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1240 481L1278.5 464.5" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1240 481L1278.5 486" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1278.5 443L1317 448" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1278.5 443L1317 481" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1278.5 464.5L1317 448" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1278.5 464.5L1317 481" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1278.5 486L1317 448" stroke="#0E7A57" stroke-opacity=".35"/><path d="M1278.5 486L1317 481" stroke="#0E7A57" stroke-opacity=".35"/><circle cx="1240" cy="448" r="4" fill="#0E7A57"/><circle cx="1240" cy="481" r="4" fill="#0E7A57"/><circle cx="1278.5" cy="443" r="4" fill="#0E7A57"/><circle cx="1278.5" cy="464.5" r="4" fill="#0E7A57"/><circle cx="1278.5" cy="486" r="4" fill="#0E7A57"/><circle cx="1317" cy="448" r="4" fill="#0E7A57"/><circle cx="1317" cy="481" r="4" fill="#0E7A57"/><text x="1278.5" y="528" class="bold" text-anchor="middle" style="font-size:17px;font-weight:700">Diffusion Policy</text><image href="images/so101_sim2real/s2r_real_stack.jpg" x="1380" y="412" width="159" height="119" preserveAspectRatio="xMidYMid slice" clip-path="url(#slide5-s6st)"/><rect x="1380" y="412" width="159" height="119" rx="6" fill="none" stroke="#CDD8D2" stroke-width="1.2"/><path d="M1346 468H1367" class="arr" marker-end="url(#slide5-so-prep-arrow)"/><text x="1221" y="602" class="tx" text-anchor="start" style="font-weight:700">실제 로봇 policy deployment · 평가</text><path d="M336 489H360" class="arr" marker-end="url(#slide5-so-prep-arrow)"/><path d="M706 489H730" class="arr" marker-end="url(#slide5-so-prep-arrow)"/><path d="M1166 489H1190" class="arr" marker-end="url(#slide5-so-prep-arrow)"/></g><path d="M1314 279V295H950V374" class="arr" marker-end="url(#slide5-so-prep-arrow)"/></svg></div><aside class="notes" hidden>출처: Sim-to-Real 작업 기록 p.2, p.7–9. 9점 그립점 평균 18.15 → 5.51 mm. 32.07 px는 wrist EXTRINSIC fit으로 intrinsic 0.267 px와 다르다. extrinsic 품질 게이트를 넘는 설정이 시뮬레이션 데이터에 적용돼 있어 완전한 카메라 정합 완료로 주장하지 않는다. 시뮬 actuator stiffness/damping은 변경하지 않았다. 보정 후 teacher open-loop replay는 release 뒤 미끄러짐으로 적층 실패. 이를 성공 Sim-to-Real 영상으로 쓰지 않는다. 사진 확보 후 촬영 자료 대기 영역 교체. Rendering domain randomization은 실제 사용한 wrist 카메라 위치·회전 jitter를 표기. 구체 사진 미확보로 빈 프레임 유지. behavior cloning/ResiP 공동 기반 활용. 기존 실제 로봇 300ep와 신규40ep는 별도. 삭제한 본문 부연설명:  9점 오차는 보정에 사용한 점 기준. 잔여: wrist extrinsic 32.07 px · 추종 지연 1–3 step.  ResiP는 원문 알고리즘과 공동 구현 기반을 활용한 단계이며, 새로 제안한 알고리즘이 아니다. π_base는 behavior cloning 사전학습 policy, π_res는 Residual policy.</aside></section>
+
+<section class="slide portfolio-header-aligned" data-project-tone="green" data-sec="solo" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger simreal-ablation"><p class="kicker">개별 연구 · 실제 로봇 평가</p><h2>Sim-to-Real - 데이터 수 ablation</h2><div class="so-comparison-video filled" data-synced-comparison role="group" aria-label="같은 체크포인트의 시뮬레이션 롤아웃과 실제 로봇 롤아웃을 front · wrist 카메라로 비교"><div class="so-video-media"><p class="so-eyebrow">SIMULATION</p><video src="videos/KIA/s2r_sim_rollout_aligned_v2.mp4" poster="images/so101/s2r_sim_rollout_poster.jpg" muted playsinline preload="auto"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/s2r_sim_rollout_aligned_v2.mp4" target="_blank" rel="noopener">영상 링크</a></div><div class="so-video-media"><p class="so-eyebrow">REAL ROBOT</p><video src="videos/KIA/s2r_real_rollout_aligned_v2.mp4" poster="images/so101/s2r_real_rollout_poster.jpg" muted playsinline preload="auto"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/s2r_real_rollout_aligned_v2.mp4" target="_blank" rel="noopener">영상 링크</a></div></div><div class="s2r-plots"><figure><h3 class="ablation-fixed-condition">실제 로봇 시연 40 episodes 고정</h3><svg viewBox="0 30 620 294" xmlns="http://www.w3.org/2000/svg" role="img"><style>.ax{font:13px Inter,"Noto Sans KR",sans-serif;fill:#6E7A74}.vl{font:600 13px Inter,sans-serif}.lg{font:13px Inter,"Noto Sans KR",sans-serif;fill:#31403A}.xc{font:13px Inter,"Noto Sans KR",sans-serif;fill:#6E7A74}</style><line x1="54" y1="262.0" x2="612" y2="262.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="266.0" text-anchor="end">0</text><line x1="54" y1="208.0" x2="612" y2="208.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="212.0" text-anchor="end">25</text><line x1="54" y1="154.0" x2="612" y2="154.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="158.0" text-anchor="end">50</text><line x1="54" y1="100.0" x2="612" y2="100.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="104.0" text-anchor="end">75</text><line x1="54" y1="46.0" x2="612" y2="46.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="50.0" text-anchor="end">100</text><rect x="80.0" y="148.6" width="40" height="113.4" rx="3" fill="#1E6FA8"/><text class="vl" x="100.0" y="141.6" text-anchor="middle" fill="#1E6FA8">52.5</text><rect x="127.0" y="197.2" width="40" height="64.8" rx="3" fill="#9A5B12"/><text class="vl" x="147.0" y="190.2" text-anchor="middle" fill="#9A5B12">30</text><rect x="174.0" y="197.2" width="40" height="64.8" rx="3" fill="#0E7A57"/><text class="vl" x="194.0" y="190.2" text-anchor="middle" fill="#0E7A57">30</text><text class="xc" x="147.0" y="284" text-anchor="middle" font-size="15" fill="#101613">200</text><rect x="266.0" y="62.2" width="40" height="199.8" rx="3" fill="#1E6FA8"/><text class="vl" x="286.0" y="55.2" text-anchor="middle" fill="#1E6FA8">92.5</text><rect x="313.0" y="100.0" width="40" height="162.0" rx="3" fill="#9A5B12"/><text class="vl" x="333.0" y="93.0" text-anchor="middle" fill="#9A5B12">75</text><rect x="360.0" y="132.4" width="40" height="129.6" rx="3" fill="#0E7A57"/><text class="vl" x="380.0" y="125.4" text-anchor="middle" fill="#0E7A57">60</text><text class="xc" x="333.0" y="284" text-anchor="middle" font-size="15" fill="#101613">400</text><rect x="452.0" y="56.8" width="40" height="205.2" rx="3" fill="#1E6FA8"/><text class="vl" x="472.0" y="49.8" text-anchor="middle" fill="#1E6FA8">95</text><rect x="499.0" y="51.4" width="40" height="210.6" rx="3" fill="#9A5B12"/><text class="vl" x="519.0" y="44.4" text-anchor="middle" fill="#9A5B12">97.5</text><rect x="546.0" y="132.4" width="40" height="129.6" rx="3" fill="#0E7A57"/><text class="vl" x="566.0" y="125.4" text-anchor="middle" fill="#0E7A57">60</text><text class="xc" x="519.0" y="284" text-anchor="middle" font-size="15" fill="#101613">600</text><line x1="54" y1="262" x2="612" y2="262" stroke="#6E7A74" stroke-width="1.2"/><text x="13" y="154" text-anchor="middle" transform="rotate(-90 13 154)" font-size="13" font-weight="700" fill="#31403A">성공률 (%)</text><text x="333" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#31403A">시뮬레이션 데이터 수 (episodes)</text></svg></figure><figure><h3 class="ablation-fixed-condition">시뮬레이션 시연 600 episodes 고정</h3><svg viewBox="0 30 620 294" xmlns="http://www.w3.org/2000/svg" role="img"><style>.ax{font:13px Inter,"Noto Sans KR",sans-serif;fill:#6E7A74}.vl{font:600 13px Inter,sans-serif}.lg{font:13px Inter,"Noto Sans KR",sans-serif;fill:#31403A}.xc{font:13px Inter,"Noto Sans KR",sans-serif;fill:#6E7A74}</style><line x1="54" y1="262.0" x2="612" y2="262.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="266.0" text-anchor="end">0</text><line x1="54" y1="208.0" x2="612" y2="208.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="212.0" text-anchor="end">25</text><line x1="54" y1="154.0" x2="612" y2="154.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="158.0" text-anchor="end">50</text><line x1="54" y1="100.0" x2="612" y2="100.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="104.0" text-anchor="end">75</text><line x1="54" y1="46.0" x2="612" y2="46.0" stroke="#DCE3DF" stroke-width="1"/><text class="ax" x="45" y="50.0" text-anchor="end">100</text><rect x="80.0" y="67.6" width="40" height="194.4" rx="3" fill="#1E6FA8"/><text class="vl" x="100.0" y="60.6" text-anchor="middle" fill="#1E6FA8">90</text><rect x="127.0" y="78.4" width="40" height="183.6" rx="3" fill="#9A5B12"/><text class="vl" x="147.0" y="71.4" text-anchor="middle" fill="#9A5B12">85</text><rect x="174.0" y="110.8" width="40" height="151.2" rx="3" fill="#0E7A57"/><text class="vl" x="194.0" y="103.8" text-anchor="middle" fill="#0E7A57">70</text><text class="xc" x="147.0" y="284" text-anchor="middle" font-size="15" fill="#101613">20</text><rect x="266.0" y="51.4" width="40" height="210.6" rx="3" fill="#1E6FA8"/><text class="vl" x="286.0" y="44.4" text-anchor="middle" fill="#1E6FA8">97.5</text><rect x="313.0" y="62.2" width="40" height="199.8" rx="3" fill="#9A5B12"/><text class="vl" x="333.0" y="55.2" text-anchor="middle" fill="#9A5B12">92.5</text><rect x="360.0" y="154.0" width="40" height="108.0" rx="3" fill="#0E7A57"/><text class="vl" x="380.0" y="147.0" text-anchor="middle" fill="#0E7A57">50</text><text class="xc" x="333.0" y="284" text-anchor="middle" font-size="15" fill="#101613">30</text><rect x="452.0" y="56.8" width="40" height="205.2" rx="3" fill="#1E6FA8"/><text class="vl" x="472.0" y="49.8" text-anchor="middle" fill="#1E6FA8">95</text><rect x="499.0" y="51.4" width="40" height="210.6" rx="3" fill="#9A5B12"/><text class="vl" x="519.0" y="44.4" text-anchor="middle" fill="#9A5B12">97.5</text><rect x="546.0" y="132.4" width="40" height="129.6" rx="3" fill="#0E7A57"/><text class="vl" x="566.0" y="125.4" text-anchor="middle" fill="#0E7A57">60</text><text class="xc" x="519.0" y="284" text-anchor="middle" font-size="15" fill="#101613">40</text><line x1="54" y1="262" x2="612" y2="262" stroke="#6E7A74" stroke-width="1.2"/><text x="13" y="154" text-anchor="middle" transform="rotate(-90 13 154)" font-size="13" font-weight="700" fill="#31403A">성공률 (%)</text><text x="333" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#31403A">실제 로봇 시연 수 (episodes)</text></svg></figure></div><div class="ablation-legend"><span style="--series:#1E6FA8">nominal · 40회</span><span style="--series:#9A5B12">rendering domain randomization · 40회</span><span style="--series:#0E7A57">실제 로봇 · 10회</span></div></div><aside class="notes" hidden>비교 영상은 예시 rollout이며 아래 ablation과 다른 run이다. 시뮬레이션 영상 3/3, 실제 로봇 영상 예시 1건 실패. 삭제한 오차 막대는 표준편차가 아닌 Wilson 95% 신뢰구간. 결과: 시뮬레이션 200→400개에서 nominal +40%p, rendering domain randomization +45%p. 실제 로봇 성공률 30–70%. 실패 23건 중 집기 실패 17건. 출처: Diffusion Policy Ablation 기록 p.1–3. PDF의 success_rate로 차트 재작성. sim600_real40 checkpoint는 두 비교에서 공유된다. source fraction sim 0.928858 / real 0.071142 고정, 중첩 episode subset. 고정 시드 20261002, 학습·평가 시드 각각 하나, 신뢰구간이나 통계적 유의성 아님. validation split 없음. from scratch 100k. 성공은 큐브 적층 AND 그리퍼 이탈. 실제 로봇 성능과 별개이며 이 ablation의 실제 로봇 평가 기록은 없다. sim200은 재시작, 데이터로더 RNG 복원은 기록상 미확인. 삭제한 본문 부연설명:  전부 시뮬레이션 평가 · 조건별 100k 학습 · 평가 시드 1개 · nominal/domain randomization 각 40회 · 시뮬레이션/실제 로봇 샘플링 비율 고정. 출처: Sim-to-Real 작업 기록 p.8. Diffusion Policy 11/23 운영자 판정; episode 0 interrupted 별도. ACT 1/6. cotrain_v3_slow2. 실제 로봇와 ablation의 sim600_real40 checkpoint는 다른 run이다. 기존 Diffusion Policy 11/23의 checkpoint와 source metadata가 일치하는 영상이 없다면 화요일 촬영을 당시 영상으로 표기하지 않는다. 새 세션에서 checkpoint·sampler·배치·성공 판정과 모든 시도 기록. Diffusion Policy inference step은 deploy 기본값 4지만 당시 rollout pkl의 실행 인자 저장이 없어 확정하지 않는다. DDIM 4 step에서도 최대 tick 약70 ms 기록. 영상이 없는 동안 사진/동영상을 꾸며 넣지 않고 자료 대기 영역 사용. 기존 10/01 수치는 새 평가 결과로 교체 예정이므로 본문에서 제외. 비교 영상은 2행(Sim/Real) × 3열(로봇 전체/front/wrist), 단일 영상 파일로 제작. Sim과 Real을 같은 태스크·시작 배치·속도 기준으로 표시하고, 동시 실행이 아니면 시간 정렬 비교로 명시. 영상 완성 전 빈 화면 사용.</aside></section>
+
+<section class="slide portfolio-header-aligned peg-project-overview" data-project-tone="rose" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger"><p class="kicker">공동 과제 · 숙련된 로봇 조작 및 파지 성능을 지원하기 위한 평가방법 개발연구</p><h2>Peg-In-Hole Task 시연 수집 · 모방학습 · deployment</h2><div class="peg-project-steps"><div class="peg-project-card"><h3><span>1</span>텔레오퍼레이션</h3><ul class="sentence-list"><li>SpaceMouse 6-DoF 제어 구현</li><li>xArm6 · Robotiq Hand-E 구동</li></ul></div><div class="peg-project-card"><h3><span>2</span>멀티모달 로깅</h3><ul class="sentence-list"><li>로봇 · 그리퍼 상태 및 영상 동기 기록</li><li>RealSense 기반 시연 데이터셋 수집</li></ul></div><div class="peg-project-card"><h3><span>3</span>모방학습 모델 학습</h3><ul class="sentence-list"><li>Flow Matching policy 학습</li><li>수집 시연 데이터 기반 학습</li></ul></div><div class="peg-project-card"><h3><span>4</span>실제 로봇 검증</h3><ul class="sentence-list"><li>Peg-in-Hole policy rollout</li><li>AutomationWorld 2026 라이브 시연</li></ul></div></div><div class="peg-project-media"><figure class="fig"><img src="images/imitation/peg_in_hole_layout.png" alt="Peg-in-Hole 실험 구성">
+            <figcaption>Peg-in-Hole 실험 구성</figcaption></figure><figure class="fig"><video src="videos/KIA/aw_demo.mp4" poster="images/imitation/aw_demo_poster.jpg" aria-label="AutomationWorld 2026 라이브 시연 장면"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/aw_demo.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>AutomationWorld 2026 · Live demo</figcaption></figure><figure class="fig"><video src="videos/KIA/peg_in_hole_tactile.mp4" poster="images/imitation/peg_tactile_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/peg_in_hole_tactile.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>Insertion policy rollout · Peg / Connector · 배속</figcaption></figure></div></div><aside class="notes" hidden>공동 수행 과제. 내 비중이 큰 쪽은 텔레오퍼레이션 스택과 데이터 수집이므로,
+        세부 질문이 그쪽으로 오면 그렇게 답한다. NIST 기반 7개 지표로 정량 평가했으나 수치는 사내 자료 —
+        슬라이드에서 빼고, 물어보면 그때 언급한다.
+    </aside></section>
+
+<section class="slide portfolio-header-aligned tactile-project-page" data-project-tone="rose" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger"><p class="kicker">공동 과제 · 숙련된 로봇 조작 및 파지 성능을 지원하기 위한 평가방법 개발연구</p><h2>XELA 촉각 센서 기반 observation 확장</h2><div class="tactile-main"><figure class="fig tactile-evidence"><video src="videos/KIA/peg_in_hole_multimodal.mp4" poster="images/imitation/peg_multimodal_poster.jpg" aria-label="삽입 영상과 두 손가락 팁의 XELA 접촉력 분포" autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/peg_in_hole_multimodal.mp4" target="_blank" rel="noopener">영상 링크</a><figcaption>Insertion Task · 카메라 영상 / XELA 접촉력 분포</figcaption></figure><div class="tactile-summary"><div class="tactile-card"><h3><span>1</span>삽입 정렬</h3><ul class="sentence-list"><li>좁은 삽입 공차 · 위치 오차에 민감</li><li>AutomationWorld 시연에서 한계 확인</li></ul></div><div class="tactile-card"><h3><span>2</span>멀티모달 observation</h3><ul class="sentence-list"><li>영상 · 로봇 proprioception · 촉각</li><li>XELA 손가락 팁 2개 접촉력 분포</li></ul></div><div class="tactile-card"><h3><span>3</span>TD3 Residual policy</h3><ul class="sentence-list"><li>XELA 접촉 픽셀 → CNN → 촉각 벡터</li><li>촉각 벡터 + 로봇 proprioception + 그리퍼 상태 → observation</li><li>base policy freeze · TD3 Residual action 가산</li></ul></div></div></div></div><aside class="notes" hidden>요지는 공차 문제다 — 가림(occlusion)이 아니라, 삽입 공차가 위치 오차보다 작아서
+        위치 제어만으로는 끼워지지 않는 구간을 접촉력 조절로 넘긴다.
+        스토리: 위치 제어만으로 나간 AutomationWorld 시연에서 정렬 민감도가 한계로 드러났고,
+        그 다음 단계로 촉각 센서를 넣어 접촉력 피드백으로 삽입하도록 바꿨다.
+        정량 비교(촉각 유무 성공률 · 삽입 시간)는 아직 집계하지 않았다 — 물어보면 그렇게 답한다.
+        영상은 여러 시행을 이어붙인 배속본이며 원본은 videos/imitation/peg_in_hole_데모2.mp4. 구현 보충: 기존 모방학습 policy에 TD3로 학습한 Residual policy를 추가. TD3 observation은 CNN으로 벡터화한 XELA 접촉 픽셀, 로봇 proprioception, 그리퍼 상태. Flow Matching 입력 자체의 촉각 확장이 아니라 Residual policy의 observation 확장. 후속 논문: Tactile-Guided Residual Reinforcement Learning for Precise Connector Insertion. Jusung Kim은 2저자. 논문 구조는 Flow Matching base policy freeze + 실제 로봇 online TD3 Residual 학습. 후속 Residual observation은 tactile, F/T, robot joint state, base action. base 30 Hz / Residual 200 Hz, 센서 XELA HE35 및 AIDIN AFT200. 논문에는 CNN 촉각 인코더 및 그리퍼 상태 입력의 구체 구현이 명시되지 않으므로 기존 구현 설명과 구분. HARTING HAN DDD / HAN E 각 50시연, 각 방법·커넥터 30회 평가. base 17/30·21/30 → base+Residual 27/30·29/30. 이는 후속 논문의 결과이며 현재 영상의 성공률로 표기하지 않는다.</aside></section>
+
+<section class="slide portfolio-header-aligned relocate-project-draft" data-project-tone="violet" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1"><div class="measure wide stagger"><p class="kicker">공동 과제 · 시촉각 센싱기반 모방학습에 의한 자율조작파지기술개발</p><h2>Relocate Task 시연 수집 · 강화학습 · deployment</h2><div class="relocate-project-steps"><div class="relocate-project-card"><h3><span>1</span>observation · action 구성</h3><ul class="sentence-list"><li>observation 31D = 팔 pose 6 + 손 관절 16 + 상대 위치 9</li><li>action 22D = 팔 목표 pose 6 + 손 목표 관절 16</li><li>상대 위치: grasp–object / grasp–target / object–target</li></ul></div><div class="relocate-project-card"><h3><span>2</span>시뮬레이션 시연</h3><ul class="sentence-list"><li>Apple Vision Pro 텔레오퍼레이션</li><li>MuJoCo 시연 데이터 수집</li></ul></div><div class="relocate-project-card"><h3><span>3</span>모방학습 · Asymmetric 강화학습</h3><ul class="sentence-list"><li>behavior cloning → 강화학습</li><li>Actor: 실제 로봇 observation</li><li>Critic: ground-truth relative position 추가</li></ul></div><div class="relocate-project-card"><h3><span>4</span>실제 로봇 deployment</h3><ul class="sentence-list"><li>Actor 실행 · Inverse Kinematics · clipping</li><li>충돌 검사 후 로봇 명령 전달</li></ul></div></div><div class="relocate-merged-grid"><div class="relocate-videos"><figure class="fig"><video src="videos/KIA/gasp_symmetric_asymmetric_right.mp4" poster="images/dualarm/gasp_symmetric_asymmetric_right_poster.jpg" aria-label="Symmetric 파지 실패 후 Asymmetric 성공 예시를 순서대로 재생" autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/gasp_symmetric_asymmetric_right.mp4" target="_blank" rel="noopener">영상 링크</a><figcaption>Relocate Task · Symmetric → Asymmetric</figcaption></figure></div><div class="relocate-learning"><svg class="diagram region-titles d12 s14-illustrated" viewBox="-12 -38 1588 728" role="img" aria-label="시연 데이터가 behavior cloning 초기화와 density model 두 분기로 연결되고, 시연 점수와 advantage를 사용한 NPG policy 갱신이 반복되는 구조"><defs><marker id="s14-illustrated-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#6E7A74"/></marker><marker id="s9-lower-teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#247F86"/></marker></defs><style>
+.stage-panel{fill:none;stroke-width:2;stroke-dasharray:10 8}.heading{font-size:23px;font-weight:700;fill:#101613}.lane-title{font:600 15px Inter,sans-serif;letter-spacing:1.2px;fill:#6F5AA6}.caption{font-size:18px;fill:#31403A}.tiny{font-size:16px;fill:#6E7A74}.math{font-size:21px;font-weight:600;fill:#101613}.formula{font-size:28px;font-weight:600;fill:#8A72BD!important}.media-frame{fill:#F7F9F8;stroke:#CDD8D2;stroke-width:1.5;stroke-dasharray:5 4}.slot-label{font-size:18px;fill:#50665c}.flow{fill:none;stroke:#6E7A74;stroke-width:2;stroke-linejoin:round}.return-flow{stroke-dasharray:6 5;stroke:#8A72BD}.trajectory{fill:none;stroke:#6F5AA6;stroke-width:2.5}
+</style><rect class="stage-panel" x="0" y="10" width="1560" height="285" rx="16" stroke="#6F5AA6"/><text class="lane-title" x="15" y="-10" text-anchor="start" style="fill:#6F5AA6;font-weight:700">시연 데이터 수집 · policy 초기화 · 시연 판별</text><text class="heading" x="22" y="49" text-anchor="start" font-weight="700">Vision Pro · MuJoCo 시연</text><rect x="22" y="73" width="258" height="153" rx="9" fill="#F7F9F8" stroke="#CDD8D2" stroke-width="1.5"/><path d="M48 164C48 139 96 139 96 164" fill="#6F5AA6" fill-opacity=".10" stroke="#6F5AA6" stroke-width="2"/><rect x="67" y="124" width="10" height="18" fill="#6F5AA6" fill-opacity=".10" stroke="#6F5AA6" stroke-width="2"/><circle cx="72" cy="110" r="16" fill="#FFFFFF" stroke="#6F5AA6" stroke-width="2"/><path d="M57 110H47" stroke="#6E7A74" stroke-width="3" stroke-linecap="round"/><path d="M58 104H86V112C86 118 78 121 72 121S58 118 58 112Z" fill="#6F5AA6" fill-opacity=".30" stroke="#6F5AA6" stroke-width="2"/><path d="M62 108H80" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/><path d="M101 112C117 106 128 103 141 105" fill="none" stroke="#6F5AA6" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#s14-illustrated-arrow)"/><rect x="150" y="84" width="112" height="74" rx="5" fill="#F1EDF8" stroke="#6F5AA6" stroke-width="2"/><rect x="198" y="158" width="16" height="13" fill="#CDD8D2"/><rect x="180" y="171" width="52" height="5" rx="2.5" fill="#6E7A74"/><path d="M158 146H254" stroke="#6F5AA6" stroke-opacity=".35" stroke-width="1.5"/><rect x="161" y="138" width="20" height="8" rx="2" fill="#6F5AA6" fill-opacity=".55" stroke="#6F5AA6" stroke-width="1.5"/><path d="M171 138L190 112L216 120" fill="none" stroke="#6F5AA6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="190" cy="112" r="3.2" fill="#FFFFFF" stroke="#6F5AA6" stroke-width="1.5"/><path d="M216 120L225 114M216 120L225 127" fill="none" stroke="#6F5AA6" stroke-width="2.5" stroke-linecap="round"/><rect x="231" y="130" width="14" height="14" rx="2" fill="#9A5B12" fill-opacity=".45" stroke="#9A5B12" stroke-width="1.5"/><text x="151" y="200" text-anchor="middle" font-size="17" fill="#50665C" font-weight="700">Vision Pro 텔레오퍼레이션</text><text x="151" y="218" text-anchor="middle" font-size="15" fill="#6E7A74" font-weight="700">손 · 머리 추적 → MuJoCo 로봇</text><text class="caption" x="22" y="267" text-anchor="start" font-weight="700">상태 · 행동 기반 시연 수집</text><path d="M347 119V197C347 216 440 216 440 197V119" fill="#6F5AA6" fill-opacity=".12" stroke="#6F5AA6" stroke-width="2"/><path d="M347 142.88C347 160.88 440 160.88 440 142.88" fill="none" stroke="#6F5AA6" stroke-width="2"/><path d="M347 170.95999999999998C347 188.95999999999998 440 188.95999999999998 440 170.95999999999998" fill="none" stroke="#6F5AA6" stroke-width="2"/><path d="M347 197C347 215 440 215 440 197" fill="none" stroke="#6F5AA6" stroke-width="2"/><ellipse cx="393.5" cy="119" rx="46.5" ry="15" fill="#6F5AA6" fill-opacity=".18" stroke="#6F5AA6" stroke-width="2"/><text class="math" x="393.5" y="242" text-anchor="middle" font-weight="700">시연 데이터</text><rect x="505" y="55" width="442" height="198" rx="12" fill="#6F5AA6" fill-opacity=".035" stroke="#6F5AA6" stroke-width="1.5"/><text class="heading" x="523" y="87" text-anchor="start" font-weight="700">behavior cloning 초기화</text><rect x="645" y="105" width="160" height="84" rx="10" fill="#6F5AA6" fill-opacity=".055" stroke="#6F5AA6" stroke-width="1.5"/><path d="M667 126L725.0 121" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M667 126L725.0 147.0" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M667 126L725.0 173" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M667 168L725.0 121" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M667 168L725.0 147.0" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M667 168L725.0 173" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M725.0 121L783 126" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M725.0 121L783 168" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M725.0 147.0L783 126" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M725.0 147.0L783 168" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M725.0 173L783 126" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><path d="M725.0 173L783 168" stroke="#6F5AA6" stroke-opacity=".4" stroke-width="1.3"/><circle cx="667" cy="126" r="5" fill="#6F5AA6"/><circle cx="667" cy="168" r="5" fill="#6F5AA6"/><circle cx="725.0" cy="121" r="5" fill="#6F5AA6"/><circle cx="725.0" cy="147.0" r="5" fill="#6F5AA6"/><circle cx="725.0" cy="173" r="5" fill="#6F5AA6"/><circle cx="783" cy="126" r="5" fill="#6F5AA6"/><circle cx="783" cy="168" r="5" fill="#6F5AA6"/><text class="math" x="725.0" y="216" text-anchor="middle" font-weight="700">π · 초기 policy</text><rect x="1043" y="55" width="490" height="198" rx="12" fill="#8A72BD" fill-opacity=".035" stroke="#8A72BD" stroke-width="1.5"/><text class="heading" x="1061" y="87" text-anchor="start" font-weight="700">Density model</text><circle cx="1065" cy="126" r="4" fill="#6F5AA6"/><circle cx="1078" cy="126" r="4" fill="#6F5AA6"/><circle cx="1091" cy="126" r="4" fill="#6F5AA6"/><circle cx="1104" cy="126" r="4" fill="#6F5AA6"/><circle cx="1065" cy="181" r="4" fill="#9A5B12"/><circle cx="1078" cy="181" r="4" fill="#9A5B12"/><circle cx="1091" cy="181" r="4" fill="#9A5B12"/><circle cx="1104" cy="181" r="4" fill="#9A5B12"/><text class="tiny" x="1063" y="153" text-anchor="start" font-weight="700">시연 관측</text><text class="tiny" x="1063" y="208" text-anchor="start" font-weight="700">policy 관측</text><rect x="1194" y="110" width="142" height="78" rx="10" fill="#8A72BD" fill-opacity=".055" stroke="#8A72BD" stroke-width="1.5"/><path d="M1216 131L1265.0 126" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1216 131L1265.0 149.0" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1216 131L1265.0 172" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1216 167L1265.0 126" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1216 167L1265.0 149.0" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1216 167L1265.0 172" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1265.0 126L1314 131" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1265.0 126L1314 167" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1265.0 149.0L1314 131" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1265.0 149.0L1314 167" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1265.0 172L1314 131" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><path d="M1265.0 172L1314 167" stroke="#8A72BD" stroke-opacity=".4" stroke-width="1.3"/><circle cx="1216" cy="131" r="5" fill="#8A72BD"/><circle cx="1216" cy="167" r="5" fill="#8A72BD"/><circle cx="1265.0" cy="126" r="5" fill="#8A72BD"/><circle cx="1265.0" cy="149.0" r="5" fill="#8A72BD"/><circle cx="1265.0" cy="172" r="5" fill="#8A72BD"/><circle cx="1314" cy="131" r="5" fill="#8A72BD"/><circle cx="1314" cy="167" r="5" fill="#8A72BD"/><text class="math" x="1265.0" y="215" text-anchor="middle" style="font-size:17px;font-weight:700">Binary cross-entropy</text><path d="M1120 126H1160V135H1184" class="flow" marker-end="url(#s14-illustrated-arrow)"/><path d="M1120 181H1160V170H1184" class="flow" marker-end="url(#s14-illustrated-arrow)"/><text class="caption" x="1370" y="155" text-anchor="start" font-weight="700">density score</text><path d="M288 147H335" class="flow" marker-end="url(#s14-illustrated-arrow)"/><path d="M440 147H495" class="flow" marker-end="url(#s14-illustrated-arrow)"/><path d="M393 104V40H1011V151H1032" class="flow" marker-end="url(#s14-illustrated-arrow)"/><g class="s9-lower-theme"><rect class="stage-panel" x="0" y="382" width="1560" height="282" rx="16" stroke="#247F86"/><text class="lane-title" x="15" y="357" text-anchor="start" style="fill:#247F86;fill:#247F86;font-weight:700">시연 점수를 활용한 강화학습 · policy 갱신</text><rect x="20" y="411" width="342" height="174" rx="12" fill="#247F86" fill-opacity=".035" stroke="#247F86" stroke-width="1.5"/><text class="heading" x="38" y="443" text-anchor="start" style="fill:#247F86;font-weight:700">Actor policy rollout</text><g transform="translate(22 0)"><path d="M46 528C85 467 132 556 169 501S232 471 271 514" class="trajectory"/><circle cx="46" cy="528" r="5" fill="#247F86"/><circle cx="271" cy="514" r="5" fill="#247F86"/><text class="caption" x="40" y="563" text-anchor="start" font-weight="700">실제 로봇 observation → action</text></g><rect x="422" y="411" width="347" height="174" rx="12" fill="#247F86" fill-opacity=".035" stroke="#247F86" stroke-width="1.5"/><text class="heading" x="440" y="443" style="fill:#247F86;font-weight:700">Critic · 학습 전용</text><rect x="439" y="462" width="142" height="58" rx="8" fill="#EAF4F4" stroke="#247F86"/><text x="510" y="487" text-anchor="middle" font-size="20" font-weight="700">observation</text><text x="510" y="509" text-anchor="middle" font-size="17" font-weight="700">Actor와 동일</text><rect x="593" y="462" width="158" height="58" rx="8" fill="#EAF4F4" stroke="#247F86"/><text x="672" y="487" text-anchor="middle" font-size="19" font-weight="700">ground truth</text><text x="672" y="509" text-anchor="middle" font-size="17" font-weight="700">relative position</text><path d="M510 520V531H595 M672 520V531H595V538" fill="none" stroke="#247F86" stroke-width="2" marker-end="url(#s9-lower-teal-arrow)"/><rect x="476" y="543" width="238" height="30" rx="7" fill="#247F86" fill-opacity=".1" stroke="#247F86"/><text x="595" y="565" text-anchor="middle" font-size="21" font-weight="700" style="fill:#247F86">Critic → advantage</text><rect x="829" y="411" width="321" height="174" rx="12" fill="#247F86" fill-opacity=".035" stroke="#247F86" stroke-width="1.5"/><text class="heading" x="847" y="443" text-anchor="start" style="fill:#247F86;font-weight:700">시연 점수 가산</text><text class="formula" x="989" y="494" text-anchor="middle" font-weight="700">A + λ · score</text><text class="caption" x="989" y="528" text-anchor="middle" font-weight="700">A: advantage</text><text class="tiny" x="989" y="559" text-anchor="middle" font-weight="700">λ · iteration에 따라 감소</text><rect x="1210" y="411" width="322" height="174" rx="12" fill="#247F86" fill-opacity=".035" stroke="#247F86" stroke-width="1.5"/><text class="heading" x="1228" y="443" text-anchor="start" style="fill:#247F86;font-weight:700">Natural Policy Gradient</text><rect x="1233" y="462" width="122" height="72" rx="10" fill="#247F86" fill-opacity=".055" stroke="#247F86" stroke-width="1.5"/><path d="M1255 483L1294.0 478" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1255 483L1294.0 498.0" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1255 483L1294.0 518" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1255 513L1294.0 478" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1255 513L1294.0 498.0" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1255 513L1294.0 518" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1294.0 478L1333 483" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1294.0 478L1333 513" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1294.0 498.0L1333 483" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1294.0 498.0L1333 513" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1294.0 518L1333 483" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><path d="M1294.0 518L1333 513" stroke="#247F86" stroke-opacity=".4" stroke-width="1.3"/><circle cx="1255" cy="483" r="5" fill="#247F86"/><circle cx="1255" cy="513" r="5" fill="#247F86"/><circle cx="1294.0" cy="478" r="5" fill="#247F86"/><circle cx="1294.0" cy="498.0" r="5" fill="#247F86"/><circle cx="1294.0" cy="518" r="5" fill="#247F86"/><circle cx="1333" cy="483" r="5" fill="#247F86"/><circle cx="1333" cy="513" r="5" fill="#247F86"/><text class="math" x="1294.0" y="561" text-anchor="middle" font-weight="700"></text><text class="caption" x="1373" y="506" text-anchor="start" style="font-size:15px;font-weight:700">Kullback–Leibler 제약</text><path d="M362 499H411" class="flow" marker-end="url(#s9-lower-teal-arrow)" style="stroke:#247F86"/><path d="M769 499H818" class="flow" marker-end="url(#s9-lower-teal-arrow)" style="stroke:#247F86"/><path d="M1150 499H1199" class="flow" marker-end="url(#s9-lower-teal-arrow)" style="stroke:#247F86"/><path d="M720 253V319H-42V499H10" class="flow" marker-end="url(#s9-lower-teal-arrow)" style="stroke:#247F86"/><text class="tiny" x="730" y="342" text-anchor="start" font-weight="700">초기 가중치</text><path d="M1411 253V339H989V400" class="flow" marker-end="url(#s9-lower-teal-arrow)" style="stroke:#247F86"/><text class="tiny" x="1090" y="330" text-anchor="start" font-weight="700">시연 관측 판별 점수</text><path d="M1372 585V626H191V596" class="flow return-flow" marker-end="url(#s9-lower-teal-arrow)" style="stroke:#247F86"/><text class="tiny" x="647" y="651" text-anchor="start" font-weight="700">갱신된 policy → 다음 rollout</text></g></svg></div></div></div><aside class="notes" hidden>영상은 실제 로봇 대조 예시 2건(대조군 실패 / asymmetric 성공)이며 성공률 비교가 아니다 —
+        물어보면 정량 비교는 미집계라고 답한다. 촬영 시점이 달라 카메라 앵글이 다르다는 점도 먼저 밝힌다.
+        추가 실패 사례 영상 1건 더 있음(gasp_sym_실패2.mp4).
+        실제 로봇 deploy policy는 asymmetric. deploy checkpoint 파일명과 촬영 자료를 연결할 것.
+        RoboWorld 2024 의 53% 를 이 policy 결과로 재사용하지 않는다.
+        필요한 결과 · 자료 목록: docs/project03-rl-evidence.md.
+        통합 전 학습 구조 설명: 추가 입력은 접촉력·질량이 아니라 참값 기반 상대 위치 6-D. dynamics randomization 미사용.
+        목적과 구현을 설명하는 장이며 성공률 향상을 확정하지 않는다. cfg 기본값 CRITIC_PRIVILEGED=false 가 대조군.
+        개선 수치 인용 전 원본 로그 · checkpoint · 학습 seed 수를 확인한다. 삭제한 본문 부연설명:  두 영상은  같은 태스크의 예시 rollout 이다 — 반복 성공률 · 도달 오차 · 완료 시간은 미집계.  본문 용어 설명: policy=Actor, 학습 평가망=Critic. Actor 관측31-D. Critic 추가6-D는 참값 기반 상대 위치이며 실제 로봇 policy에는 들어가지 않는다. 물체 위치 bias ±15mm는 에피소드 단위 고정.팀 공동 기반 위의 통합 · 학습 · deploy. GASP를 새로 제안했다는 주장이 아니다.
+        학습 대상은 오른팔·오른손이며 양팔 동시 RL이 아니다. 상대 위치 9 = grasp–object / grasp–target / object–target 각 3.
+        행동 22차원은 관절 22개가 아니다. 근거: gasp/train_relocate.py, env/relocate_env.py. 삭제한 본문 부연설명:  xArm7 + Allegro Hand · 관측 31-D → 행동 22-D · 시연 수집에서 강화학습 연계  영상 편집: Symmetric 실패 영상 0–9.2초(손이 다시 올라오는 지점까지), 이어 Asymmetric 성공 예시 12.8초 전체. 원본 속도 유지. 왼쪽 상단 각 policy 이름 표기.</aside></section>
+
+<section class="slide portfolio-header-aligned relocate-control-draft" data-diagram-layout="full-size" data-project-tone="violet" data-sec="task" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">공동 과제 · 시촉각 센싱기반 모방학습에 의한 자율조작파지기술개발</p>
+        <h2>시뮬레이션 · 실제 로봇 공용 통합 제어 프레임워크</h2>
+        <svg class="diagram region-titles d13" viewBox="-24 -38 1608 856" role="img" aria-label="지각·policy 및 안전 검사·실행 경로"><defs><marker id="kia12-serpentine" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--dim)"/></marker><marker id="slide10-control-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#247F86"/></marker></defs><rect class="grp sim" x="0" y="10" width="1560" height="355" rx="16"/><text class="lane sim" x="10" y="-12">perception 30 Hz · policy deployment 30 Hz</text><rect class="box" x="25" y="32" width="420" height="321" rx="12"/><text class="t" x="45" y="72">실제 관측</text><image href="images/dualarm/foundation_pose.png" x="43" y="89" width="384" height="218" preserveAspectRatio="xMidYMid meet"/><text class="cap" x="45" y="331">RGB-D · 물체 자세 추적</text><rect class="box" x="505" y="70" width="430" height="105" rx="12"/><text class="t" x="525" y="110">공유 메모리 → Observation</text><text class="s" x="525" y="147">최신 프레임 + 팔 · 손 · 물체 상태</text><rect class="box learned" x="1010" y="70" width="510" height="105" rx="12"/><text class="t" x="1030" y="110">policy · 31-D → 22 targets</text><text class="s" x="1030" y="147">30 Hz · normalized action</text><path class="edge" d="M445 122H495" marker-end="url(#kia12-serpentine)"/><path class="edge" d="M935 122H1000" marker-end="url(#kia12-serpentine)"/><g transform="translate(0 126)" class="control-path-teal"><rect class="grp real" x="0" y="330" width="1560" height="350" rx="16"/><text class="lane real" x="10" y="310">명령 경로 · 안전 검사 · 200 Hz 제어</text><rect class="box" x="1175" y="365" width="345" height="95" rx="12"/><text class="t" x="1195" y="405">어댑터 · Action chunk</text><text class="s" x="1195" y="435">denormalization · Inverse Kinematics</text><rect class="box" x="740" y="355" width="370" height="215" rx="12"/><text class="t" x="760" y="395">Marker Shield</text><image href="images/dualarm/shield_mujoco_poster.jpg" x="758" y="412" width="334" height="112" preserveAspectRatio="xMidYMid meet"/><text class="cap" x="760" y="548">후보 명령 안전 검사</text><rect class="box" x="390" y="365" width="280" height="95" rx="12"/><text class="t" x="410" y="405">Buffer → 제어</text><text class="s" x="410" y="435">200 Hz · chunk 보간</text><rect class="box" x="25" y="350" width="300" height="255" rx="12"/><text class="t" x="45" y="390">실제 양팔 로봇</text><image href="images/dualarm/dualarm_act_c_poster.jpg" x="43" y="407" width="264" height="160" preserveAspectRatio="xMidYMid meet"/><text class="cap" x="45" y="583">xArm7 ×2 · Allegro</text><path class="edge" d="M1347 49V355" marker-end="url(#slide10-control-arrow)"/><path class="edge" d="M1175 412H1120" marker-end="url(#slide10-control-arrow)"/><path class="edge" d="M740 412H680" marker-end="url(#slide10-control-arrow)"/><text class="elabel" x="687" y="390">safe</text><path class="edge" d="M390 412H335" marker-end="url(#slide10-control-arrow)"/><rect class="box" x="750" y="595" width="350" height="65" rx="12"/><text class="t" x="770" y="636">unsafe → 정지 유지</text><path class="edge" d="M925 570V585" marker-end="url(#slide10-control-arrow)"/><rect class="box" x="390" y="565" width="280" height="95" rx="12"/><text class="t" x="410" y="605">State buffer</text><text class="s" x="410" y="635">latest-only snapshot</text><path class="edge dash" d="M175 605V625H380" marker-end="url(#slide10-control-arrow)"/><text class="elabel" x="205" y="650">측정 상태</text><path class="edge dash" d="M530 565V510H705V69H720V59" marker-end="url(#slide10-control-arrow)"/><text class="elabel" x="535" y="272">다음 Observation</text></g></svg>
+        
+      </div>
+      <aside class="notes" hidden>레이트: 지각 30 Hz · policy 20 Hz(파지) ~ 30 Hz(모방학습) · 제어 200 Hz · 텔레오퍼레이션 60 Hz ·
+        장치 250/333 Hz. 요지는 "느린 policy가 팔을 멈추지 못한다". 사내 모듈명은 일반화해서 표기.
+        어댑터: policy 출력은 [-1, 1] normalization 값이라 actuator 범위의 중앙 + 정규값 x 반폭으로 되돌린 뒤(코드의 denormalize_action),
+        TCP 목표는 IK로 관절각으로 풀고 관절 한계로 clipping한다.
+    </aside></section>
+
+<section class="slide portfolio-header-aligned go2-style-draft" data-sec="task" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">공동 과제 · AI 내장형 다중감각지능 통합모듈 및 로봇플랫폼 실증기술 개발</p>
+        <h2>World Model dynamics fine-tuning 기반 sim to real deployment</h2>
+        <p class="subt">Unitree Go2 · <a href="https://sim-dist.github.io/" target="_blank" rel="noopener">SimDist 원문</a></p>
+        
+        <div class="go2-summary-cards"><div class="go2-summary-card"><h3><span>1</span>World Model 제어 파이프라인</h3><p>사전학습 → MPPI 계획 → 실제 로봇 deployment</p></div><div class="go2-summary-card"><h3><span>2</span>deployment 방법</h3><p>World Model · MPPI 제어기 50 Hz 실행</p></div><div class="go2-summary-card"><h3><span>3</span>dynamics 적응 비교</h3><p>dynamics fine-tuning 전 · 후를 같은 하드웨어에서 비교</p></div></div>
+        <div class="go2-merged-layout"><figure class="fig"><video src="videos/KIA/go2_dynamics_before_after_crop.mp4" poster="images/go2/go2_dynamics_before_after_crop_poster.jpg" autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/go2_dynamics_before_after_crop.mp4" target="_blank" rel="noopener">영상 링크</a><figcaption>World Model dynamics 튜닝 전 → 튜닝 후</figcaption></figure><div class="go2-merged-diagram"><svg class="diagram region-titles d16" viewBox="-66 -38 1640 800" role="img"
+             aria-label="시뮬레이션에서 PPO 전문가 policy를 학습하고, 전문가와 중간 policy로 품질이 섞인 rollout을 생성해 잠재 world model을 사전학습한다. 실제 로봇에서는 MPPI가 world model 안에서 행동 시퀀스를 샘플링해 50 Hz로 계획하고, 수집된 실제 로봇 데이터로 dynamics head만 미세조정해 다시 계획에 사용한다.">
+          <defs>
+            <marker id="g2ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            <clipPath id="g2imgA"><rect x="24" y="100" width="432" height="140" rx="8"/></clipPath>
+            <clipPath id="g2imgE"><rect x="624" y="500" width="372" height="156" rx="8"/></clipPath>
+            <clipPath id="g2vizB"><rect x="520" y="96" width="480" height="160"/></clipPath>
+          </defs>
+
+          <!-- ================= 시뮬레이션 그룹 ================= -->
+          <rect class="grp sim" x="-14" y="4" width="1588" height="282" rx="16"/>
+          <text class="lane sim" x="-8" y="-18">시뮬레이션 · rollout 생성 · world model 사전학습</text>
+
+          <rect class="box" x="0" y="30" width="480" height="240" rx="12"/>
+          <text class="t" x="24" y="62">1 · 전문가 policy 학습</text>
+          <text class="s" x="24" y="88">Proximal Policy Optimization · 4096 병렬 환경</text>
+          <image href="images/go2/go2_sim_evaluation_poster.jpg" clip-path="url(#g2imgA)"
+                 x="24" y="100" width="432" height="140" preserveAspectRatio="xMidYMid slice"/>
+          <text class="cap" x="24" y="258">[시뮬레이션 학습 · 평가 환경]</text>
+
+          <rect class="box" x="520" y="30" width="480" height="240" rx="12"/>
+          <text class="t" x="544" y="62">2 · rollout 데이터 생성</text>
+          <text class="s" x="544" y="88">다양한 성능 수준의 policy로 수집</text>
+          <g clip-path="url(#g2vizB)">
+            <path class="traj hi" d="M548,132 Q590,126 632,132 T716,132 T800,132 T884,132"/>
+            <path class="traj mid" d="M548,172 Q590,158 632,172 T716,172 T800,172 T884,172"/>
+            <path class="traj low" d="M548,212 Q580,184 612,212 T676,212 T740,212 T804,212 T868,212"/>
+          </g>
+          <text class="s2 ac" x="900" y="138">expert · 50%</text>
+          <text class="s2" x="900" y="178">중간 policy</text>
+          <text class="s2" x="900" y="218">초기 policy</text>
+          <text class="cap" x="544" y="258">expert + 중간 policy 11종 + 행동 노이즈</text>
+
+          <rect class="box learned" x="1040" y="30" width="520" height="240" rx="12"/>
+          <text class="t" x="1064" y="62">3 · World Model 사전학습</text>
+          <text class="s" x="1064" y="88">다음 상태 · 보상 · 가치 예측</text>
+          <g transform="translate(0 20)"><rect class="chip" x="1064" y="112" width="112" height="44" rx="7"/>
+          <text class="s2 mid" x="1120" y="140" text-anchor="middle">encoder</text>
+          <rect class="chip" x="1204" y="112" width="132" height="44" rx="7"/>
+          <text class="s2 mid" x="1270" y="140" text-anchor="middle">dynamics</text>
+          <rect class="chip" x="1364" y="96" width="112" height="36" rx="7"/>
+          <text class="s2 mid" x="1420" y="119" text-anchor="middle">reward</text>
+          <rect class="chip" x="1364" y="138" width="112" height="36" rx="7"/>
+          <text class="s2 mid" x="1420" y="161" text-anchor="middle">value</text>
+          <g class="edge thin" color="var(--dim)">
+            <path d="M1176,134 H1200" marker-end="url(#g2ar)"/>
+            <path d="M1336,134 H1360" marker-end="url(#g2ar)"/>
+          </g>
+          </g><text class="cap" x="1064" y="258">latent 64 · causal attention · 25스텝 → 25스텝 예측</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M480,150 H515" marker-end="url(#g2ar)"/>
+            <path d="M1000,150 H1035" marker-end="url(#g2ar)"/>
+          </g>
+
+          <!-- ================= 전이 ================= -->
+          <g class="edge" color="var(--dim)">
+            <path d="M1300,270 V324 H-56 V550 H-10" marker-end="url(#g2ar)"/>
+          </g>
+          <text class="elabel" x="600" y="314">사전학습된 world model</text>
+
+          <!-- ================= 실기 그룹 ================= --><g class="go2-real-theme">
+          <rect class="grp real" x="-14" y="412" width="1588" height="336" rx="16"/>
+          <text class="lane real" x="-8" y="384">실제 로봇 · 온라인 계획 · dynamics 보정</text>
+
+          <rect class="box" x="0" y="430" width="560" height="240" rx="12"/>
+          <text class="t" x="24" y="462">4a · MPPI 온라인 계획 · 50 Hz</text>
+          <text class="s" x="24" y="488">후보 행동 시퀀스의 예측 리턴 평가</text>
+          <g class="fan">
+            <path class="traj low" d="M60,570 C160,570 240,532 420,504"/>
+            <path class="traj low" d="M60,570 C160,570 240,548 420,530"/>
+            <path class="traj low" d="M60,570 C160,570 250,606 420,638"/>
+            <path class="traj low" d="M60,570 C160,570 250,594 420,612"/>
+            <path class="traj mid" d="M60,570 C160,570 245,558 420,546"/>
+            <path class="traj mid" d="M60,570 C160,570 245,582 420,592"/>
+            <path class="traj hi bold" d="M60,570 C160,570 245,570 420,568"/>
+          </g>
+          <circle class="dot" cx="60" cy="570" r="5"/>
+          <text class="s2" x="436" y="510">450 샘플</text>
+          <text class="s2" x="436" y="550">elite 64</text>
+          <text class="s2 ac" x="436" y="576">가중평균</text>
+          <text class="cap" x="24" y="656">450 샘플 × 8회 반복 · 상위 64개 가중평균 · 매 스텝 재계획</text>
+
+          <rect class="box" x="600" y="430" width="420" height="240" rx="12"/>
+          <text class="t" x="624" y="462">실제 로봇 · Unitree Go2</text>
+          <text class="s" x="624" y="488">관절 상태 · 관성 센서 · 속도 명령</text>
+          <image href="images/go2/go2_deploy_finetuned_poster.jpg" clip-path="url(#g2imgE)"
+                 x="624" y="500" width="372" height="156" preserveAspectRatio="xMidYMid slice"/>
+          
+
+          <rect class="box learned" x="1060" y="430" width="500" height="240" rx="12"/>
+          <text class="t" x="1084" y="462">4b · dynamics fine-tuning</text>
+          <text class="s" x="1084" y="488">encoder · reward · value freeze, dynamics만 적응</text>
+          <g transform="translate(0 18)"><rect class="chip go2-frozen" x="1084" y="506" width="212" height="42" rx="7" style="fill:#E8EDF0;stroke:#9BA8B2"/>
+          <text class="s2 mid dim" x="1190" y="533" text-anchor="middle">encoder · reward · value</text>
+          <g class="freeze-lock" fill="none" stroke="#758693" stroke-width="2.5"><path d="M1316 521V515a7 7 0 0 1 14 0v6"/><rect x="1312" y="521" width="22" height="18" rx="3" fill="#DCE4EA"/><path d="M1323 526v7"/></g><text class="s2 dim" x="1344" y="534" style="fill:#758693">freeze</text>
+          <rect class="chip act" x="1084" y="560" width="212" height="42" rx="7"/>
+          <text class="s2 mid ac" x="1190" y="587" text-anchor="middle">dynamics</text>
+          <text class="s2 ac" x="1310" y="587">학습</text>
+          </g><text class="cap" x="1084" y="656">실제 로봇 rollout에 대한 지도학습 — 하드웨어 강화학습 없음</text>
+
+          <g class="edge" color="var(--dim)">
+            <path d="M560,550 H595" marker-end="url(#g2ar)"/>
+            <path d="M1020,550 H1055" marker-end="url(#g2ar)"/>
+          </g>
+
+          <g class="edge dash" color="var(--accent-2)">
+            <path d="M1310,670 V702 H280 V674" marker-end="url(#g2ar)"/>
+          </g>
+          <text class="elabel" x="560" y="730">적응된 dynamics 가 곧바로 다음 계획에 사용</text>
+        </g></svg></div></div>
+        
+      </div>
+      <aside class="notes" hidden>world model · PPO · Isaac Lab · MuJoCo · Unitree SDK.
+        재현 프로젝트라는 것을 먼저 말한다 — 기여를 부풀리지 않는 것이 방어에 유리.
+        정량 지표가 없다는 점도 먼저 말한다. 논문 링크: sim-dist.github.io
+    </aside></section>
+
+
+
+<section class="slide portfolio-header-aligned appendix-style-draft" data-sec="tech" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger rbfnn-expanded">
+        <p class="kicker">부록 · 로봇 제어 및 안전 요소기술</p>
+        <h2>Residual torque 보상 · 거리 기반 충돌 회피</h2>
+        <style>.tech2{ display:grid; grid-template-columns:1fr 1fr; gap:1.1em; align-items:start }
+        .tech2 .fig img, .tech2 .fig video{ width:100%; height:12.4em; object-fit:contain; background:#fff; max-height:none; aspect-ratio:auto }</style>
+        <div class="tech2 rbfnn-media">
+          <figure class="fig rbfnn-figure"><img src="images/rbfnn/RBFNN_framework.png" alt="RBFNN이 Residual torque를 추정하여 내장 PD 제어 출력에 더하는 보상 구조">
+            <figcaption>RBFNN · PD 출력에 보상 torque 추가</figcaption></figure>
+          <figure class="fig"><video src="videos/KIA/gjk_real_robot.mp4" poster="images/collision/gjk_real_robot_poster.jpg" aria-label="실제 로봇 · xArm6 에서 장애물 접근 시 속도가 감쇠되는 장면"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/gjk_real_robot.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>xArm6 · 깊이 카메라 기반 30 Hz 제어</figcaption></figure>
+        </div>
+        <div class="appendix-cards two"><div class="appendix-card"><h3>Residual torque 보상</h3><ul><li>PD 제어 + RBFNN 온라인 보상</li><li>적분 슬라이딩 표면 · Lyapunov 적응 법칙</li></ul></div><div class="appendix-card"><h3>거리 기반 충돌 회피</h3><ul><li>링크 capsule–point cloud convex hull · GJK 최소거리</li><li>거리 기반 속도 감쇠 · 매 제어 주기 반응</li></ul></div></div>
+      </div>
+      <aside class="notes" hidden>지원 자격의 순기구학 · 역기구학 · 모션 제어 근거 장.
+        순기구학 는 14페이지(후보 자세 충돌 검사), 역기구학 는 13페이지(어댑터)에서 이미 다뤘고 이 장은 dynamics · 접촉 · 거리 쪽을 묶었다.
+        RBFNN 파지 유지 시험은 시행 횟수 미기록 — 물어보면 먼저 밝힌다.
+        F/T 핑거팁 접촉 위치 추정(ICCAS 2024 1저자, 평균 오차 0.85 mm)은 센싱·추정이라 이 장에서 뺐다.
+        19페이지 연구 성과 표에 남아 있고, 질문 오면 그때 설명한다.
+    </aside></section>
+
+<section class="slide portfolio-header-aligned appendix-style-draft" data-sec="appendix" data-transition="slide" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">부록 · 로봇 제어 및 안전 요소기술</p>
+        <h2>Simulation marker 기반 safety shield</h2>
+        <div class="appendix-cards three"><div class="appendix-card"><h3>충돌 위험 지점</h3><ul><li>마커 64개 배치</li><li>링크 48 · 손바닥 8 · 손가락 8</li></ul></div><div class="appendix-card"><h3>후보 명령 안전 검사</h3><ul><li>Forward Kinematics → marker–OBB 거리</li><li>위험 명령 차단</li></ul></div><div class="appendix-card"><h3>학습 · 실제 로봇 공용</h3><ul><li>학습 margin 25 mm</li><li>실제 로봇 경고·정지·복구 50·30·40 mm</li></ul></div></div>
+        <div class="figs f2 mid tall">
+          <figure class="fig"><video src="videos/KIA/shield_mujoco.mp4" poster="images/dualarm/shield_mujoco_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/shield_mujoco.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>MuJoCo · 몸통 정지 → 테이블 정지</figcaption></figure>
+          <figure class="fig"><video src="videos/KIA/shield_real.mp4" poster="images/dualarm/shield_real_poster.jpg"
+                   autoplay muted loop playsinline preload="metadata"></video><a class="kia-video-link" href="https://dsafjk0024.github.io/videos/KIA/shield_real.mp4" target="_blank" rel="noopener">영상 링크</a>
+            <figcaption>실제 로봇 · 몸통 정지 → 테이블 정지</figcaption></figure>
+        </div>
+      </div>
+      <aside class="notes" hidden>영상은 각각 몸통 검증 → 테이블 검증을 이어붙인 8.6 초 합본. 왼쪽 MuJoCo, 오른쪽 실제 로봇.
+        구현: env/safety_shield.py — 마커는 MuJoCo site(수학적 점, 렌더 크기는 시각화용).
+        후보 자세를 private MjData 에 써서 mj_fwdPosition 한 번, 환경 상태는 건드리지 않는다.
+        거리: 마커를 오른팔 base 프레임으로 옮겨 OBB 부호거리(밖 +, 안 −). 기본 정지 margin 25 mm.
+        학습 환경에서는 트리거 시 에피소드 종료 + 보상 −1 로 policy가 회피를 배우게 했다.
+        실제 로봇 deploy의 단계형 margin(경고 50 / 정지 30 / 복구 40 mm)은 별도 설정.
+    </aside></section>
+
+<section class="slide" data-sec="pub" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">technical stack</p>
+        <h2>기술 스택</h2>
+        <div class="stack">
+          <div class="row"><b>AI · 학습</b><span>PyTorch · Isaac Lab · MuJoCo · mjlab · on-policy RL (PPO · NPG/DAPG) · world model ·
+            Diffusion Policy · flow matching · ACT · RBFNN</span></div>
+          <div class="row"><b>로봇 · 제어</b><span>xArm6 · xArm7 ×2 · UR5e · Allegro Hand · Robotiq Hand-E · Unitree Go2 · SO-101 · 잔차 토크 보상</span></div>
+          <div class="row"><b>소프트웨어</b><span>Python · ROS 2 Jazzy · ros2_control · rosbag2 / MCAP · LeRobot v3.0 · Git</span></div>
+          <div class="row"><b>센싱</b><span>RealSense D435i · XELA 촉각 · DIGIT 촉각 · 6축 F/T 센서 · Apple Vision Pro 텔레옵</span></div>
+          <div class="row"><b>설계</b><span>SolidWorks</span></div>
+        </div>
+      </div>
+      <aside class="notes" hidden>스킬은 프로젝트와 연결해서 말한다.</aside>
+    </section>
+
+<section class="slide" data-sec="pub" data-transition="rise" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure wide stagger">
+        <p class="kicker">publications &amp; demonstrations</p>
+        <h2>게재 및 발표 실적</h2>
+        <div class="tbl"><table>
+          <thead><tr><th>구분</th><th>제목</th><th>학회 · 행사</th></tr></thead>
+          <tbody><tr><td><strong>논문</strong></td><td>Tactile-Guided Residual Reinforcement Learning for Precise Connector Insertion<span class="sub">— 공동저자 · 제2저자 · 삽입 연구 후속</span></td><td>IEEE/IEIE ICCE-Asia 2026</td></tr>
+            <tr><td><strong>포스터</strong></td><td>A Method for Estimating Contact Location on Dexterous Hand Fingertips
+              <span class="sub">— 제1저자</span></td><td>ICCAS 2024, 제주</td></tr>
+            <tr><td><strong>포스터</strong></td><td>RBFNN-Based Online Disturbance Compensation for Robust Grasping
+              <span class="sub">— 제1저자</span></td><td>KRoC 2026</td></tr>
+            <tr><td><strong>포스터</strong></td><td>Adaptive Control of a Multi-Fingered Dexterous Hand via
+              RBFNN-based Residual Torque Compensation <span class="sub">— 제1저자</span></td><td>생산제조 2025</td></tr>
+            <tr><td>라이브 데모</td><td>다중센서 통합 제어 프레임워크 — Relocate</td><td>RoboWorld 2024</td></tr>
+            <tr><td>라이브 데모</td><td>모방학습 매니퓰레이션 — Peg-in-Hole 삽입</td><td>AutomationWorld 2026</td></tr>
+          </tbody>
+        </table></div>
+        
+      </div>
+      <aside class="notes" hidden>실기 라이브 2회 = 연구가 실험실 밖에서 동작했다는 증거. 추가 논문 학회: 2026 IEEE/IEIE International Conference on Consumer Electronics-Asia (ICCE-Asia). 사용자 제공 EDAS 메일은 paper 1571353569 최종 원고 업로드 완료를 확인하며, 게재·발표 완료를 확인하는 메일은 아님.</aside>
+    </section>
+
+<section class="slide kia-bookend" data-transition="zoom" aria-roledescription="슬라이드" tabindex="-1">
+      <div class="measure stagger">
+        <p class="kicker">thank you</p>
+        <h1>감사합니다</h1>
+        <div class="rule"></div>
+        
+        <div class="stack">
+          <div class="row"><b>홈페이지</b><span><a href="https://dsafjk0024.github.io" target="_blank" rel="noopener">dsafjk0024.github.io</a>
+            <span class="sub">— 프로젝트별 상세 페이지와 실행 영상</span></span></div>
+          <div class="row"><b>코드 공개</b><span><a href="https://github.com/dsafjk0024/so101-imitation" target="_blank" rel="noopener">github.com/dsafjk0024/so101-imitation</a>
+            <span class="sub">— SO-101 모방학습 파이프라인</span></span></div>
+          <div class="row"><b>Email</b><span><a href="mailto:dsafjk0024@naver.com">dsafjk0024@naver.com</a></span></div>
+        </div>
+      </div>
+      <aside class="notes" hidden>마지막 장. 링크로 유도.
+    </aside></section>
+
+  </div>
+</div>
+
+<div class="bar" data-progress aria-hidden="true"></div>
+<div class="brand" aria-hidden="true">Jusung Kim · KIA Portfolio</div>
+<div class="counter" data-counter aria-hidden="true"></div>
+<div class="sr-only" data-live aria-live="polite" aria-atomic="true"></div>
+
+<div class="help" role="dialog" aria-label="키보드 단축키">
+  <b>→ / Space / PageDown</b> &nbsp;다음<br>
+  <b>← / ⇧Space / PageUp</b> &nbsp;이전<br>
+  <b>Home / End</b> &nbsp;처음 / 끝<br>
+  <b>f</b> 전체화면 &nbsp; <b>s</b> 발표자 화면<br>
+  <b>?</b> 이 창 닫기
+</div>
+
+<div class="pv">
+  <section>
+    <div class="box" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <h4>화자 노트</h4><div id="pvNotes"></div>
+    </div>
+    <div class="box">
+      <h4>타이머</h4><div id="pvClock">00:00</div>
+      <div id="pvWall"></div><div id="pvPos"></div>
+    </div>
+  </section>
+  <section>
+    <div class="box" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <h4>다음 페이지</h4><div id="pvPreview"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const LAYOUT    = document.body.dataset.layout === 'fullbleed' ? 'fullbleed' : 'stage';
+const W = 1920, H = 1080, DUR = 520;
+const PRESENTER = new URLSearchParams(location.search).has('presenter');
+document.body.classList.toggle('presenter', PRESENTER);
+
+const viewport = document.getElementById('viewport');
+const stage    = document.getElementById('stage');
+const slides   = [...stage.querySelectorAll('.slide')];
+const bar      = document.querySelector('[data-progress]');
+const counter  = document.querySelector('[data-counter]');
+const live     = document.querySelector('[data-live]');
+const help     = document.querySelector('.help');
+const pvNotes  = document.getElementById('pvNotes');
+const pvPos    = document.getElementById('pvPos');
+const pvPrev   = document.getElementById('pvPreview');
+const LAST     = slides.length - 1;
+
+let si = 0, step = 0, busy = false;
+
+/* ------------------------------------------------------------------- 배율
+   자유도 하나. 소수 3자리로 라운드해 래스터가 안정된 배율에 안착 → 블러 방지. */
+function fit(){
+  if (LAYOUT !== 'stage') return;
+  const r = viewport.getBoundingClientRect();
+  stage.style.setProperty('--scale',
+    Math.round(Math.min(r.width / W, r.height / H) * 1000) / 1000);
+}
+
+/* ------------------------------------------------------ "3-5,8" -> Set{3,4,5,8} */
+function ranges(spec){
+  const out = new Set();
+  for (const part of String(spec).split(',')){
+    const m = /^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/.exec(part);
+    if (!m) continue;
+    const a = +m[1], b = m[2] ? +m[2] : a;
+    for (let i = Math.min(a,b); i <= Math.max(a,b); i++) out.add(i);
+  }
+  return out;                                  // "0" → 빈 Set → 아무것도 안 켜짐
+}
+function paintLines(code, spec){
+  const lit = ranges(spec);
+  code.closest('pre').classList.toggle('has-hi', lit.size > 0);
+  code._lines.forEach((ln,i) => ln.classList.toggle('hi', lit.has(i + 1)));
+}
+
+/* --------------------------------------------------------- 스텝 인덱스 부여
+   워터마크 모델: 원소는 index <= step 이면 보인다. "몇 개 보이는가"를 세지 않으니
+   역방향이 undo 장부 없이 순수 재계산이 된다.
+   빌드가 없는 슬라이드는 _max = 0 → 자동으로 키 1번 = 페이지 1장. */
+for (const s of slides){
+  let auto = 0;
+  s._frags = [...s.querySelectorAll('.frag')];
+  for (const f of s._frags) f._step = f.dataset.step ? +f.dataset.step : ++auto;
+
+  s._codes = [...s.querySelectorAll('code[data-hi-steps]')];
+  for (const c of s._codes){
+    c._states = c.dataset.hiSteps.split('|');
+    c._lines  = [...c.querySelectorAll('.line')];
+  }
+  s._max = Math.max(0,
+    ...s._frags.map(f => f._step),
+    ...s._codes.map(c => c._states.length - 1));   // 코드 상태 수를 빼먹으면 마지막 상태 도달 불가
+}
+/* 정적 하이라이트는 부팅 시 1회 확정 */
+for (const c of stage.querySelectorAll('code[data-hi]')){
+  c._lines = [...c.querySelectorAll('.line')];
+  paintLines(c, c.dataset.hi);
+}
+
+const clampSlide = i => Math.max(0, Math.min(LAST, i));
+const clampStep  = (i,v) => Math.max(0, Math.min(slides[i]._max, v));
+
+/* ------------------------------------------------------------------- 미디어
+   현재 장의 영상만 처음부터 재생한다. 두 영상을 나란히 비교하는 장에서
+   진입 시점이 어긋나지 않게 하려면 매번 currentTime 을 0 으로 되돌려야 한다. */
+let mediaGeneration = 0;
+function syncMedia(cur){
+  const generation = ++mediaGeneration;
+  document.querySelectorAll('.slide video').forEach(v => {
+    v.pause();
+    try { v.currentTime = 0; } catch(e){}
+    if (v.closest('[data-synced-comparison]')) { v.onended = null; return; }
+    if (cur && cur.contains(v)) {
+      const play = () => {
+        if (cur.classList.contains('is-current')) v.play().catch(() => {});
+      };
+      if (v.readyState >= 1) play();
+      else v.addEventListener('loadedmetadata', play, { once:true });
+    }
+  });
+  const pair = [...(cur?.querySelectorAll('[data-synced-comparison] video') || [])];
+  if (!pair.length) return;
+  const active = () => generation === mediaGeneration && cur.classList.contains('is-current');
+  const ready = v => new Promise(resolve => {
+    if (v.readyState >= 3) { resolve(true); return; }
+    if (v.error) { resolve(false); return; }
+    const done = ok => {
+      v.removeEventListener('canplay', onReady);
+      v.removeEventListener('error', onError);
+      resolve(ok);
+    };
+    const onReady = () => done(true);
+    const onError = () => done(false);
+    v.addEventListener('canplay', onReady, { once:true });
+    v.addEventListener('error', onError, { once:true });
+    if (v.networkState === 0) v.load();
+  });
+  const restart = async () => {
+    const loaded = await Promise.all(pair.map(ready));
+    if (!active() || loaded.some(ok => !ok)) return;
+    pair.forEach(v => { v.currentTime = 0; });
+    pair.forEach(v => { v.play().catch(() => {}); });
+  };
+  pair.forEach(v => {
+    v.onended = () => {
+      if (active() && pair.every(video => video.ended)) restart();
+    };
+  });
+  restart();
+}
+
+/* -------------------------------------------------------------------- 렌더
+   (si, step) → DOM. 순수 함수로 두면 어떤 경로로 들어와도 같은 화면이 나온다. */
+function render({ broadcast = true } = {}){
+  slides.forEach((s,i) => {
+    s.classList.toggle('is-current', i === si);
+    s.classList.toggle('is-past',    i <  si);
+    s.classList.toggle('is-future',  i >  si);
+    // hidden(=display:none) 은 전환 애니메이션을 죽인다. inert 로 상호작용만 차단.
+    // opacity:0 만으로는 여전히 포커스되고 Ctrl+F 로 찾아진다.
+    s.toggleAttribute('inert', i !== si);
+    s.setAttribute('aria-hidden', String(i !== si));
+  });
+
+  syncMedia(slides[si]);
+
+  const s = slides[si];
+  for (const f of s._frags){
+    const on = f._step <= step;
+    f.classList.toggle('shown', on);
+    f.toggleAttribute('inert', !on);
+  }
+  for (const c of s._codes) paintLines(c, c._states[Math.min(step, c._states.length - 1)]);
+
+  if (bar) bar.style.transform = `scaleX(${LAST ? si / LAST : 1})`;
+  if (counter) counter.innerHTML =
+    `<i>${String(si + 1).padStart(2,'0')}</i> / ${String(slides.length).padStart(2,'0')}`;
+  if (live){
+    const t = (s.querySelector('h1,h2')?.textContent || '').trim().replace(/\s+/g,' ');
+    live.textContent = `${si + 1} / ${slides.length} 페이지${t ? ': ' + t : ''}`;
+  }
+
+  writeHash();
+  if (PRESENTER) paintPV();
+  if (broadcast && chan) chan.postMessage({ si, step });
+}
+
+/* ----------------------------------------------------------------- URL 해시
+   replaceState 로 쓴다. pushState/replaceState 는 hashchange·popstate 를
+   발생시키지 않으므로 "해시→슬라이드→해시" 루프가 구조적으로 불가능하다.
+   (location.hash = … 로 쓰면 루프가 실제로 돈다.) 대가: 장 간 back/forward 포기. */
+let hashTimer = 0;
+function writeHash(){
+  clearTimeout(hashTimer);
+  hashTimer = setTimeout(() => {
+    const h = step ? `#/${si + 1}/${step}` : `#/${si + 1}`;
+    try { history.replaceState(null, '', h); } catch {}   // 과빈도 호출은 SecurityError
+  }, 120);
+}
+function readHash(){
+  const m = /^#\/?(\d+)(?:\/(\d+))?/.exec(location.hash);
+  if (!m) return null;
+  const i = clampSlide(+m[1] - 1);
+  return { si:i, step:clampStep(i, +(m[2] || 0)) };
+}
+addEventListener('hashchange', () => {                    // 주소창 수동 편집 대응
+  const t = readHash();
+  if (t && !(t.si === si && t.step === step)) jump(t.si, t.step);
+});
+
+/* ------------------------------------------------------------- 전환 + 입력 잠금
+   모션은 CSS transition(연타 시 현재 계산값에서 자동 재타깃), 완료 신호는 WAAPI.
+   transitionend 로 플래그를 풀면 반드시 언젠가 박힌다 — display:none, 0s,
+   값 미변경, 중간 취소에서 안 오고, 게다가 자식에서 버블링돼 조기 해제된다. */
+function settle(els){
+  const anims = els.flatMap(el => el.getAnimations());
+  if (!anims.length) return Promise.resolve();            // reduced-motion 등
+  return Promise.race([
+    Promise.all(anims.map(a => a.finished.catch(() => {}))),  // cancel 시 reject 함
+    new Promise(r => setTimeout(r, DUR + 160)),               // 백스톱
+  ]);
+}
+
+async function jump(nsi, nstep = 0){
+  if (busy) return;
+  const target = clampSlide(nsi);
+  if (target === si){                                    // 스텝만 변경 → 잠금 불필요
+    const ns = clampStep(target, nstep);
+    if (ns === step) return;
+    step = ns; render(); return;
+  }
+  busy = true;
+  const pair = [slides[si], slides[target]];
+  si = target; step = clampStep(target, nstep);
+  pair.forEach(el => el.style.willChange = 'transform, opacity');
+  render();
+  try {
+    await new Promise(requestAnimationFrame);   // ★ 없으면 getAnimations() 가 [] 를 반환해
+    await settle(pair);                         //   잠금이 즉시 풀린다
+  } finally {
+    pair.forEach(el => el.style.willChange = ''); // 상시 걸어두면 영구 레이어가 쌓인다
+    busy = false;                                 // 예외에도 반드시 해제
+  }
+}
+
+function next(){
+  if (step < slides[si]._max) jump(si, step + 1);         // 슬라이드 내부 빌드 먼저
+  else if (si < LAST) jump(si + 1, 0);
+}
+function prev(){
+  if (step > 0) jump(si, step - 1);
+  else if (si > 0) jump(si - 1, slides[si - 1]._max);     // 완전 전개 상태로 착지
+}
+
+/* ------------------------------------------------------------------ 키보드
+   event.key 를 쓴다. keyCode 는 deprecated, code 는 물리 위치라 Dvorak/AZERTY 에서
+   'f' 가 깨진다. Space 는 key === " " ("Space" 는 code 다). */
+function isTyping(){
+  const el = document.activeElement;
+  return !!el && (el.isContentEditable === true ||
+                  /^(input|textarea|select)$/i.test(el.tagName));
+}
+document.addEventListener('keydown', e => {
+  if (isTyping() || e.ctrlKey || e.metaKey || e.altKey) return;   // Shift 는 허용
+  if (e.repeat){ e.preventDefault(); return }                    // 눌림 유지 자동반복 무시
+  let handled = true;
+  switch (e.key){
+    case 'ArrowRight': case 'PageDown': next(); break;   // PageDown/Up = 프리젠터 리모컨
+    case 'ArrowLeft':  case 'PageUp':   prev(); break;
+    case ' ': e.shiftKey ? prev() : next(); break;
+    case 'ArrowDown': jump(si + 1, 0); break;            // 빌드 무시하고 장 단위
+    case 'ArrowUp':   jump(si - 1, 0); break;
+    case 'Home': jump(0, 0); break;
+    case 'End':  jump(LAST, 0); break;
+    case 'f': case 'F': toggleFS(); break;
+    case '?': case '/': help.classList.toggle('open'); break;
+    case 's': case 'S':
+      if (!PRESENTER) open(location.pathname + '?presenter', 'presenter',
+                           'width=1200,height=820');
+      break;
+    // Escape 를 전체화면 종료로 매핑하지 않는다 — 브라우저가 이미 처리한다.
+    case 'Escape': help.classList.remove('open'); handled = false; break;
+    default: handled = false;
+  }
+  if (handled) e.preventDefault();               // 소비한 키만 (Space 스크롤 차단)
+});
+
+/* 전체화면은 사용자 제스처가 필수이고 Promise 가 reject 될 수 있다. */
+function toggleFS(){
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+  else document.exitFullscreen?.().catch(() => {});
+}
+
+/* ---------------------------------------------------------------- 스와이프
+   .viewport 에 붙인다. document/window/body 는 touch 계열이 passive 기본이라
+   거기선 preventDefault 가 무음 실패한다. 의도는 CSS touch-action 으로 선언했다. */
+const pointers = new Map();
+let gesture = null;
+const SWIPE_MIN = 52, SWIPE_RATIO = 1.4;
+
+viewport.addEventListener('pointerdown', e => {
+  pointers.set(e.pointerId, e);
+  if (pointers.size > 1){ gesture = null; return }         // 핀치/멀티터치 폐기
+  if (e.isPrimary) gesture = { id:e.pointerId, x:e.clientX, y:e.clientY };
+});
+viewport.addEventListener('pointermove', e => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, e);
+  if (pointers.size > 1) gesture = null;
+});
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if (!gesture || gesture.id !== e.pointerId){ if (!pointers.size) gesture = null; return }
+  const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+  gesture = null;
+  if (Math.abs(dx) < SWIPE_MIN) return;
+  if (Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;   // 수직 제스처였다
+  dx < 0 ? next() : prev();
+}
+viewport.addEventListener('pointerup', endPointer);
+viewport.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); gesture = null });
+
+/* --------------------------------------------------- 발표자 화면 동기화
+   BroadcastChannel: 같은 origin, 발신자는 자기 메시지를 못 받아 에코 루프가 없다.
+   file:// origin 은 opaque 라 동기화가 조용히 실패한다 → localhost 로 서빙할 것.
+   채널이 죽어도 각 창은 독립 동작한다. */
+let chan = null;
+try { chan = new BroadcastChannel('kia-portfolio-slides') } catch {}
+if (chan) chan.onmessage = e => {
+  const d = e.data;
+  if (typeof d?.si !== 'number') return;
+  const t = clampSlide(d.si), ns = clampStep(t, d.step || 0);
+  if (t === si && ns === step) return;
+  si = t; step = ns;
+  render({ broadcast:false });                   // 수신 측은 재방송하지 않음
+};
+
+function paintPV(){
+  const s = slides[si], nx = slides[si + 1];
+  pvNotes.innerHTML = s.querySelector('.notes')?.innerHTML
+    ?? '<em style="color:#6E7A74">노트 없음</em>';
+  pvPos.textContent = `${si + 1} / ${slides.length} 페이지 · 스텝 ${step}/${s._max}`;
+  pvPrev.replaceChildren();
+  if (!nx){ pvPrev.innerHTML = '<em style="color:#6E7A74;font-size:13px">마지막 페이지</em>'; return }
+  const c = nx.querySelector('.measure').cloneNode(true);
+  c.querySelectorAll('.notes').forEach(n => n.remove());
+  pvPrev.append(c);
+}
+
+if (PRESENTER){
+  const pvClock = document.getElementById('pvClock');
+  const pvWall  = document.getElementById('pvWall');
+  const t0 = Date.now();
+  setInterval(() => {
+    const t = Math.floor((Date.now() - t0) / 1000);
+    pvClock.textContent =
+      `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+    pvWall.textContent =
+      new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+  }, 1000);
+}
+
+/* ----------------------------------------------------------------- 초기화 */
+addEventListener('resize', fit);
+addEventListener('orientationchange', fit);
+visualViewport?.addEventListener('resize', fit);   // iOS 는 window resize 를 늘 안 쏜다
+new ResizeObserver(fit).observe(viewport);
+fit();
+
+/* 타이포는 기존 7번 기준으로 고정한다.
+   슬라이드별 font-size 자동 축소를 제거해 같은 역할의 글자가 항상 같은 크기를 갖는다. */
+
+const boot = readHash();
+if (boot){ si = boot.si; step = boot.step }
+render({ broadcast:false });
+})();
+</script>
+</body>
+</html>
